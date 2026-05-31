@@ -11,15 +11,15 @@ const TABELA_MAP: Record<TabelaCSV, string> = {
 }
 
 // ── EXPORTAR ──────────────────────────────────────────────────
-export function exportToCSV<T extends Record<string, unknown>>(
+export function exportToCSV<T extends object>(
   dados: T[],
   nomeArquivo: string
 ): void {
   if (!dados.length) return
-  const headers = Object.keys(dados[0])
+  const headers = Object.keys(dados[0] as Record<string, unknown>)
   const rows = dados.map(r =>
     headers.map(h => {
-      const val = r[h]
+      const val = (r as Record<string, unknown>)[h]
       const s = val == null ? '' : String(val)
       return s.includes(',') || s.includes('"') ? `"${s.replace(/"/g, '""')}"` : s
     }).join(',')
