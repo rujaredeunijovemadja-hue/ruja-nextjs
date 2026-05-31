@@ -4,7 +4,6 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'RUJA — Rede UniJovem ADJA',
   description: 'Painel de Gestão da Rede UniJovem ADJA',
-  manifest: '/manifest.json',
 }
 
 export const viewport: Viewport = {
