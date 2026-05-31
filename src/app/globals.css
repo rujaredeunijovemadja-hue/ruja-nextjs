@@ -1,31 +1,85 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-:root {
-  --red:       #D42B2B;
-  --red-dark:  #A81E1E;
-  --bg:        #0A0A0A;
-  --card:      #111111;
-  --border:    rgba(255,255,255,0.08);
-  --text1:     #F5F5F5;
-  --text2:     #A0A0A0;
-  --text3:     #666666;
+@theme {
+  --color-ruja-red:      #D42B2B;
+  --color-ruja-red-dark: #A81E1E;
+  --color-ruja-red-light:#E85555;
+  --color-bg:            #0A0A0A;
+  --color-card:          #111111;
+  --color-card2:         #161616;
+  --color-card3:         #1E1E1E;
+  --color-border:        rgba(255,255,255,0.07);
+  --color-text1:         #F5F5F5;
+  --color-text2:         #AAAAAA;
+  --color-text3:         #666666;
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
-* { -webkit-tap-highlight-color: transparent; }
+/* ─── Reset e base ───────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
 
 body {
-  background: var(--bg);
-  color: var(--text1);
-  font-family: system-ui, -apple-system, sans-serif;
+  margin: 0;
+  background-color: #0A0A0A;
+  color: #F5F5F5;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
   overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-input, button, select, textarea {
+/* ─── Touch targets ──────────────────────────────────── */
+input, button, select, textarea, a {
   touch-action: manipulation;
 }
 
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+/* ─── Scrollbar ─────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+/* ─── Safe area ─────────────────────────────────────── */
+.pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+
+/* ─── Animações ─────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-spin    { animation: spin 0.8s linear infinite; }
+.animate-slideUp { animation: slideUp 0.3s ease; }
+.animate-fadeIn  { animation: fadeIn 0.2s ease; }
+
+/* ─── CSS Variables (compatibilidade) ───────────────── */
+:root {
+  --red:    #D42B2B;
+  --red-h:  #E85555;
+  --bg:     #0A0A0A;
+  --bg2:    #111111;
+  --card:   #161616;
+  --card2:  #1E1E1E;
+  --border: rgba(255,255,255,0.07);
+  --text1:  #F5F5F5;
+  --text2:  #AAAAAA;
+  --text3:  #666666;
+  --green:  #22C55E;
+  --yellow: #EAB308;
+  --blue:   #3B82F6;
 }
