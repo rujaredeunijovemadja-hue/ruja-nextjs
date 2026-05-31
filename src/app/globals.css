@@ -1,4 +1,6 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --red:       #D42B2B;
@@ -16,10 +18,14 @@
 body {
   background: var(--bg);
   color: var(--text1);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
   overscroll-behavior: none;
 }
 
 input, button, select, textarea {
   touch-action: manipulation;
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
