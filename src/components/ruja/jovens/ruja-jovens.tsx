@@ -4,6 +4,7 @@ import { useRuja } from '@/lib/ruja/context'
 import { Spinner } from '@/components/ui/spinner'
 import { StatusBadge } from '@/components/ui/badge'
 import { RujaJovemForm } from './ruja-jovem-form'
+import { RujaJovemDetalhe } from './ruja-jovem-detalhe'
 import { deleteJovem, auditLog } from '@/lib/ruja/queries'
 import type { Jovem, Status } from '@/lib/ruja/types'
 
@@ -16,6 +17,7 @@ export default function RujaJovens() {
   const [filtroStatus, setFiltroStatus] = useState<Filtro>('todos')
   const [filtroDepto,  setFiltroDepto]  = useState<Depto>('todos')
   const [editando,   setEditando]   = useState<Jovem | null | 'novo'>(null)
+  const [detalhe,    setDetalhe]    = useState<Jovem | null>(null)
   const [deletando,  setDeletando]  = useState<Jovem | null>(null)
   const [toast,      setToast]      = useState('')
 
@@ -110,11 +112,21 @@ export default function RujaJovens() {
             <JovemCard
               key={j.id}
               jovem={j}
+              onView={() => setDetalhe(j)}
               onEdit={() => setEditando(j)}
               onDelete={() => setDeletando(j)}
             />
           ))}
         </div>
+      )}
+
+      {/* Detalhe do jovem */}
+      {detalhe && (
+        <RujaJovemDetalhe
+          jovem={detalhe}
+          onClose={() => setDetalhe(null)}
+          onEdit={() => { setEditando(detalhe); setDetalhe(null) }}
+        />
       )}
 
       {/* Modal formulário */}
@@ -158,15 +170,16 @@ export default function RujaJovens() {
   )
 }
 
-function JovemCard({ jovem, onEdit, onDelete }: {
+function JovemCard({ jovem, onView, onEdit, onDelete }: {
   jovem: Jovem
+  onView: () => void
   onEdit: () => void
   onDelete: () => void
 }) {
   const deptos = jovem.departamento ? jovem.departamento.split(';').filter(Boolean) : []
 
   return (
-    <div className="bg-[#111] border border-white/8 rounded-xl p-4 flex items-start gap-4">
+    <div className="bg-[#111] border border-white/8 rounded-xl p-4 flex items-start gap-4 cursor-pointer hover:border-white/15 transition" onClick={onView}>
       {/* Avatar */}
       <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-400 font-bold text-sm flex-shrink-0 overflow-hidden">
         {jovem.foto_url
@@ -196,11 +209,11 @@ function JovemCard({ jovem, onEdit, onDelete }: {
 
       {/* Ações */}
       <div className="flex gap-1 flex-shrink-0">
-        <button onClick={onEdit}
+        <button onClick={e => { e.stopPropagation(); onEdit() }}
           className="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition touch-manipulation text-base">
           ✏️
         </button>
-        <button onClick={onDelete}
+        <button onClick={e => { e.stopPropagation(); onDelete() }}
           className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition touch-manipulation text-base">
           🗑️
         </button>

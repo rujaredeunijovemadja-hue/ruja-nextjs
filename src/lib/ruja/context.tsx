@@ -35,7 +35,7 @@ export function RujaProvider({ children }: { children: ReactNode }) {
     frequencias:     [],
     recuperacoes:    [],
     historicoMensal: [],
-    liderSupremo:    { nome:'', contato:'', instagram:'', foto:'', descricao:'', dataPosseLider:'', versiculoLider:'', visao:'', tempoRuja:'' },
+    liderSupremo:    { nome:'', funcao:'', contato:'', instagram:'', foto:'', descricao:'', dataPosseLider:'', versiculoLider:'', visao:'', tempoRuja:'' },
     regras:          DEFAULT_REGRAS,
     metas:           DEFAULT_METAS,
   })

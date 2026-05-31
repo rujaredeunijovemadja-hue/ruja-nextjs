@@ -98,6 +98,7 @@ export interface Metas {
 
 export interface LiderSupremo {
   nome: string
+  funcao: string
   contato: string
   instagram: string
   foto: string
