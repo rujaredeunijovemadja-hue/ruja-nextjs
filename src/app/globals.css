@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+:root {
+  --red:       #D42B2B;
+  --red-dark:  #A81E1E;
+  --bg:        #0A0A0A;
+  --card:      #111111;
+  --border:    rgba(255,255,255,0.08);
+  --text1:     #F5F5F5;
+  --text2:     #A0A0A0;
+  --text3:     #666666;
+}
+
+* { -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text1);
+  font-family: 'Inter', system-ui, sans-serif;
+  overscroll-behavior: none;
+}
+
+input, button, select, textarea {
+  touch-action: manipulation;
+}
