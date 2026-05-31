@@ -20,6 +20,7 @@ const NAV_ITEMS: { page: RujaPage; icon: string; label: string }[] = [
   { page: 'aniversarios', icon: '🎂', label: 'Aniversários' },
   { page: 'alertas',      icon: '🚨', label: 'Alertas' },
   { page: 'lidersupremo', icon: '👑', label: 'Líder Supremo' },
+  { page: 'usuarios',     icon: '👤', label: 'Usuários' },
   { page: 'config',       icon: '⚙️', label: 'Configurações' },
 ]
 

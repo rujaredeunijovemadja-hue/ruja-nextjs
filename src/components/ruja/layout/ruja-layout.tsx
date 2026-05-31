@@ -19,11 +19,12 @@ const RujaAniversarios  = dynamic(() => import('../aniversarios/ruja-aniversario
 const RujaConfig        = dynamic(() => import('../config/ruja-config'))
 const RujaLiderSupremo  = dynamic(() => import('../lidersupremo/ruja-lidersupremo'))
 const RujaAlertas       = dynamic(() => import('../alertas/ruja-alertas'))
+const RujaUsuarios      = dynamic(() => import('../usuarios/ruja-usuarios'))
 
 export type RujaPage =
   | 'dashboard' | 'jovens' | 'frequencia' | 'recuperacao'
   | 'departamentos' | 'lideres' | 'metas' | 'aniversarios'
-  | 'config' | 'lidersupremo' | 'alertas'
+  | 'config' | 'lidersupremo' | 'alertas' | 'usuarios'
 
 const PAGE_TITLES: Record<RujaPage, string> = {
   dashboard:    'Dashboard',
@@ -37,6 +38,7 @@ const PAGE_TITLES: Record<RujaPage, string> = {
   config:       'Configurações',
   lidersupremo: 'Líder Supremo',
   alertas:      'Alertas',
+  usuarios:     'Usuários',
 }
 
 function PageLoader() {
@@ -72,6 +74,7 @@ export function RujaLayout({ userName }: Props) {
     config:       <RujaConfig />,
     lidersupremo: <RujaLiderSupremo />,
     alertas:      <RujaAlertas />,
+    usuarios:     <RujaUsuarios />,
   }
 
   return (

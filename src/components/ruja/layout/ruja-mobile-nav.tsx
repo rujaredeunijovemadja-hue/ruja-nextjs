@@ -22,6 +22,7 @@ const MORE_PAGES: { page: RujaPage; icon: string; label: string }[] = [
   { page: 'metas',         icon: '🎯', label: 'Metas' },
   { page: 'alertas',       icon: '🚨', label: 'Alertas' },
   { page: 'lidersupremo',  icon: '👑', label: 'Líder Supremo' },
+  { page: 'usuarios',       icon: '👤', label: 'Usuários' },
   { page: 'config',        icon: '⚙️', label: 'Configurações' },
 ]
 
