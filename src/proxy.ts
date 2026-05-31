@@ -2,41 +2,33 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function proxy(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
+  let response = NextResponse.next({ request })
 
+  // Apenas atualiza cookies da sessão Supabase — sem lógica de redirect
+  // O redirect de auth é feito no Server Component (src/app/ruja/page.tsx)
   const sb = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll()  { return request.cookies.getAll() },
+        getAll() { return request.cookies.getAll() },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            response.cookies.set(name, value, options)
           )
         },
       },
     }
   )
 
-  const { data: { user } } = await sb.auth.getUser()
-  const path = request.nextUrl.pathname
+  // Refresha a sessão sem crash — necessário para manter auth SSR
+  await sb.auth.getUser().catch(() => null)
 
-  if (!user && path.startsWith('/ruja')) {
-    return NextResponse.redirect(new URL('/login', request.url))
-  }
-  if (user && path === '/login') {
-    return NextResponse.redirect(new URL('/ruja', request.url))
-  }
-  if (path === '/') {
-    return NextResponse.redirect(new URL(user ? '/ruja' : '/login', request.url))
-  }
-
-  return supabaseResponse
+  return response
 }
 
 export const config = {
-  matcher: ['/', '/login', '/ruja/:path*'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 }
