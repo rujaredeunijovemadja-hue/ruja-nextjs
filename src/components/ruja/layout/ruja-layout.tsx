@@ -49,6 +49,8 @@ const PAGE_TITLES: Record<RujaPage, string> = {
   'analista-ia': 'Analista IA',
 }
 
+const FULL_HEIGHT_PAGES: RujaPage[] = ['analista-ia']
+
 interface Props { userName: string }
 
 export function RujaLayout({ userName }: Props) {
@@ -78,6 +80,8 @@ export function RujaLayout({ userName }: Props) {
     usuarios:      <RujaUsuarios />,
     'analista-ia': <RujaAnalistaIA />,
   }
+
+  const isFull = FULL_HEIGHT_PAGES.includes(page)
 
   return (
     <RujaProvider>
@@ -130,8 +134,8 @@ export function RujaLayout({ userName }: Props) {
             </div>
           </header>
 
-          {/* Área de conteúdo — único elemento com scroll */}
-          <div className="flex-1 overflow-y-auto pb-20 md:pb-0">
+          {/* Área de conteúdo — no Analista IA, o filho controla o próprio scroll */}
+          <div className={`flex-1 min-h-0 ${isFull ? 'overflow-hidden' : 'overflow-y-auto pb-20 md:pb-0'}`}>
             {PAGES[page]}
           </div>
         </div>
