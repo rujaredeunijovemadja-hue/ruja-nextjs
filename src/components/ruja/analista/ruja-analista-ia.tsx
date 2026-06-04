@@ -275,7 +275,7 @@ export default function RujaAnalistaIA() {
         </div>
 
         {/* ── INPUT ────────────────────────────────────────── */}
-        <div className="px-4 md:px-6 pb-4 pt-3 border-t border-white/8 shrink-0">
+        <div className="px-4 md:px-6 pb-4 pt-3 border-t border-white/8 bg-[#0A0A0A] shrink-0" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 0px))' }}>
           <div className="flex gap-2 items-end">
             <textarea
               ref={textareaRef}

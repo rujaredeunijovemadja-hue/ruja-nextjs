@@ -33,7 +33,7 @@ export function RujaMobileNav({ current, onNavigate, onBusca }: Props) {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#111]/95 backdrop-blur border-t border-white/8"
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#111]/95 backdrop-blur border-t border-white/8"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <div className="flex items-stretch h-16">
           {MAIN_TABS.map(t => (
@@ -53,7 +53,7 @@ export function RujaMobileNav({ current, onNavigate, onBusca }: Props) {
       </nav>
 
       {showMore && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end">
+        <div className="md:hidden fixed inset-0 z-50 flex flex-col justify-end">
           <div className="flex-1 bg-black/50" onClick={() => setShowMore(false)} />
           <div className="bg-[#111] border-t border-white/8 rounded-t-2xl"
             style={{ paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}>
