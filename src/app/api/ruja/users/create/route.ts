@@ -1,11 +1,15 @@
+// src/app/api/ruja/users/create/route.ts
+// ─── API ROUTE: CRIAR USUÁRIO ─────────────────────────────────
+// Alinhado com schema real: departamento_id (FK), created_at, updated_at.
+
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient }      from '@/lib/supabase/server'
-import { getSupabaseAdmin }  from '@/lib/supabase/admin'
+import { createClient }     from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AdminClient = any
 
-const ROLES_COM_PERMISSAO  = ['lider_supremo', 'admin'] as const
-const ROLES_VALIDAS        = ['lider_supremo', 'admin', 'lider_departamento', 'voluntario'] as const
+const ROLES_COM_PERMISSAO = ['lider_supremo', 'admin'] as const
+const ROLES_VALIDAS       = ['lider_supremo', 'admin', 'lider_departamento', 'voluntario'] as const
 
 function gerarSenha(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$'
@@ -38,43 +42,31 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // ── 1. Verificar sessão ───────────────────────────────────
+    // ── 1. Verificar sessão ──────────────────────────────────
     const sb = await createClient()
     const { data: { user: caller }, error: sessErr } = await sb.auth.getUser()
-
     if (sessErr || !caller) {
       return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
     }
 
-    // ── 2. Verificar permissão via ruja_profiles ──────────────
+    // ── 2. Verificar permissão ───────────────────────────────
     const { data: callerProfile, error: profErr } = await admin
       .from('ruja_profiles')
       .select('role, nome, ativo')
       .eq('id', caller.id)
-      .single() as {
-        data: { role: string; nome: string; ativo: boolean } | null
-        error: unknown
-      }
+      .single() as { data: { role: string; nome: string; ativo: boolean } | null; error: unknown }
 
     if (profErr || !callerProfile) {
-      return NextResponse.json(
-        { error: 'Perfil não encontrado. Execute a migration SQL primeiro.' },
-        { status: 403 }
-      )
+      return NextResponse.json({ error: 'Perfil não encontrado.' }, { status: 403 })
     }
-
     if (!callerProfile.ativo) {
       return NextResponse.json({ error: 'Conta inativa.' }, { status: 403 })
     }
-
     if (!ROLES_COM_PERMISSAO.includes(callerProfile.role as typeof ROLES_COM_PERMISSAO[number])) {
-      return NextResponse.json(
-        { error: `Permissão negada. Seu cargo (${callerProfile.role}) não pode criar usuários.` },
-        { status: 403 }
-      )
+      return NextResponse.json({ error: 'Permissão negada.' }, { status: 403 })
     }
 
-    // ── 3. Validar body ───────────────────────────────────────
+    // ── 3. Validar body ──────────────────────────────────────
     const body = await request.json().catch(() => null)
     if (!body) return NextResponse.json({ error: 'Body inválido.' }, { status: 400 })
 
@@ -83,19 +75,17 @@ export async function POST(request: NextRequest) {
       email,
       senha: senhaInput,
       role: novoRole = 'voluntario',
-      departamento = '',
+      departamento_id = null,
     } = body
 
     if (!nome?.trim())
       return NextResponse.json({ error: 'Nome é obrigatório.' }, { status: 400 })
-
     if (!email?.trim() || !emailValido(email.trim()))
       return NextResponse.json({ error: 'Email inválido.' }, { status: 400 })
-
     if (!ROLES_VALIDAS.includes(novoRole))
       return NextResponse.json({ error: `Cargo inválido: ${novoRole}` }, { status: 400 })
 
-    // Apenas lider_supremo pode criar admin ou outro lider_supremo
+    // Apenas lider_supremo cria admin/lider_supremo
     if (['lider_supremo', 'admin'].includes(novoRole) && callerProfile.role !== 'lider_supremo') {
       return NextResponse.json(
         { error: 'Apenas o Líder Supremo pode criar Administradores.' },
@@ -103,12 +93,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validar departamento_id se fornecido
+    if (departamento_id) {
+      const { data: depto } = await admin
+        .from('ruja_departamentos')
+        .select('id')
+        .eq('id', departamento_id)
+        .single()
+      if (!depto) {
+        return NextResponse.json({ error: 'Departamento não encontrado.' }, { status: 400 })
+      }
+    }
+
     // Senha
     const senha = senhaInput?.trim() || gerarSenha()
     const { ok: senhaOk, msg: senhaMsg } = senhaForte(senha)
     if (!senhaOk) return NextResponse.json({ error: senhaMsg }, { status: 400 })
 
-    // ── 4. Criar no Supabase Auth ─────────────────────────────
+    // ── 4. Criar no Supabase Auth ────────────────────────────
     const { data: newUser, error: createErr } = await admin.auth.admin.createUser({
       email:         email.trim().toLowerCase(),
       password:      senha,
@@ -124,7 +126,6 @@ export async function POST(request: NextRequest) {
       ) {
         return NextResponse.json({ error: 'Este email já está cadastrado.' }, { status: 409 })
       }
-      // Log sem a senha
       console.error('[API /users/create] Auth error:', createErr.message)
       return NextResponse.json({ error: 'Erro ao criar usuário.' }, { status: 500 })
     }
@@ -134,29 +135,30 @@ export async function POST(request: NextRequest) {
     }
 
     const uid = newUser.user.id
+    const now = new Date().toISOString()
 
-    // ── 5. Criar ruja_profiles ────────────────────────────────
+    // ── 5. Criar ruja_profiles (schema real) ─────────────────
     const { error: profInsertErr } = await admin
       .from('ruja_profiles')
       .insert({
-        id:            uid,
-        nome:          nome.trim(),
-        email:         email.trim().toLowerCase(),
-        role:          novoRole,
-        departamento:  departamento?.trim() ?? '',
-        ativo:         true,
-        criado_em:     new Date().toISOString(),
-        atualizado_em: new Date().toISOString(),
+        id:              uid,
+        nome:            nome.trim(),
+        email:           email.trim().toLowerCase(),
+        role:            novoRole,
+        departamento_id: departamento_id ?? null,
+        ativo:           true,
+        created_at:      now,
+        updated_at:      now,
       })
 
     if (profInsertErr) {
-      // Rollback: deletar usuário Auth para não deixar órfão
+      // Rollback: deletar usuário Auth
       await admin.auth.admin.deleteUser(uid).catch(() => {})
       console.error('[API /users/create] Profile error:', profInsertErr.message)
       return NextResponse.json({ error: 'Erro ao criar perfil.' }, { status: 500 })
     }
 
-    // ── 6. Audit log (silencioso) ─────────────────────────────
+    // ── 6. Audit log (silencioso) ────────────────────────────
     await admin
       .from('ruja_audit_logs')
       .insert({
@@ -165,16 +167,16 @@ export async function POST(request: NextRequest) {
         tabela:       'ruja_profiles',
         registro_id:  uid,
         dados_depois: {
-          nome:        nome.trim(),
-          email:       email.trim().toLowerCase(),
-          role:        novoRole,
-          departamento,
-          criado_por:  callerProfile.nome,
+          nome:           nome.trim(),
+          email:          email.trim().toLowerCase(),
+          role:           novoRole,
+          departamento_id,
+          criado_por:     callerProfile.nome,
         },
       })
-      .catch(() => {}) // não bloqueia a resposta
+      .catch(() => {})
 
-    // ── 7. Retornar sucesso — NUNCA incluir senha no log ──────
+    // ── 7. Retornar — senha só aparece se foi gerada pelo server
     const resposta: Record<string, unknown> = {
       ok: true,
       usuario: {
@@ -184,8 +186,6 @@ export async function POST(request: NextRequest) {
         role:  novoRole,
       },
     }
-
-    // Senha temporária só aparece se foi GERADA pelo servidor (não fornecida)
     if (!senhaInput?.trim()) {
       resposta.senhaTemporaria = senha
     }

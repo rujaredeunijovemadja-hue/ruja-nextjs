@@ -16,11 +16,13 @@ const MAIN_TABS: { page: RujaPage; icon: string; label: string }[] = [
 ]
 
 const MORE_PAGES: { page: RujaPage; icon: string; label: string }[] = [
+  { page: 'historico-frequencia', icon: '📋', label: 'Hist. Frequência' },
   { page: 'recuperacao',   icon: '🚑', label: 'Recuperação' },
   { page: 'departamentos', icon: '🏛️', label: 'Departamentos' },
   { page: 'lideres',       icon: '⭐', label: 'Líderes' },
   { page: 'metas',         icon: '🎯', label: 'Metas' },
   { page: 'alertas',       icon: '🚨', label: 'Alertas' },
+  { page: 'analista-ia',   icon: '🦁', label: 'Analista IA' },
   { page: 'lidersupremo',  icon: '👑', label: 'Líder Supremo' },
   { page: 'usuarios',       icon: '👤', label: 'Usuários' },
   { page: 'config',        icon: '⚙️', label: 'Configurações' },

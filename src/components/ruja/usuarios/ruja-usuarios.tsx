@@ -1,41 +1,50 @@
 'use client'
+// ─── GESTÃO DE USUÁRIOS DO RUJA ───────────────────────────────
+// Alinhado com schema real: departamento_id (FK), created_at/updated_at.
+// Funcionalidades: criar, editar cargo/departamento, ativar/desativar.
+
 import { useState, useEffect, useCallback } from 'react'
 import { useRuja } from '@/lib/ruja/context'
 import { Spinner } from '@/components/ui/spinner'
 import {
-  fetchProfiles, fetchMyProfile, createUser,
+  fetchProfiles, fetchMyProfile, createUser, updateProfile,
   ROLE_LABELS, type RujaProfile,
 } from '@/lib/ruja/users'
 
-function gerarSenhaLocal(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$'
-  return Array.from({ length: 12 }, () =>
-    chars[Math.floor(Math.random() * chars.length)]
-  ).join('')
+// ── Estado do form de criação ──────────────────────────────────
+const FORM_INICIAL = {
+  nome:           '',
+  email:          '',
+  role:           'voluntario' as RujaProfile['role'],
+  departamento_id: '',
+  senha:          '',
+  gerarSenha:     true,
 }
 
 export default function RujaUsuarios() {
   const { departamentos } = useRuja()
 
-  const [profiles,     setProfiles]     = useState<RujaProfile[]>([])
-  const [myProfile,    setMyProfile]    = useState<RujaProfile | null>(null)
-  const [loading,      setLoading]      = useState(true)
-  const [showForm,     setShowForm]     = useState(false)
-  const [saving,       setSaving]       = useState(false)
-  const [toast,        setToast]        = useState('')
-  const [senhaCopiada, setSenhaCopiada] = useState(false)
-  const [resultado,    setResultado]    = useState<{
+  const [profiles,      setProfiles]      = useState<RujaProfile[]>([])
+  const [myProfile,     setMyProfile]     = useState<RujaProfile | null>(null)
+  const [loading,       setLoading]       = useState(true)
+  const [showForm,      setShowForm]      = useState(false)
+  const [saving,        setSaving]        = useState(false)
+  const [toast,         setToast]         = useState('')
+  const [senhaCopiada,  setSenhaCopiada]  = useState(false)
+  const [resultado,     setResultado]     = useState<{
     nome: string; email: string; senha: string; role: string
   } | null>(null)
 
-  const [form, setForm] = useState({
-    nome:        '',
-    email:       '',
-    role:        'voluntario' as RujaProfile['role'],
-    departamento:'',
-    senha:       '',
-    gerarSenha:  true,
-  })
+  // Estado do modal de edição
+  const [editando,  setEditando]  = useState<RujaProfile | null>(null)
+  const [editForm,  setEditForm]  = useState<{
+    role:            RujaProfile['role']
+    departamento_id: string
+    ativo:           boolean
+  }>({ role: 'voluntario', departamento_id: '', ativo: true })
+  const [editSaving, setEditSaving] = useState(false)
+
+  const [form,    setForm]    = useState(FORM_INICIAL)
   const [formErr, setFormErr] = useState('')
 
   const showToast = (m: string) => { setToast(m); setTimeout(() => setToast(''), 4000) }
@@ -46,18 +55,31 @@ export default function RujaUsuarios() {
       const [profs, mine] = await Promise.all([fetchProfiles(), fetchMyProfile()])
       setProfiles(profs)
       setMyProfile(mine)
-    } catch (e) {
+    } catch {
       showToast('Erro ao carregar usuários.')
     } finally {
       setLoading(false)
     }
   }, [])
 
-  useEffect(() => { loadData() }, [loadData])
+  useEffect(() => {
+    void Promise.resolve().then(loadData)
+  }, [loadData])
 
-  // Verificar permissão
   const canCreate = myProfile?.role === 'lider_supremo' || myProfile?.role === 'admin'
 
+  // Verifica se pode editar um perfil alvo
+  function canEdit(target: RujaProfile): boolean {
+    if (!myProfile) return false
+    if (target.id === myProfile.id) return false // não edita a si mesmo
+    if (myProfile.role === 'lider_supremo') return true
+    if (myProfile.role === 'admin') {
+      return !['lider_supremo', 'admin'].includes(target.role)
+    }
+    return false
+  }
+
+  // ── Criar usuário ──────────────────────────────────────────
   async function handleCreate() {
     setFormErr('')
     if (!form.nome.trim())  { setFormErr('Nome é obrigatório.'); return }
@@ -70,19 +92,15 @@ export default function RujaUsuarios() {
     setSaving(true)
     try {
       const res = await createUser({
-        nome:        form.nome.trim(),
-        email:       form.email.trim(),
-        role:        form.role,
-        departamento:form.departamento,
-        senha:       form.gerarSenha ? undefined : form.senha,
+        nome:            form.nome.trim(),
+        email:           form.email.trim(),
+        role:            form.role,
+        departamento_id: form.departamento_id || null,
+        senha:           form.gerarSenha ? undefined : form.senha,
       })
 
-      if (!res.ok) {
-        setFormErr(res.error ?? 'Erro ao criar usuário.')
-        return
-      }
+      if (!res.ok) { setFormErr(res.error ?? 'Erro ao criar usuário.'); return }
 
-      // Exibir resultado com senha temporária
       const senhaFinal = res.senhaTemporaria ?? form.senha
       setResultado({
         nome:  res.usuario?.nome ?? form.nome,
@@ -91,8 +109,7 @@ export default function RujaUsuarios() {
         role:  ROLE_LABELS[res.usuario?.role as RujaProfile['role']] ?? res.usuario?.role ?? '',
       })
 
-      // Resetar form
-      setForm({ nome:'', email:'', role:'voluntario', departamento:'', senha:'', gerarSenha:true })
+      setForm(FORM_INICIAL)
       setShowForm(false)
       await loadData()
     } catch (e) {
@@ -102,17 +119,57 @@ export default function RujaUsuarios() {
     }
   }
 
+  // ── Abrir modal de edição ──────────────────────────────────
+  function abrirEdicao(p: RujaProfile) {
+    setEditando(p)
+    setEditForm({
+      role:            p.role,
+      departamento_id: p.departamento_id ?? '',
+      ativo:           p.ativo,
+    })
+  }
+
+  // ── Salvar edição ──────────────────────────────────────────
+  async function handleSalvarEdicao() {
+    if (!editando) return
+    setEditSaving(true)
+    try {
+      const res = await updateProfile({
+        id:              editando.id,
+        role:            editForm.role,
+        departamento_id: editForm.departamento_id || null,
+        ativo:           editForm.ativo,
+      })
+      if (!res.ok) { showToast(res.error ?? 'Erro ao atualizar.'); return }
+      showToast('✅ Usuário atualizado com sucesso.')
+      setEditando(null)
+      await loadData()
+    } catch {
+      showToast('Erro ao atualizar usuário.')
+    } finally {
+      setEditSaving(false)
+    }
+  }
+
   function copiarSenha(senha: string) {
     navigator.clipboard.writeText(senha).catch(() => {})
     setSenhaCopiada(true)
     setTimeout(() => setSenhaCopiada(false), 2000)
   }
 
+  // Helper: nome do departamento a partir do id
+  function nomeDepto(id: string | null): string {
+    if (!id) return ''
+    const d = departamentos.find(d => d.id === id)
+    return d ? `${d.icone} ${d.nome}` : id
+  }
+
   if (loading) return <div className="flex-1 flex items-center justify-center"><Spinner /></div>
 
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto">
-      {/* Header */}
+
+      {/* ── HEADER ─────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-5">
         <div>
           <h1 className="text-xl font-bold text-white">Usuários do Sistema</h1>
@@ -120,7 +177,7 @@ export default function RujaUsuarios() {
             {profiles.length} usuário{profiles.length !== 1 ? 's' : ''} ·{' '}
             {myProfile
               ? <span className="text-gray-400">{ROLE_LABELS[myProfile.role]}</span>
-              : 'carregando perfil...'}
+              : 'carregando...'}
           </p>
         </div>
         {canCreate && (
@@ -137,14 +194,14 @@ export default function RujaUsuarios() {
       {!canCreate && myProfile && (
         <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 mb-4">
           <p className="text-yellow-400 text-sm">
-            🔒 Apenas <strong>Líder Supremo</strong> e <strong>Administradores</strong> podem criar novos usuários.
+            🔒 Apenas <strong>Líder Supremo</strong> e <strong>Administradores</strong> podem criar ou editar usuários.
           </p>
         </div>
       )}
 
-      {/* Resultado de criação */}
+      {/* ── RESULTADO DE CRIAÇÃO ────────────────────────────── */}
       {resultado && (
-        <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-5 mb-5 animate-fadeIn">
+        <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-5 mb-5">
           <div className="text-green-400 font-bold mb-3">✅ Usuário criado com sucesso!</div>
           <div className="space-y-2 text-sm mb-4">
             <div className="flex gap-2"><span className="text-gray-400 w-20">Nome:</span><span className="text-white">{resultado.nome}</span></div>
@@ -169,35 +226,36 @@ export default function RujaUsuarios() {
                 </button>
               </div>
               <p className="text-gray-500 text-xs mt-2">
-                Envie esta senha ao usuário por canal seguro (WhatsApp, Signal, etc). Peça para alterar no primeiro acesso.
+                Envie por WhatsApp ou canal seguro. Peça para alterar no primeiro acesso.
               </p>
             </div>
           )}
 
-          <button
-            onClick={() => setResultado(null)}
-            className="mt-3 text-gray-500 text-sm hover:text-gray-300 touch-manipulation"
-          >
+          <button onClick={() => setResultado(null)}
+            className="mt-3 text-gray-500 text-sm hover:text-gray-300 touch-manipulation">
             Fechar
           </button>
         </div>
       )}
 
-      {/* Lista de usuários */}
+      {/* ── LISTA DE USUÁRIOS ───────────────────────────────── */}
       {profiles.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
           <div className="text-4xl mb-3">👤</div>
           <p>Nenhum perfil cadastrado ainda.</p>
-          <p className="text-xs mt-1">Execute a migration SQL para criar a tabela ruja_profiles.</p>
         </div>
       ) : (
-        <div className="space-y-2 mb-20">
+        <div className="space-y-2 mb-24">
           {profiles.map(p => (
             <div key={p.id} className={`bg-[#111] border rounded-xl p-4 flex items-center gap-4
               ${!p.ativo ? 'opacity-50 border-white/5' : 'border-white/8'}`}>
+
+              {/* Avatar */}
               <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-400 font-bold text-sm flex-shrink-0">
                 {p.nome.charAt(0).toUpperCase()}
               </div>
+
+              {/* Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-white font-semibold text-sm">{p.nome}</span>
@@ -209,31 +267,40 @@ export default function RujaUsuarios() {
                   )}
                 </div>
                 <div className="text-gray-500 text-xs mt-0.5">{p.email}</div>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
                   <span className="text-xs bg-white/5 text-gray-400 px-2 py-0.5 rounded-full">
                     {ROLE_LABELS[p.role]}
                   </span>
-                  {p.departamento && (
-                    <span className="text-xs text-gray-600">· {p.departamento}</span>
+                  {p.departamento_id && (
+                    <span className="text-xs text-gray-600">· {nomeDepto(p.departamento_id)}</span>
                   )}
                 </div>
               </div>
+
+              {/* Botão editar */}
+              {canEdit(p) && (
+                <button
+                  onClick={() => abrirEdicao(p)}
+                  className="flex-shrink-0 p-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition touch-manipulation text-xs"
+                  title="Editar usuário"
+                >
+                  ✏️
+                </button>
+              )}
             </div>
           ))}
         </div>
       )}
 
-      {/* Modal de criação */}
+      {/* ── MODAL CRIAR USUÁRIO ──────────────────────────────── */}
       {showForm && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-end md:items-center justify-center">
           <div className="bg-[#111] border border-white/10 rounded-t-2xl md:rounded-2xl w-full max-w-md max-h-[92dvh] flex flex-col">
-            {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/8 flex-shrink-0">
               <h2 className="text-white font-bold">Criar Novo Usuário</h2>
               <button onClick={() => setShowForm(false)} className="text-gray-400 text-xl touch-manipulation">✕</button>
             </div>
 
-            {/* Form */}
             <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
               {/* Nome */}
               <div>
@@ -274,12 +341,12 @@ export default function RujaUsuarios() {
               {/* Departamento */}
               <div>
                 <label className={LBL}>Departamento (opcional)</label>
-                <select value={form.departamento}
-                  onChange={e => setForm(f => ({ ...f, departamento: e.target.value }))}
+                <select value={form.departamento_id}
+                  onChange={e => setForm(f => ({ ...f, departamento_id: e.target.value }))}
                   className={INP}>
                   <option value="">— Sem departamento</option>
                   {departamentos.map(d => (
-                    <option key={d.id} value={d.nome}>{d.icone} {d.nome}</option>
+                    <option key={d.id} value={d.id}>{d.icone} {d.nome}</option>
                   ))}
                 </select>
               </div>
@@ -298,26 +365,24 @@ export default function RujaUsuarios() {
                   <input type="password"
                     value={form.senha}
                     onChange={e => setForm(f => ({ ...f, senha: e.target.value }))}
-                    placeholder="Mínimo 8 chars, 1 maiúscula, 1 número"
+                    placeholder="Mín. 8 chars, 1 maiúscula, 1 número"
                     className={INP} />
                 )}
 
                 {form.gerarSenha && (
-                  <div className="bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-gray-500 text-sm flex items-center gap-2">
-                    🔐 Uma senha segura de 12 caracteres será gerada e exibida após a criação.
+                  <div className="bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-gray-500 text-sm">
+                    🔐 Senha de 12 caracteres gerada e exibida após criação.
                   </div>
                 )}
               </div>
 
-              {/* Aviso */}
               <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3">
                 <p className="text-yellow-400 text-xs">
                   ⚠️ A senha temporária será exibida <strong>apenas uma vez</strong>.
-                  Copie e envie ao usuário por canal seguro. Peça para alterar no primeiro acesso.
+                  Copie e envie por canal seguro.
                 </p>
               </div>
 
-              {/* Erro */}
               {formErr && (
                 <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-red-400 text-sm">
                   {formErr}
@@ -325,7 +390,6 @@ export default function RujaUsuarios() {
               )}
             </div>
 
-            {/* Footer */}
             <div className="px-5 py-4 border-t border-white/8 flex gap-3 flex-shrink-0">
               <button onClick={() => setShowForm(false)}
                 className="flex-1 py-3 rounded-xl bg-white/5 text-gray-300 font-semibold touch-manipulation">
@@ -341,6 +405,98 @@ export default function RujaUsuarios() {
         </div>
       )}
 
+      {/* ── MODAL EDITAR USUÁRIO ─────────────────────────────── */}
+      {editando && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-end md:items-center justify-center">
+          <div className="bg-[#111] border border-white/10 rounded-t-2xl md:rounded-2xl w-full max-w-md max-h-[92dvh] flex flex-col">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/8 flex-shrink-0">
+              <div>
+                <h2 className="text-white font-bold">Editar Usuário</h2>
+                <p className="text-gray-500 text-xs mt-0.5">{editando.nome} · {editando.email}</p>
+              </div>
+              <button onClick={() => setEditando(null)} className="text-gray-400 text-xl touch-manipulation">✕</button>
+            </div>
+
+            <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
+
+              {/* Cargo */}
+              <div>
+                <label className={LBL}>Cargo / Nível de Acesso</label>
+                <select value={editForm.role}
+                  onChange={e => setEditForm(f => ({ ...f, role: e.target.value as RujaProfile['role'] }))}
+                  className={INP}>
+                  <option value="voluntario">🙋 Voluntário</option>
+                  <option value="lider_departamento">⭐ Líder de Departamento</option>
+                  {myProfile?.role === 'lider_supremo' && (
+                    <>
+                      <option value="admin">🔑 Administrador</option>
+                      <option value="lider_supremo">👑 Líder Supremo</option>
+                    </>
+                  )}
+                </select>
+              </div>
+
+              {/* Departamento */}
+              <div>
+                <label className={LBL}>Departamento</label>
+                <select value={editForm.departamento_id}
+                  onChange={e => setEditForm(f => ({ ...f, departamento_id: e.target.value }))}
+                  className={INP}>
+                  <option value="">— Sem departamento</option>
+                  {departamentos.map(d => (
+                    <option key={d.id} value={d.id}>{d.icone} {d.nome}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Status ativo */}
+              <div>
+                <label className={LBL}>Status da Conta</label>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setEditForm(f => ({ ...f, ativo: true }))}
+                    className={`flex-1 py-3 rounded-xl text-sm font-bold transition touch-manipulation
+                      ${editForm.ativo
+                        ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                        : 'bg-white/5 text-gray-500 border border-white/5'}`}>
+                    ✅ Ativo
+                  </button>
+                  <button
+                    onClick={() => setEditForm(f => ({ ...f, ativo: false }))}
+                    className={`flex-1 py-3 rounded-xl text-sm font-bold transition touch-manipulation
+                      ${!editForm.ativo
+                        ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                        : 'bg-white/5 text-gray-500 border border-white/5'}`}>
+                    🚫 Inativo
+                  </button>
+                </div>
+              </div>
+
+              {!editForm.ativo && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2.5">
+                  <p className="text-red-400 text-xs">
+                    ⚠️ Desativar bloqueia o acesso imediatamente. O usuário não conseguirá fazer login.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="px-5 py-4 border-t border-white/8 flex gap-3 flex-shrink-0">
+              <button onClick={() => setEditando(null)}
+                className="flex-1 py-3 rounded-xl bg-white/5 text-gray-300 font-semibold touch-manipulation">
+                Cancelar
+              </button>
+              <button onClick={handleSalvarEdicao} disabled={editSaving}
+                className="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold flex items-center justify-center gap-2 touch-manipulation">
+                {editSaving ? <Spinner size="sm" /> : null}
+                {editSaving ? 'Salvando...' : 'Salvar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── TOAST ───────────────────────────────────────────── */}
       {toast && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-gray-800 text-white text-sm px-5 py-2.5 rounded-full shadow-lg">
           {toast}

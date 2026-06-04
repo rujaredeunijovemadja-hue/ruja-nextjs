@@ -51,7 +51,7 @@ export function RujaBusca({ onClose, onJovem }: Props) {
         ) : total === 0 ? (
           <div className="text-center py-20 text-gray-600">
             <div className="text-4xl mb-3">😕</div>
-            <p>Nenhum resultado para <span className="text-white">"{query}"</span></p>
+            <p>Nenhum resultado para <span className="text-white">&ldquo;{query}&rdquo;</span></p>
           </div>
         ) : (
           <div className="p-4 space-y-4">

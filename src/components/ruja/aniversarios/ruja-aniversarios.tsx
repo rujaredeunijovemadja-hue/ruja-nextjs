@@ -51,7 +51,7 @@ export default function RujaAniversarios() {
   }
 
   function abrirWpp(p: typeof todos[0]) {
-    const contato = (p as any).contato
+    const contato = 'contato' in p ? p.contato : null
     if (!contato) { showToast('Sem WhatsApp cadastrado.'); return }
     const numero = contato.replace(/\D/g,'')
     const texto  = getMensagem(p.nome, p.dias)
@@ -101,7 +101,7 @@ export default function RujaAniversarios() {
         <div className="space-y-2">
           {filtrados.map(p => {
             const isHoje = p.dias === 0
-            const contato = (p as any).contato
+            const contato = 'contato' in p ? p.contato : null
             return (
               <div key={p.id} className={`bg-[#111] border rounded-xl p-4 flex items-center gap-3
                 ${isHoje ? 'border-yellow-500/40 bg-yellow-500/5' : 'border-white/8'}`}>

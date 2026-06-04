@@ -91,7 +91,9 @@ export function RujaProvider({ children }: { children: ReactNode }) {
     }))
   }, [state.frequencias, state.regras, state.jovens])
 
-  useEffect(() => { reload() }, [reload])
+  useEffect(() => {
+    void Promise.resolve().then(reload)
+  }, [reload])
 
   return (
     <RujaContext.Provider value={{ ...state, loading, error, reload, reloadJovens, setJovens, recalcularStatus }}>
