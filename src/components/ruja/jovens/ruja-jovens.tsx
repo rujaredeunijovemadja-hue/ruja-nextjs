@@ -4,6 +4,7 @@ import { useRuja } from '@/lib/ruja/context'
 import { Spinner } from '@/components/ui/spinner'
 import { StatusBadge } from '@/components/ui/badge'
 import { Avatar } from '@/components/ui/avatar'
+import { FotoLightbox } from '@/components/ui/foto-lightbox'
 import { RujaJovemForm } from './ruja-jovem-form'
 import { RujaJovemDetalhe } from './ruja-jovem-detalhe'
 import { deleteJovem, auditLog } from '@/lib/ruja/queries'
@@ -20,6 +21,7 @@ export default function RujaJovens() {
   const [editando,   setEditando]   = useState<Jovem | null | 'novo'>(null)
   const [detalhe,    setDetalhe]    = useState<Jovem | null>(null)
   const [deletando,  setDeletando]  = useState<Jovem | null>(null)
+  const [fotoExpandida, setFotoExpandida] = useState<{ url: string; nome: string } | null>(null)
   const [toast,      setToast]      = useState('')
 
   const showToast = (msg: string) => {
@@ -116,6 +118,7 @@ export default function RujaJovens() {
               onView={() => setDetalhe(j)}
               onEdit={() => setEditando(j)}
               onDelete={() => setDeletando(j)}
+              onExpandFoto={() => setFotoExpandida({ url: j.foto_url, nome: j.nome })}
             />
           ))}
         </div>
@@ -161,6 +164,11 @@ export default function RujaJovens() {
         </div>
       )}
 
+      {/* Foto em destaque */}
+      {fotoExpandida && (
+        <FotoLightbox src={fotoExpandida.url} nome={fotoExpandida.nome} onClose={() => setFotoExpandida(null)} />
+      )}
+
       {/* Toast */}
       {toast && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-gray-800 text-white text-sm px-5 py-2.5 rounded-full shadow-lg">
@@ -171,18 +179,24 @@ export default function RujaJovens() {
   )
 }
 
-function JovemCard({ jovem, onView, onEdit, onDelete }: {
+function JovemCard({ jovem, onView, onEdit, onDelete, onExpandFoto }: {
   jovem: Jovem
   onView: () => void
   onEdit: () => void
   onDelete: () => void
+  onExpandFoto: () => void
 }) {
   const deptos = jovem.departamento ? jovem.departamento.split(';').filter(Boolean) : []
 
   return (
     <div className="bg-[#111] border border-white/8 rounded-xl p-4 flex items-start gap-4 cursor-pointer hover:border-white/15 transition" onClick={onView}>
       {/* Avatar */}
-      <Avatar src={jovem.foto_url} nome={jovem.nome} size={80} className="w-16 h-16 md:w-20 md:h-20" />
+      <div
+        onClick={jovem.foto_url ? e => { e.stopPropagation(); onExpandFoto() } : undefined}
+        className={jovem.foto_url ? 'cursor-zoom-in' : undefined}
+      >
+        <Avatar src={jovem.foto_url} nome={jovem.nome} size={80} className="w-16 h-16 md:w-20 md:h-20" />
+      </div>
 
       {/* Info */}
       <div className="flex-1 min-w-0">
