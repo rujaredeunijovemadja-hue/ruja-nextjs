@@ -135,7 +135,7 @@ export function RujaLayout({ userName }: Props) {
           </header>
 
           {/* Área de conteúdo — no Analista IA, o filho controla o próprio scroll */}
-          <div className={`flex-1 min-h-0 ${isFull ? 'overflow-hidden' : 'overflow-y-auto pb-20 md:pb-0'}`}>
+          <div className={`flex-1 min-h-0 ${isFull ? 'overflow-hidden pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0' : 'overflow-y-auto pb-20 md:pb-0'}`}>
             {PAGES[page]}
           </div>
         </div>
