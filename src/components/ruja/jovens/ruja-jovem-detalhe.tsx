@@ -2,6 +2,7 @@
 import { useMemo } from 'react'
 import { useRuja } from '@/lib/ruja/context'
 import { StatusBadge } from '@/components/ui/badge'
+import { Avatar } from '@/components/ui/avatar'
 import { getFreqPct, getFaltasSeguidas, getDiasParaAniversario, getIdade } from '@/lib/ruja/calculos'
 import type { Jovem } from '@/lib/ruja/types'
 
@@ -33,21 +34,8 @@ export function RujaJovemDetalhe({ jovem, onClose, onEdit }: Props) {
     <div className="fixed inset-0 bg-black/85 z-50 flex items-end md:items-center justify-center">
       <div className="bg-[#111] border border-white/10 rounded-t-2xl md:rounded-2xl w-full max-w-lg max-h-[92dvh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-white/8 flex-shrink-0">
-          <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-400 font-bold overflow-hidden flex-shrink-0">
-            {jovem.foto_url
-              ? <img src={jovem.foto_url} className="w-full h-full object-cover" alt="" />
-              : jovem.nome.charAt(0).toUpperCase()
-            }
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-white font-bold truncate">{jovem.nome}</div>
-            <div className="flex items-center gap-2">
-              <StatusBadge status={jovem.status} />
-              {jovem.batizado === 'sim' && <span className="text-blue-400 text-xs">🔵 Batizado</span>}
-              {emRecup && <span className="text-orange-400 text-xs">🚑 Recuperação</span>}
-            </div>
-          </div>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/8 flex-shrink-0">
+          <h2 className="text-white font-bold truncate">Perfil do Jovem</h2>
           <div className="flex gap-2 flex-shrink-0">
             <button onClick={onEdit}
               className="p-2 text-gray-400 hover:text-white bg-white/5 rounded-lg touch-manipulation">✏️</button>
@@ -58,6 +46,22 @@ export function RujaJovemDetalhe({ jovem, onClose, onEdit }: Props) {
 
         {/* Scroll */}
         <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
+          {/* Foto em destaque */}
+          <div className="flex flex-col items-center text-center">
+            <Avatar
+              src={jovem.foto_url}
+              nome={jovem.nome}
+              size={250}
+              className="w-[200px] h-[200px] md:w-[250px] md:h-[250px]"
+            />
+            <div className="text-white font-bold text-lg mt-3">{jovem.nome}</div>
+            <div className="flex items-center gap-2 mt-1 flex-wrap justify-center">
+              <StatusBadge status={jovem.status} />
+              {jovem.batizado === 'sim' && <span className="text-blue-400 text-xs">🔵 Batizado</span>}
+              {emRecup && <span className="text-orange-400 text-xs">🚑 Recuperação</span>}
+            </div>
+          </div>
+
           {/* Contato */}
           <div className="flex gap-2">
             {jovem.contato && (

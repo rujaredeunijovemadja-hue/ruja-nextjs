@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react'
 import { useRuja } from '@/lib/ruja/context'
 import { Spinner } from '@/components/ui/spinner'
+import { Avatar } from '@/components/ui/avatar'
 import { getDiasParaAniversario, getIdade, diasLabel } from '@/lib/ruja/calculos'
 
 type Tab = 'hoje' | 'mes' | '30dias' | 'todos'
@@ -102,13 +103,17 @@ export default function RujaAniversarios() {
           {filtrados.map(p => {
             const isHoje = p.dias === 0
             const contato = 'contato' in p ? p.contato : null
+            const foto = 'foto_url' in p ? p.foto_url : null
             return (
               <div key={p.id} className={`bg-[#111] border rounded-xl p-4 flex items-center gap-3
                 ${isHoje ? 'border-yellow-500/40 bg-yellow-500/5' : 'border-white/8'}`}>
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0
-                  ${isHoje ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'}`}>
-                  {p.nome.charAt(0).toUpperCase()}
-                </div>
+                <Avatar
+                  src={foto}
+                  nome={p.nome}
+                  size={80}
+                  className="w-16 h-16 md:w-20 md:h-20"
+                  bg={isHoje ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'}
+                />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-white font-semibold text-sm">{p.nome}</span>

@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react'
 import { useRuja } from '@/lib/ruja/context'
 import { Spinner } from '@/components/ui/spinner'
 import { StatusBadge } from '@/components/ui/badge'
+import { Avatar } from '@/components/ui/avatar'
 import { RujaJovemForm } from './ruja-jovem-form'
 import { RujaJovemDetalhe } from './ruja-jovem-detalhe'
 import { deleteJovem, auditLog } from '@/lib/ruja/queries'
@@ -181,12 +182,7 @@ function JovemCard({ jovem, onView, onEdit, onDelete }: {
   return (
     <div className="bg-[#111] border border-white/8 rounded-xl p-4 flex items-start gap-4 cursor-pointer hover:border-white/15 transition" onClick={onView}>
       {/* Avatar */}
-      <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-400 font-bold text-sm flex-shrink-0 overflow-hidden">
-        {jovem.foto_url
-          ? <img src={jovem.foto_url} alt={jovem.nome} className="w-full h-full object-cover" />
-          : jovem.nome.charAt(0).toUpperCase()
-        }
-      </div>
+      <Avatar src={jovem.foto_url} nome={jovem.nome} size={80} className="w-16 h-16 md:w-20 md:h-20" />
 
       {/* Info */}
       <div className="flex-1 min-w-0">

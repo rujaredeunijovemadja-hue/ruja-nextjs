@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react'
 import { useRuja } from '@/lib/ruja/context'
 import { upsertRecuperacao, deleteRecuperacao } from '@/lib/ruja/queries'
 import { Spinner } from '@/components/ui/spinner'
+import { Avatar } from '@/components/ui/avatar'
 import type { Recuperacao } from '@/lib/ruja/types'
 
 export default function RujaRecuperacao() {
@@ -131,7 +132,14 @@ export default function RujaRecuperacao() {
             return (
               <div key={r.id} className={`bg-[#111] border rounded-xl p-4
                 ${r.status === 'ativo' ? 'border-red-500/20' : 'border-white/8 opacity-60'}`}>
-                <div className="flex items-start justify-between gap-2">
+                <div className="flex items-start justify-between gap-3">
+                  <Avatar
+                    src={jovem?.foto_url}
+                    nome={jovem?.nome ?? '?'}
+                    size={80}
+                    className="w-16 h-16 md:w-20 md:h-20"
+                    bg={r.status === 'ativo' ? 'bg-red-500/20 text-red-400' : 'bg-white/5 text-gray-400'}
+                  />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-white font-semibold">{jovem?.nome ?? 'Jovem não encontrado'}</span>

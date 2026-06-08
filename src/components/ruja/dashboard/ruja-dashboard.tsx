@@ -2,6 +2,7 @@
 import { useMemo } from 'react'
 import { useRuja } from '@/lib/ruja/context'
 import { Spinner } from '@/components/ui/spinner'
+import { Avatar } from '@/components/ui/avatar'
 import { getDiasParaAniversario, getFreqPct } from '@/lib/ruja/calculos'
 
 export default function RujaDashboard() {
@@ -78,6 +79,36 @@ export default function RujaDashboard() {
           <AlertCard label="Aniversários no Mês" value={kpis.aniversMes.length} icon="📅" color="bg-purple-500/20 border-purple-500/30 text-purple-400" />
         )}
       </div>
+
+      {/* Aniversariantes */}
+      {(kpis.aniversHoje.length > 0 || kpis.aniversMes.length > 0) && (
+        <div className="bg-[#111] border border-white/8 rounded-xl p-4">
+          <h3 className="text-white font-semibold mb-3">🎂 Aniversariantes</h3>
+          <div className="space-y-2">
+            {(kpis.aniversHoje.length > 0 ? kpis.aniversHoje : kpis.aniversMes.slice(0, 5)).map(j => {
+              const isHoje = getDiasParaAniversario(j.data_nasc) === 0
+              return (
+                <div key={j.id} className="flex items-center gap-3">
+                  <Avatar
+                    src={j.foto_url}
+                    nome={j.nome}
+                    size={64}
+                    className="w-16 h-16"
+                    bg={isHoje ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white text-sm font-semibold truncate">{j.nome}</div>
+                    <div className="text-gray-500 text-xs">
+                      {j.data_nasc && `${j.data_nasc.slice(8,10)}/${j.data_nasc.slice(5,7)}`}
+                      {isHoje && <span className="text-yellow-400 font-bold ml-1">🎉 Hoje!</span>}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Status breakdown */}
       <div className="bg-[#111] border border-white/8 rounded-xl p-4">

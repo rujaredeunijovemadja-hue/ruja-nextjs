@@ -19,6 +19,17 @@ const SUGESTOES = [
   { icon: '📝', texto: 'Gere um resumo semanal completo da juventude.' },
 ]
 
+const COMO_USAR = [
+  'Como cadastrar jovem?',
+  'Como registrar frequência?',
+  'Como corrigir um erro?',
+  'Como cadastrar líder?',
+  'Como acompanhar recuperação?',
+  'Como usar aniversários?',
+  'Como usar metas?',
+  'Como usar o sistema no celular?',
+]
+
 interface Mensagem {
   role: 'user' | 'assistant'
   content: string
@@ -82,6 +93,23 @@ function montarContexto(state: ReturnType<typeof useRuja>): string {
   const bot10 = jovensComFreq.slice(-10).map(j => `${j.nome}(${j.pct}%,${j.depto})`).join('; ')
 
   return `Você é o Analista IA do RUJA (Rede UniJovem ADJA). Analisa dados reais. NUNCA invente números. Apenas leitura — nunca altere dados. Responda em português, de forma pastoral e objetiva.
+
+Você também atua como instrutor oficial e secretária digital da liderança — explicando como usar o sistema RUJA.
+
+Ao explicar como usar o sistema:
+- responda passo a passo
+- explique como se estivesse ensinando alguém sem conhecimento técnico
+- nunca use linguagem de programador
+- explique onde clicar
+- explique o que preencher
+- explique o resultado esperado
+
+Sempre que possível, ao explicar uma funcionalidade:
+1. Explique o que é/para que serve.
+2. Mostre o passo a passo numerado.
+3. Dê uma dica prática.
+
+Seu público principal são líderes de igreja, professores, supervisores e administradores — pessoas que podem não ter familiaridade com tecnologia. Nunca responda de forma curta e técnica como "Vá em Jovens e clique em criar"; sempre dê o caminho completo, com cada clique e cada campo a preencher.
 
 DATA: ${new Date().toLocaleDateString('pt-BR')}
 REGRAS STATUS: Ativo≥${regras.ativo}% | Oscilando≥${regras.oscilando}% | Em Risco:${regras.risco}+ faltas seguidas
@@ -202,6 +230,18 @@ export default function RujaAnalistaIA() {
                   <span className="text-gray-400 group-hover:text-gray-200 text-sm leading-snug transition">{s.texto}</span>
                 </button>
               ))}
+            </div>
+
+            <div>
+              <p className="text-gray-600 text-xs uppercase tracking-wider mb-2 px-1">Como usar o sistema</p>
+              <div className="flex flex-wrap gap-2">
+                {COMO_USAR.map(p => (
+                  <button key={p} onClick={() => enviar(p)}
+                    className="px-3 py-1.5 bg-[#111] hover:bg-white/5 border border-white/8 hover:border-white/15 rounded-full text-gray-400 hover:text-gray-200 text-xs transition touch-manipulation">
+                    {p}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="bg-blue-500/8 border border-blue-500/20 rounded-xl px-4 py-3 flex items-start gap-3">
