@@ -39,7 +39,7 @@ const PAGE_TITLES: Record<RujaPage, string> = {
   dashboard:     'Dashboard Geral',
   teens:         'Teens',
   simply:        'Simply',
-  eventos:       'Eventos',
+  eventos:       'Eventos Gerais',
   jovens:        'Jovens',
   frequencia:    'Frequência',
   'historico-frequencia': 'Histórico de Frequência',
@@ -195,7 +195,7 @@ function DepartmentArea({
   const tabs: { page: RujaPage; label: string }[] = [
     { page: scope, label: 'Dashboard' },
     { page: 'jovens', label: 'Jovens' },
-    { page: 'frequencia', label: 'Frequência' },
+    { page: 'frequencia', label: `Eventos do ${label}` },
     { page: 'recuperacao', label: 'Recuperação' },
     { page: 'lideres', label: 'Líderes' },
     { page: 'metas', label: 'Metas' },

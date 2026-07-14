@@ -4,6 +4,7 @@
 export type Status = 'Ativo' | 'Oscilando' | 'Ocioso' | 'Em Risco'
 export type Batizado = 'sim' | 'nao'
 export type Presenca = 'presente' | 'falta'
+export type StatusEvento = 'Agendado' | 'Em andamento' | 'Finalizado' | 'Cancelado'
 export type TipoEventoFrequencia =
   | 'Culto'
   | 'Reunião'
@@ -110,6 +111,12 @@ export interface EventoFrequencia {
   departamento_id: string | null
   lider_responsavel_id: string | null
   tipo: TipoEventoFrequencia | string | null
+  hora_inicio: string | null
+  hora_termino: string | null
+  local: string | null
+  descricao: string | null
+  status: StatusEvento | string | null
+  departamentos_envolvidos: string[] | null
   observacao: string | null
   created_by: string
   created_at: string
@@ -123,6 +130,12 @@ export interface EventoFrequenciaInput {
   departamento_id: string | null
   lider_responsavel_id: string | null
   tipo: TipoEventoFrequencia | string | null
+  hora_inicio: string | null
+  hora_termino: string | null
+  local: string | null
+  descricao: string | null
+  status: StatusEvento | string | null
+  departamentos_envolvidos: string[] | null
   observacao: string | null
   participantes: Array<{ jovem_id: string; observacao?: string | null }>
 }

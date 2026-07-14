@@ -64,3 +64,23 @@ criar eventos canônicos e vincular somente registros presentes. A tabela
 9. Conferir entradas em `ruja_audit_logs`.
 10. Testar permissões com admin e líder de departamento.
 11. Rodar `npm run lint` e `npm run build`.
+
+## 2026-07-14 — Eventos Gerais como entidade completa
+
+## Módulo
+Eventos Gerais / Eventos departamentais / Histórico de Frequência
+
+## Solução
+- A navegação agora separa **Eventos Gerais** da RUJA dos eventos operacionais
+  dentro de Teens/Simply.
+- Eventos Gerais podem envolver Toda RUJA ou vários departamentos/ministérios
+  como Teens, Simply, Louvor, Mídia, Recepção, Intercessão, Comunicação e
+  Organização.
+- O cadastro do evento foi expandido com hora de início, hora de término,
+  local, descrição, status e departamentos envolvidos.
+- A edição e o detalhe do histórico preservam e exibem os novos dados do evento.
+
+## Banco
+- Nova migration: `src/lib/supabase/migration_eventos_entidade_completa.sql`.
+- Novas colunas em `ruja_eventos_frequencia`: `hora_inicio`, `hora_termino`,
+  `local`, `descricao`, `status`, `departamentos_envolvidos`.

@@ -26,6 +26,12 @@ Campos:
 - `lider_responsavel_id text null`
 - `tipo text null`
 - `observacao text null`
+- `hora_inicio time null`
+- `hora_termino time null`
+- `local text null`
+- `descricao text null`
+- `status text default 'Agendado'`
+- `departamentos_envolvidos text[] null`
 - `created_by uuid not null references auth.users(id)`
 - `created_at timestamptz not null default now()`
 - `updated_at timestamptz not null default now()`
@@ -87,3 +93,4 @@ Status permitidos:
 
 - `src/lib/supabase/migration_departamentos_pendentes.sql`
 - `src/lib/supabase/migration_eventos_frequencia.sql`
+- `src/lib/supabase/migration_eventos_entidade_completa.sql`

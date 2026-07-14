@@ -56,6 +56,27 @@ Fluxo oficial:
 Ausência é implícita: jovem ativo do departamento que não está nos participantes
 do evento é considerado ausente para cálculo. O sistema não cria linhas de falta.
 
+## Eventos Gerais
+
+Eventos Gerais são eventos institucionais da RUJA, separados dos eventos
+operacionais de Teens/Simply. Eles podem envolver Toda RUJA ou vários
+departamentos/ministérios ao mesmo tempo.
+
+Campos oficiais do evento:
+
+- nome;
+- tipo;
+- data;
+- hora de início;
+- hora de término;
+- local;
+- descrição;
+- responsável;
+- departamentos envolvidos;
+- status;
+- observação interna;
+- participantes/presença.
+
 ## Fonte oficial de departamentos
 
 A tabela `ruja_departamentos` é a fonte oficial. A aplicação filtra apenas
