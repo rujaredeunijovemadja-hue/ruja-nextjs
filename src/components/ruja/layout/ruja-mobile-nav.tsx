@@ -12,10 +12,11 @@ const MAIN_TABS: { page: RujaPage; icon: string; label: string }[] = [
   { page: 'dashboard',   icon: '🏠', label: 'Geral' },
   { page: 'teens',       icon: '👦', label: 'Teens' },
   { page: 'simply',      icon: '🌱', label: 'Simply' },
-  { page: 'pendentes',   icon: '📋', label: 'Pendentes' },
+  { page: 'eventos',     icon: '📅', label: 'Eventos' },
 ]
 
 const MORE_PAGES: { page: RujaPage; icon: string; label: string }[] = [
+  { page: 'pendentes',   icon: '📋', label: 'Pendentes' },
   { page: 'analista-ia',   icon: '🤖', label: 'IA Nexus' },
   { page: 'config',        icon: '⚙️', label: 'Configurações' },
   { page: 'historico-frequencia', icon: '📋', label: 'Relatórios' },

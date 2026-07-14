@@ -17,6 +17,7 @@ const NAV_ITEMS: { page: RujaPage; icon: string; label: string }[] = [
   { page: 'dashboard',     icon: '🏠', label: 'Dashboard Geral' },
   { page: 'teens',         icon: '👦', label: 'Teens' },
   { page: 'simply',        icon: '🌱', label: 'Simply' },
+  { page: 'eventos',       icon: '📅', label: 'Eventos' },
   { page: 'pendentes',     icon: '📋', label: 'Cadastros Pendentes' },
   { page: 'analista-ia',   icon: '🤖', label: 'IA Nexus' },
   { page: 'config',        icon: '⚙️', label: 'Configurações' },

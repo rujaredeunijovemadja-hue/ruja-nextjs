@@ -31,7 +31,7 @@ const RujaAnalistaIA    = dynamic(() => import('../analista/ruja-analista-ia'))
 const RujaCadastrosPendentes = dynamic(() => import('../pendentes/ruja-cadastros-pendentes'))
 
 export type RujaPage =
-  | 'dashboard' | 'teens' | 'simply' | 'jovens' | 'frequencia' | 'historico-frequencia' | 'recuperacao'
+  | 'dashboard' | 'teens' | 'simply' | 'eventos' | 'jovens' | 'frequencia' | 'historico-frequencia' | 'recuperacao'
   | 'departamentos' | 'lideres' | 'metas' | 'aniversarios'
   | 'pendentes' | 'config' | 'lidersupremo' | 'alertas' | 'usuarios' | 'analista-ia'
 
@@ -39,6 +39,7 @@ const PAGE_TITLES: Record<RujaPage, string> = {
   dashboard:     'Dashboard Geral',
   teens:         'Teens',
   simply:        'Simply',
+  eventos:       'Eventos',
   jovens:        'Jovens',
   frequencia:    'Frequência',
   'historico-frequencia': 'Histórico de Frequência',
@@ -76,7 +77,7 @@ export function RujaLayout({ userName }: Props) {
       setDepartmentScope('teens')
     } else if (nextPage === 'simply') {
       setDepartmentScope('simply')
-    } else if (nextPage === 'dashboard') {
+    } else if (nextPage === 'dashboard' || nextPage === 'eventos') {
       setDepartmentScope('all')
     }
     setPage(nextPage)
@@ -89,6 +90,7 @@ export function RujaLayout({ userName }: Props) {
     dashboard:     <RujaDashboard scope="all" />,
     teens:         <DepartmentArea scope="teens" activePage={page} onNavigate={handleNavigate} />,
     simply:        <DepartmentArea scope="simply" activePage={page} onNavigate={handleNavigate} />,
+    eventos:       <RujaFrequencia scope="all" allowMixedDepartments />,
     jovens:        <RujaJovens scope={activeScope} />,
     frequencia:    <RujaFrequencia scope={activeScope} />,
     'historico-frequencia': <RujaHistoricoFrequencia />,

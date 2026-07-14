@@ -12,10 +12,20 @@ const TIPOS: TipoEventoFrequencia[] = ['Culto', 'Reunião', 'Ensaio', 'Conexão'
 const LBL = 'block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5'
 const INP = 'w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-red-500/40 transition touch-manipulation'
 
-export default function RujaFrequencia({ scope = 'all' }: { scope?: DepartmentScope }) {
+export default function RujaFrequencia({
+  scope = 'all',
+  allowMixedDepartments = false,
+}: {
+  scope?: DepartmentScope
+  allowMixedDepartments?: boolean
+}) {
   const { jovens, lideres, departamentos, frequencias, eventosFrequencia, loading, reload, recalcularStatus } = useRuja()
   const officialDepartments = activeOfficialDepartments(departamentos)
-  const defaultDepto = scope === 'all' ? (officialDepartments[0]?.id ?? '') : (officialDepartments.find(d => d.slug === scope)?.id ?? '')
+  const defaultDepto = allowMixedDepartments
+    ? ''
+    : scope === 'all'
+      ? (officialDepartments[0]?.id ?? '')
+      : (officialDepartments.find(d => d.slug === scope)?.id ?? '')
 
   const [nome, setNome] = useState('')
   const [data, setData] = useState(new Date().toISOString().slice(0, 10))
@@ -30,8 +40,8 @@ export default function RujaFrequencia({ scope = 'all' }: { scope?: DepartmentSc
 
   const selectedDepto = officialDepartments.find(d => d.id === departamentoId)
   const selectedScope: DepartmentScope = selectedDepto?.slug && isOfficialDepartmentSlug(selectedDepto.slug) ? selectedDepto.slug : scope
-  const selectedLabel = selectedScope === 'all' ? 'Geral' : DEPARTMENT_LABELS[selectedScope]
-  const scopedJovens = filterJovensByScope(jovens, selectedScope)
+  const selectedLabel = allowMixedDepartments && !selectedDepto ? 'Toda RUJA' : selectedScope === 'all' ? 'Geral' : DEPARTMENT_LABELS[selectedScope]
+  const scopedJovens = allowMixedDepartments && !selectedDepto ? jovens : filterJovensByScope(jovens, selectedScope)
   const jovensBase = selectedDepto ? scopedJovens.filter(j => jovemMatchesDepartment(j, selectedScope)) : scopedJovens
   const termoBusca = busca.trim().toLowerCase()
   const jovensDepto = termoBusca ? jovensBase.filter(j => j.nome.toLowerCase().includes(termoBusca)) : jovensBase
@@ -57,7 +67,7 @@ export default function RujaFrequencia({ scope = 'all' }: { scope?: DepartmentSc
   async function handleSalvar() {
     if (!nome.trim()) { showToast('Informe o nome do evento.'); return }
     if (!data) { showToast('Informe a data do evento.'); return }
-    if (!departamentoId) { showToast('Selecione Teens ou Simply.'); return }
+    if (!allowMixedDepartments && !departamentoId) { showToast('Selecione Teens ou Simply.'); return }
     if (!liderId) { showToast('Selecione o líder responsável.'); return }
 
     setSaving(true)
@@ -65,7 +75,7 @@ export default function RujaFrequencia({ scope = 'all' }: { scope?: DepartmentSc
       const input: EventoFrequenciaInput = {
         nome,
         data,
-        departamento_id: departamentoId,
+        departamento_id: departamentoId || null,
         lider_responsavel_id: liderId,
         tipo,
         observacao: observacao.trim() || null,
@@ -93,7 +103,11 @@ export default function RujaFrequencia({ scope = 'all' }: { scope?: DepartmentSc
       <div className="flex items-start justify-between gap-3 mb-5">
         <div>
           <h1 className="text-xl font-bold text-white">Novo evento de frequência</h1>
-          <p className="text-gray-500 text-sm mt-1">Marque somente quem esteve presente. Ausências são calculadas pelo sistema.</p>
+          <p className="text-gray-500 text-sm mt-1">
+            {allowMixedDepartments
+              ? 'Use para cultos, reuniões e eventos com participantes de vários departamentos.'
+              : 'Marque somente quem esteve presente. Ausências são calculadas pelo sistema.'}
+          </p>
         </div>
         <span className="text-xs bg-white/8 text-gray-400 px-2.5 py-1 rounded-full whitespace-nowrap">
           {presentes.size}/{jovensDepto.length}
@@ -111,9 +125,9 @@ export default function RujaFrequencia({ scope = 'all' }: { scope?: DepartmentSc
             <input type="date" value={data} onChange={e => setData(e.target.value)} className={INP} />
           </div>
           <div>
-            <label className={LBL}>Departamento</label>
+            <label className={LBL}>{allowMixedDepartments ? 'Abrangência' : 'Departamento'}</label>
             <select value={departamentoId} onChange={e => { setDepartamentoId(e.target.value); setPresentes(new Set()) }} className={INP}>
-              <option value="">Selecione</option>
+              <option value="">{allowMixedDepartments ? 'Toda RUJA / vários departamentos' : 'Selecione'}</option>
               {(scope === 'all' ? officialDepartments : officialDepartments.filter(d => d.slug === scope)).map(d => (
                 <option key={d.id} value={d.id}>{d.nome}</option>
               ))}
