@@ -11,6 +11,8 @@ import { RujaSidebar } from './ruja-sidebar'
 import { RujaMobileNav } from './ruja-mobile-nav'
 import { RujaBusca } from '../busca/ruja-busca'
 import dynamic from 'next/dynamic'
+import type { DepartmentScope } from '@/lib/ruja/departments'
+import { DEPARTMENT_LABELS } from '@/lib/ruja/departments'
 
 const RujaDashboard     = dynamic(() => import('../dashboard/ruja-dashboard'))
 const RujaJovens        = dynamic(() => import('../jovens/ruja-jovens'))
@@ -26,14 +28,17 @@ const RujaLiderSupremo  = dynamic(() => import('../lidersupremo/ruja-lidersuprem
 const RujaAlertas       = dynamic(() => import('../alertas/ruja-alertas'))
 const RujaUsuarios      = dynamic(() => import('../usuarios/ruja-usuarios'))
 const RujaAnalistaIA    = dynamic(() => import('../analista/ruja-analista-ia'))
+const RujaCadastrosPendentes = dynamic(() => import('../pendentes/ruja-cadastros-pendentes'))
 
 export type RujaPage =
-  | 'dashboard' | 'jovens' | 'frequencia' | 'historico-frequencia' | 'recuperacao'
+  | 'dashboard' | 'teens' | 'simply' | 'jovens' | 'frequencia' | 'historico-frequencia' | 'recuperacao'
   | 'departamentos' | 'lideres' | 'metas' | 'aniversarios'
-  | 'config' | 'lidersupremo' | 'alertas' | 'usuarios' | 'analista-ia'
+  | 'pendentes' | 'config' | 'lidersupremo' | 'alertas' | 'usuarios' | 'analista-ia'
 
 const PAGE_TITLES: Record<RujaPage, string> = {
-  dashboard:     'Dashboard',
+  dashboard:     'Dashboard Geral',
+  teens:         'Teens',
+  simply:        'Simply',
   jovens:        'Jovens',
   frequencia:    'Frequência',
   'historico-frequencia': 'Histórico de Frequência',
@@ -42,11 +47,12 @@ const PAGE_TITLES: Record<RujaPage, string> = {
   lideres:       'Líderes',
   metas:         'Metas',
   aniversarios:  'Aniversários',
+  pendentes:     'Cadastros Pendentes',
   config:        'Configurações',
   lidersupremo:  'Líder Supremo',
   alertas:       'Alertas',
   usuarios:      'Usuários',
-  'analista-ia': 'Analista IA',
+  'analista-ia': 'IA Nexus',
 }
 
 const FULL_HEIGHT_PAGES: RujaPage[] = ['analista-ia']
@@ -56,6 +62,7 @@ interface Props { userName: string }
 export function RujaLayout({ userName }: Props) {
   const router = useRouter()
   const [page,        setPage]        = useState<RujaPage>('dashboard')
+  const [departmentScope, setDepartmentScope] = useState<DepartmentScope>('all')
   const [buscaAberta, setBuscaAberta] = useState(false)
 
   async function handleLogout() {
@@ -64,16 +71,33 @@ export function RujaLayout({ userName }: Props) {
     router.refresh()
   }
 
+  function handleNavigate(nextPage: RujaPage) {
+    if (nextPage === 'teens') {
+      setDepartmentScope('teens')
+    } else if (nextPage === 'simply') {
+      setDepartmentScope('simply')
+    } else if (nextPage === 'dashboard') {
+      setDepartmentScope('all')
+    }
+    setPage(nextPage)
+  }
+
+  const activeScope: DepartmentScope =
+    page === 'teens' ? 'teens' : page === 'simply' ? 'simply' : departmentScope
+
   const PAGES: Record<RujaPage, React.ReactNode> = {
-    dashboard:     <RujaDashboard />,
-    jovens:        <RujaJovens />,
-    frequencia:    <RujaFrequencia />,
+    dashboard:     <RujaDashboard scope="all" />,
+    teens:         <DepartmentArea scope="teens" activePage={page} onNavigate={handleNavigate} />,
+    simply:        <DepartmentArea scope="simply" activePage={page} onNavigate={handleNavigate} />,
+    jovens:        <RujaJovens scope={activeScope} />,
+    frequencia:    <RujaFrequencia scope={activeScope} />,
     'historico-frequencia': <RujaHistoricoFrequencia />,
-    recuperacao:   <RujaRecuperacao />,
+    recuperacao:   <RujaRecuperacao scope={activeScope} />,
     departamentos: <RujaDepartamentos />,
-    lideres:       <RujaLideres />,
+    lideres:       <RujaLideres scope={activeScope} />,
     metas:         <RujaMetas />,
     aniversarios:  <RujaAniversarios />,
+    pendentes:     <RujaCadastrosPendentes scope={activeScope} />,
     config:        <RujaConfig />,
     lidersupremo:  <RujaLiderSupremo />,
     alertas:       <RujaAlertas />,
@@ -97,7 +121,7 @@ export function RujaLayout({ userName }: Props) {
         <RujaSidebar
           current={page}
           userName={userName}
-          onNavigate={setPage}
+          onNavigate={handleNavigate}
           onLogout={handleLogout}
           onBusca={() => setBuscaAberta(true)}
         />
@@ -143,7 +167,7 @@ export function RujaLayout({ userName }: Props) {
         {/* ── BOTTOM NAV MOBILE ── */}
         <RujaMobileNav
           current={page}
-          onNavigate={setPage}
+          onNavigate={handleNavigate}
           onBusca={() => setBuscaAberta(true)}
         />
 
@@ -153,5 +177,53 @@ export function RujaLayout({ userName }: Props) {
         )}
       </div>
     </RujaProvider>
+  )
+}
+
+function DepartmentArea({
+  scope,
+  activePage,
+  onNavigate,
+}: {
+  scope: Exclude<DepartmentScope, 'all'>
+  activePage: RujaPage
+  onNavigate: (page: RujaPage) => void
+}) {
+  const label = DEPARTMENT_LABELS[scope]
+  const tabs: { page: RujaPage; label: string }[] = [
+    { page: scope, label: 'Dashboard' },
+    { page: 'jovens', label: 'Jovens' },
+    { page: 'frequencia', label: 'Frequência' },
+    { page: 'recuperacao', label: 'Recuperação' },
+    { page: 'lideres', label: 'Líderes' },
+    { page: 'metas', label: 'Metas' },
+    { page: 'historico-frequencia', label: 'Relatórios' },
+  ]
+
+  return (
+    <div className="space-y-4">
+      <div className="px-4 md:px-6 pt-4 md:pt-6 max-w-5xl mx-auto">
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <div>
+            <p className="text-gray-500 text-xs uppercase tracking-wider">Departamento</p>
+            <h1 className="text-xl font-bold text-white">{label}</h1>
+          </div>
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab.page}
+              onClick={() => onNavigate(tab.page)}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition touch-manipulation ${
+                activePage === tab.page ? 'bg-red-600 text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <RujaDashboard scope={scope} title={`Dashboard ${label}`} />
+    </div>
   )
 }

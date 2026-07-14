@@ -1,10 +1,8 @@
 // ─── CÁLCULOS CENTRALIZADOS DO RUJA ───────────────────────────
-// Migração de: getDiasParaAniversario, calcularStatusAutomatico,
-// getFreqPct, getFaltasSeguidas, getIdade, calcStatus
 
-import type { Frequencia, Regras, Status } from './types'
+import type { Departamento, EventoFrequencia, Frequencia, Jovem, Regras, Status } from './types'
+import { departmentSlug, isOfficialDepartmentSlug, jovemMatchesDepartment } from './departments'
 
-/** Dias até o próximo aniversário. Retorna 0 se for hoje. */
 export function getDiasParaAniversario(dataNasc: string): number {
   if (!dataNasc) return 999
   const hoje = new Date()
@@ -17,7 +15,6 @@ export function getDiasParaAniversario(dataNasc: string): number {
   return Math.ceil((aniv.getTime() - hoje.getTime()) / 86400000)
 }
 
-/** Idade atual a partir da data de nascimento YYYY-MM-DD */
 export function getIdade(dataNasc: string): number | null {
   if (!dataNasc) return null
   const hoje = new Date()
@@ -28,7 +25,6 @@ export function getIdade(dataNasc: string): number | null {
   return idade
 }
 
-/** Percentual de presença de um jovem */
 export function getFreqPct(jovemId: string, frequencias: Frequencia[]): number {
   const regs = frequencias.filter(f => String(f.jovem_id) === String(jovemId))
   if (!regs.length) return 0
@@ -36,7 +32,6 @@ export function getFreqPct(jovemId: string, frequencias: Frequencia[]): number {
   return Math.round((presentes / regs.length) * 100)
 }
 
-/** Faltas consecutivas recentes (últimas 5) */
 export function getFaltasSeguidas(jovemId: string, frequencias: Frequencia[]): number {
   const regs = frequencias
     .filter(f => String(f.jovem_id) === String(jovemId))
@@ -46,7 +41,6 @@ export function getFaltasSeguidas(jovemId: string, frequencias: Frequencia[]): n
   return idx === -1 ? ultimas.length : idx
 }
 
-/** Calcula status automático com base em frequência e regras */
 export function calcularStatus(
   jovemId: string,
   frequencias: Frequencia[],
@@ -62,15 +56,85 @@ export function calcularStatus(
   return 'Ocioso'
 }
 
-/** Label de dias para aniversário */
+export function departamentoNomePorId(departamentos: Departamento[], id?: string | null): string {
+  if (!id) return 'Geral'
+  const departamento = departamentos.find(d => String(d.id) === String(id))
+  return departamento?.nome ?? id
+}
+
+export function eventosDoDepartamento(
+  eventos: EventoFrequencia[],
+  jovem: Pick<Jovem, 'departamento'>,
+  departamentos: Departamento[],
+  inicio?: string,
+  fim?: string
+): EventoFrequencia[] {
+  return eventos.filter(evento => {
+    if (inicio && evento.data < inicio) return false
+    if (fim && evento.data > fim) return false
+    if (!evento.departamento_id) return true
+    const departamento = departamentos.find(d => String(d.id) === String(evento.departamento_id))
+    if (!departamento) return false
+    const slug = departmentSlug(departamento)
+    if (!isOfficialDepartmentSlug(slug)) return false
+    return jovemMatchesDepartment(jovem, slug)
+  })
+}
+
+export function getEventoFreqPct(
+  jovemId: string,
+  eventos: EventoFrequencia[],
+  jovem: Pick<Jovem, 'departamento'>,
+  departamentos: Departamento[],
+  inicio?: string,
+  fim?: string
+): number {
+  const elegiveis = eventosDoDepartamento(eventos, jovem, departamentos, inicio, fim)
+  if (!elegiveis.length) return 0
+  const presentes = elegiveis.filter(e =>
+    e.participantes?.some(p => String(p.jovem_id) === String(jovemId) && p.presente)
+  ).length
+  return Math.round((presentes / elegiveis.length) * 100)
+}
+
+export function getEventoFaltasSeguidas(
+  jovemId: string,
+  eventos: EventoFrequencia[],
+  jovem: Pick<Jovem, 'departamento'>,
+  departamentos: Departamento[]
+): number {
+  const elegiveis = eventosDoDepartamento(eventos, jovem, departamentos)
+    .sort((a, b) => b.data.localeCompare(a.data))
+    .slice(0, 5)
+  const idx = elegiveis.findIndex(e =>
+    e.participantes?.some(p => String(p.jovem_id) === String(jovemId) && p.presente)
+  )
+  return idx === -1 ? elegiveis.length : idx
+}
+
+export function calcularStatusEventos(
+  jovem: Jovem,
+  eventos: EventoFrequencia[],
+  departamentos: Departamento[],
+  regras: Regras
+): Status | null {
+  const elegiveis = eventosDoDepartamento(eventos, jovem, departamentos)
+  if (!elegiveis.length) return null
+  const pct = getEventoFreqPct(jovem.id, eventos, jovem, departamentos)
+  const faltas = getEventoFaltasSeguidas(jovem.id, eventos, jovem, departamentos)
+  if (faltas >= regras.risco)   return 'Em Risco'
+  if (pct >= regras.ativo)      return 'Ativo'
+  if (pct >= regras.oscilando)  return 'Oscilando'
+  return 'Ocioso'
+}
+
 export function diasLabel(dias: number): string {
-  if (dias === 0) return '🎉 Hoje!'
+  if (dias === 0) return 'Hoje!'
   if (dias === 1) return 'Amanhã'
   if (dias <= 7)  return `em ${dias} dias`
   return `em ${dias} dias`
 }
 
-/** Cor do status */
 export function statusColor(status: Status): string {
   switch (status) {
     case 'Ativo':     return 'text-green-400'
@@ -80,7 +144,6 @@ export function statusColor(status: Status): string {
   }
 }
 
-/** Badge CSS do status */
 export function statusBadgeClass(status: Status): string {
   switch (status) {
     case 'Ativo':     return 'bg-green-500/20 text-green-400 border border-green-500/30'

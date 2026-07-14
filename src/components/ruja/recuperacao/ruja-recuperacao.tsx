@@ -5,8 +5,10 @@ import { upsertRecuperacao, deleteRecuperacao } from '@/lib/ruja/queries'
 import { Spinner } from '@/components/ui/spinner'
 import { Avatar } from '@/components/ui/avatar'
 import type { Recuperacao } from '@/lib/ruja/types'
+import type { DepartmentScope } from '@/lib/ruja/departments'
+import { DEPARTMENT_LABELS, filterJovensByScope } from '@/lib/ruja/departments'
 
-export default function RujaRecuperacao() {
+export default function RujaRecuperacao({ scope = 'all' }: { scope?: DepartmentScope }) {
   const { jovens, lideres, recuperacoes, loading, reload } = useRuja()
   const [editando,  setEditando]  = useState<Recuperacao | 'novo' | null>(null)
   const [deletando, setDeletando] = useState<Recuperacao | null>(null)
@@ -18,9 +20,12 @@ export default function RujaRecuperacao() {
 
   const showToast = (m: string) => { setToast(m); setTimeout(() => setToast(''), 3000) }
 
+  const scopedJovens = useMemo(() => filterJovensByScope(jovens, scope), [jovens, scope])
+  const scopedJovemIds = useMemo(() => new Set(scopedJovens.map(j => j.id)), [scopedJovens])
+
   const filtrados = useMemo(() =>
-    recuperacoes.filter(r => filtro === 'todos' || r.status === filtro),
-    [recuperacoes, filtro]
+    recuperacoes.filter(r => scopedJovemIds.has(r.jovem_id) && (filtro === 'todos' || r.status === filtro)),
+    [recuperacoes, filtro, scopedJovemIds]
   )
 
   function openEdit(r: Recuperacao | 'novo') {
@@ -75,13 +80,15 @@ export default function RujaRecuperacao() {
 
   if (loading) return <div className="flex-1 flex items-center justify-center"><Spinner /></div>
 
-  const jovensEmRisco = jovens.filter(j => j.status === 'Em Risco')
+  const jovensEmRisco = scopedJovens.filter(j => j.status === 'Em Risco')
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-xl font-bold text-white">Recuperação</h1>
+          <h1 className="text-xl font-bold text-white">
+            Recuperação{scope !== 'all' ? ` · ${DEPARTMENT_LABELS[scope]}` : ''}
+          </h1>
           <p className="text-gray-500 text-sm">{jovensEmRisco.length} em risco · {filtrados.length} planos</p>
         </div>
         <button onClick={() => openEdit('novo')}
@@ -185,7 +192,7 @@ export default function RujaRecuperacao() {
                 <label className={LBL}>Jovem *</label>
                 <select value={form.jovem_id} onChange={e => setForm(f => ({ ...f, jovem_id: e.target.value }))} className={INP}>
                   <option value="">— Selecionar jovem</option>
-                  {jovens.map(j => <option key={j.id} value={j.id}>{j.nome}</option>)}
+                  {scopedJovens.map(j => <option key={j.id} value={j.id}>{j.nome}</option>)}
                 </select>
               </div>
               <div>

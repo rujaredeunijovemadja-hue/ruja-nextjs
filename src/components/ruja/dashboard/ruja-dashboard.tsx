@@ -4,31 +4,46 @@ import { useRuja } from '@/lib/ruja/context'
 import { Spinner } from '@/components/ui/spinner'
 import { Avatar } from '@/components/ui/avatar'
 import { getDiasParaAniversario, getFreqPct } from '@/lib/ruja/calculos'
+import type { DepartmentScope } from '@/lib/ruja/departments'
+import { DEPARTMENT_LABELS, filterJovensByScope, jovemMatchesDepartment } from '@/lib/ruja/departments'
 
-export default function RujaDashboard() {
+interface Props {
+  scope?: DepartmentScope
+  title?: string
+}
+
+export default function RujaDashboard({ scope = 'all', title }: Props) {
   const { jovens, frequencias, recuperacoes, metas, historicoMensal, loading } = useRuja()
 
   const kpis = useMemo(() => {
-    const total           = jovens.length
-    const ativos          = jovens.filter(j => j.status === 'Ativo').length
-    const ativosDepto     = jovens.filter(j => j.status === 'Ativo' && j.departamento).length
-    const emRisco         = jovens.filter(j => j.status === 'Em Risco').length
-    const batizados       = jovens.filter(j => j.batizado === 'sim').length
-    const batizadosDepto  = jovens.filter(j => j.batizado === 'sim' && j.status === 'Ativo' && j.departamento).length
-    const recuperacaoAtiva= recuperacoes.filter(r => r.status === 'ativo').length
+    const scopedJovens = filterJovensByScope(jovens, scope)
+    const scopedIds = new Set(scopedJovens.map(j => j.id))
+    const total           = scopedJovens.length
+    const ativos          = scopedJovens.filter(j => j.status === 'Ativo').length
+    const oscilando       = scopedJovens.filter(j => j.status === 'Oscilando').length
+    const ativosDepto     = scopedJovens.filter(j => j.status === 'Ativo' && j.departamento).length
+    const emRisco         = scopedJovens.filter(j => j.status === 'Em Risco').length
+    const batizados       = scopedJovens.filter(j => j.batizado === 'sim').length
+    const batizadosDepto  = scopedJovens.filter(j => j.batizado === 'sim' && j.status === 'Ativo' && j.departamento).length
+    const recuperacaoAtiva= recuperacoes.filter(r => r.status === 'ativo' && scopedIds.has(r.jovem_id)).length
+    const frequenciaGeral = total > 0
+      ? Math.round(scopedJovens.reduce((sum, jovem) => sum + getFreqPct(jovem.id, frequencias), 0) / total)
+      : 0
+    const totalTeens      = jovens.filter(j => jovemMatchesDepartment(j, 'teens')).length
+    const totalSimply     = jovens.filter(j => jovemMatchesDepartment(j, 'simply')).length
 
     const hoje = new Date()
     hoje.setHours(0,0,0,0)
-    const aniversHoje = jovens.filter(j => getDiasParaAniversario(j.data_nasc) === 0)
-    const aniversMes  = jovens.filter(j => {
+    const aniversHoje = scopedJovens.filter(j => getDiasParaAniversario(j.data_nasc) === 0)
+    const aniversMes  = scopedJovens.filter(j => {
       if (!j.data_nasc) return false
       const m = parseInt(j.data_nasc.split('-')[1])
       return m === hoje.getMonth() + 1
     })
 
-    return { total, ativos, ativosDepto, emRisco, batizados, batizadosDepto,
-             recuperacaoAtiva, aniversHoje, aniversMes }
-  }, [jovens, recuperacoes])
+    return { total, ativos, oscilando, ativosDepto, emRisco, batizados, batizadosDepto,
+             recuperacaoAtiva, aniversHoje, aniversMes, frequenciaGeral, totalTeens, totalSimply }
+  }, [jovens, frequencias, recuperacoes, scope])
 
   const pctAtivos   = metas.ativosDepto > 0 ? Math.min(100, Math.round((kpis.ativosDepto / metas.ativosDepto) * 100)) : 0
   const pctBatizados= metas.batizadosDepto > 0 ? Math.min(100, Math.round((kpis.batizadosDepto / metas.batizadosDepto) * 100)) : 0
@@ -37,13 +52,24 @@ export default function RujaDashboard() {
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-5">
-      <h1 className="text-xl font-bold text-white">Dashboard</h1>
+      <div>
+        <h1 className="text-xl font-bold text-white">
+          {title ?? (scope === 'all' ? 'Dashboard Geral' : `Dashboard ${DEPARTMENT_LABELS[scope]}`)}
+        </h1>
+        <p className="text-gray-500 text-sm">
+          {scope === 'all' ? 'Visão consolidada da RUJA: Teens e Simply.' : `Dados filtrados apenas por ${DEPARTMENT_LABELS[scope]}.`}
+        </p>
+      </div>
 
       {/* KPIs principais */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <KpiCard label="Total de Jovens"  value={kpis.total}    icon="👥" />
         <KpiCard label="Ativos"           value={kpis.ativos}   icon="🟢" color="text-green-400" />
+        <KpiCard label="Oscilando"        value={kpis.oscilando} icon="🟡" color="text-yellow-400" />
         <KpiCard label="Em Risco"         value={kpis.emRisco}  icon="🔴" color="text-red-400" />
+        {scope === 'all' && <KpiCard label="Teens" value={kpis.totalTeens} icon="👦" color="text-blue-300" />}
+        {scope === 'all' && <KpiCard label="Simply" value={kpis.totalSimply} icon="🌱" color="text-emerald-300" />}
+        <KpiCard label="Frequência Geral" value={kpis.frequenciaGeral} icon="✅" suffix="%" color="text-blue-400" />
         <KpiCard label="Batizados"        value={kpis.batizados}icon="🔵" color="text-blue-400" />
       </div>
 
@@ -115,8 +141,9 @@ export default function RujaDashboard() {
         <h3 className="text-white font-semibold mb-3">Status dos Jovens</h3>
         <div className="space-y-2">
           {(['Ativo','Oscilando','Ocioso','Em Risco'] as const).map(status => {
-            const count = jovens.filter(j => j.status === status).length
-            const pct   = jovens.length > 0 ? Math.round((count / jovens.length) * 100) : 0
+            const scopedJovens = filterJovensByScope(jovens, scope)
+            const count = scopedJovens.filter(j => j.status === status).length
+            const pct   = scopedJovens.length > 0 ? Math.round((count / scopedJovens.length) * 100) : 0
             const color = { Ativo:'bg-green-500', Oscilando:'bg-yellow-500', Ocioso:'bg-gray-500', 'Em Risco':'bg-red-500' }[status]
             return (
               <div key={status} className="flex items-center gap-3">
@@ -163,11 +190,11 @@ export default function RujaDashboard() {
   )
 }
 
-function KpiCard({ label, value, icon, color='text-white' }: { label:string; value:number; icon:string; color?:string }) {
+function KpiCard({ label, value, icon, color='text-white', suffix='' }: { label:string; value:number; icon:string; color?:string; suffix?: string }) {
   return (
     <div className="bg-[#111] border border-white/8 rounded-xl p-4">
       <div className="text-2xl mb-1">{icon}</div>
-      <div className={`text-2xl font-black ${color}`}>{value}</div>
+      <div className={`text-2xl font-black ${color}`}>{value}{suffix}</div>
       <div className="text-gray-500 text-xs mt-1">{label}</div>
     </div>
   )

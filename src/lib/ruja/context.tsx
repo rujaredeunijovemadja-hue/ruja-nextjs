@@ -1,17 +1,16 @@
 'use client'
 // ─── CONTEXTO GLOBAL DO RUJA ──────────────────────────────────
-// Centraliza todos os dados do app — substitui o "data store" in-memory
-// do index.html (let jovens = [], let lideres = [], etc.)
 
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
 import {
   fetchJovens, fetchLideres, fetchDepartamentos,
-  fetchFrequencias, fetchRecuperacoes, fetchHistoricoMensal,
+  fetchCadastrosPendentes,
+  fetchFrequencias, fetchEventosFrequencia, fetchRecuperacoes, fetchHistoricoMensal,
   fetchRegras, fetchMetas, fetchLiderSupremo,
   updateJovemStatus,
 } from './queries'
-import { calcularStatus } from './calculos'
-import type { RujaState, Jovem, Regras, Metas, LiderSupremo } from './types'
+import { calcularStatus, calcularStatusEventos } from './calculos'
+import type { RujaState, Jovem } from './types'
 import { DEFAULT_REGRAS, DEFAULT_METAS } from './types'
 
 interface RujaContextValue extends RujaState {
@@ -32,7 +31,9 @@ export function RujaProvider({ children }: { children: ReactNode }) {
     jovens:          [],
     lideres:         [],
     departamentos:   [],
+    cadastrosPendentes: [],
     frequencias:     [],
+    eventosFrequencia: [],
     recuperacoes:    [],
     historicoMensal: [],
     liderSupremo:    { nome:'', funcao:'', contato:'', instagram:'', foto:'', descricao:'', dataPosseLider:'', versiculoLider:'', visao:'', tempoRuja:'' },
@@ -44,23 +45,27 @@ export function RujaProvider({ children }: { children: ReactNode }) {
     setLoading(true)
     setError(null)
     try {
-      const [jovens, lideres, departamentos, frequencias, recuperacoes,
-             historicoMensal, regras, metas, liderSupremo] = await Promise.all([
+      const [jovens, lideres, departamentos, frequencias, eventosFrequencia, recuperacoes,
+             historicoMensal, regras, metas, liderSupremo, cadastrosPendentes] = await Promise.all([
         fetchJovens(), fetchLideres(), fetchDepartamentos(),
-        fetchFrequencias(), fetchRecuperacoes(), fetchHistoricoMensal(),
+        fetchFrequencias().catch(() => []), fetchEventosFrequencia().catch(() => []),
+        fetchRecuperacoes(), fetchHistoricoMensal(),
         fetchRegras(), fetchMetas(), fetchLiderSupremo(),
+        fetchCadastrosPendentes().catch(() => []),
       ])
-      setState({
+      setState(s => ({
         jovens,
         lideres,
         departamentos,
+        cadastrosPendentes,
         frequencias,
+        eventosFrequencia,
         recuperacoes,
         historicoMensal,
-        liderSupremo: liderSupremo ?? state.liderSupremo,
+        liderSupremo: liderSupremo ?? s.liderSupremo,
         regras:       regras ?? DEFAULT_REGRAS,
         metas:        metas  ?? DEFAULT_METAS,
-      })
+      }))
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao carregar dados.')
     } finally {
@@ -78,10 +83,14 @@ export function RujaProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const recalcularStatus = useCallback(async (jovemId: string) => {
-    const novoStatus = calcularStatus(jovemId, state.frequencias, state.regras)
-    if (!novoStatus) return
     const jovem = state.jovens.find(j => String(j.id) === String(jovemId))
-    if (!jovem || jovem.status === novoStatus) return
+    if (!jovem) return
+
+    const novoStatus = state.eventosFrequencia.length
+      ? calcularStatusEventos(jovem, state.eventosFrequencia, state.departamentos, state.regras)
+      : calcularStatus(jovemId, state.frequencias, state.regras)
+
+    if (!novoStatus || jovem.status === novoStatus) return
     await updateJovemStatus(jovemId, novoStatus)
     setState(s => ({
       ...s,
@@ -89,7 +98,7 @@ export function RujaProvider({ children }: { children: ReactNode }) {
         String(j.id) === String(jovemId) ? { ...j, status: novoStatus } : j
       ),
     }))
-  }, [state.frequencias, state.regras, state.jovens])
+  }, [state.eventosFrequencia, state.departamentos, state.frequencias, state.regras, state.jovens])
 
   useEffect(() => {
     void Promise.resolve().then(reload)

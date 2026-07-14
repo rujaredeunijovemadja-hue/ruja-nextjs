@@ -1,9 +1,18 @@
 // ─── TIPOS CENTRAIS DO SISTEMA RUJA ───────────────────────────
-// Espelham exatamente o schema do Supabase (BANCO_DE_DADOS_RUJA.md)
+// Espelham o schema do Supabase documentado em BANCO_DE_DADOS_RUJA.md.
 
 export type Status = 'Ativo' | 'Oscilando' | 'Ocioso' | 'Em Risco'
 export type Batizado = 'sim' | 'nao'
 export type Presenca = 'presente' | 'falta'
+export type TipoEventoFrequencia =
+  | 'Culto'
+  | 'Reunião'
+  | 'Ensaio'
+  | 'Conexão'
+  | 'Congresso'
+  | 'Vigília'
+  | 'Evangelismo'
+  | 'Outro'
 
 export interface Jovem {
   id: string
@@ -12,13 +21,13 @@ export interface Jovem {
   contato: string
   instagram: string
   endereco: string
-  departamento: string   // múltiplos separados por ";"
+  departamento: string
   lider: string
   status: Status
-  entrada: string        // YYYY-MM-DD
+  entrada: string
   batizado: Batizado
-  data_batismo: string   // YYYY-MM-DD
-  data_nasc: string      // YYYY-MM-DD
+  data_batismo: string
+  data_nasc: string
   obs: string
   foto_path: string
   foto_url: string
@@ -32,7 +41,7 @@ export interface Lider {
   contato: string
   departamento: string
   funcao: string
-  data_nasc: string      // YYYY-MM-DD
+  data_nasc: string
   criado_em?: string
   atualizado_em?: string
 }
@@ -40,28 +49,88 @@ export interface Lider {
 export interface Departamento {
   id: string
   nome: string
+  slug?: string | null
   icone: string
   lider: string
+  lider_id?: string | null
+  ativo?: boolean
   capacidade: number
   descricao: string
   criado_em?: string
   atualizado_em?: string
 }
 
+export interface CadastroPendente {
+  id: string
+  nome: string
+  telefone: string
+  email: string
+  data_nascimento: string
+  departamento_id: string
+  departamento?: Departamento | null
+  foto_path: string | null
+  responsavel_nome: string
+  responsavel_telefone: string
+  observacoes: string
+  status: 'pendente' | 'aprovado' | 'rejeitado'
+  aprovado_por: string | null
+  aprovado_em: string | null
+  rejeitado_por: string | null
+  rejeitado_em: string | null
+  motivo_rejeicao: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface Frequencia {
-  id: string             // {jovem_id}_{data}_{evento}
+  id: string
   jovem_id: string
-  data: string           // YYYY-MM-DD
+  data: string
   evento: string
   presenca: Presenca
   obs: string
   criado_em?: string
 }
 
+export interface EventoParticipante {
+  id: string
+  evento_id: string
+  jovem_id: string
+  presente: boolean
+  observacao: string | null
+  registrado_por: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface EventoFrequencia {
+  id: string
+  nome: string
+  data: string
+  departamento_id: string | null
+  lider_responsavel_id: string | null
+  tipo: TipoEventoFrequencia | string | null
+  observacao: string | null
+  created_by: string
+  created_at: string
+  updated_at: string
+  participantes?: EventoParticipante[]
+}
+
+export interface EventoFrequenciaInput {
+  nome: string
+  data: string
+  departamento_id: string | null
+  lider_responsavel_id: string | null
+  tipo: TipoEventoFrequencia | string | null
+  observacao: string | null
+  participantes: Array<{ jovem_id: string; observacao?: string | null }>
+}
+
 export interface Recuperacao {
   id: string
   jovem_id: string
-  data_inicio: string    // YYYY-MM-DD
+  data_inicio: string
   lider_resp: string
   motivo: string
   status: 'ativo' | 'concluido'
@@ -72,7 +141,7 @@ export interface Recuperacao {
 
 export interface HistoricoMensal {
   id?: number
-  mes: string            // YYYY-MM
+  mes: string
   ativos_depto: number
   batizados_depto: number
   total: number
@@ -86,14 +155,14 @@ export interface Configuracao {
 }
 
 export interface Regras {
-  ativo: number          // % mínimo para Ativo (padrão 75)
-  oscilando: number      // % mínimo para Oscilando (padrão 40)
-  risco: number          // faltas seguidas para Em Risco (padrão 3)
+  ativo: number
+  oscilando: number
+  risco: number
 }
 
 export interface Metas {
-  ativosDepto: number    // meta de jovens ativos em departamento
-  batizadosDepto: number // meta de batizados ativos em departamento
+  ativosDepto: number
+  batizadosDepto: number
 }
 
 export interface LiderSupremo {
@@ -109,12 +178,13 @@ export interface LiderSupremo {
   tempoRuja: string
 }
 
-// ─── ESTADO GLOBAL DO APP ─────────────────────────────────────
 export interface RujaState {
   jovens: Jovem[]
   lideres: Lider[]
   departamentos: Departamento[]
+  cadastrosPendentes: CadastroPendente[]
   frequencias: Frequencia[]
+  eventosFrequencia: EventoFrequencia[]
   recuperacoes: Recuperacao[]
   historicoMensal: HistoricoMensal[]
   liderSupremo: LiderSupremo

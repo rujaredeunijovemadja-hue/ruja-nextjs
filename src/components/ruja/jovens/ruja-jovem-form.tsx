@@ -1,22 +1,24 @@
 'use client'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { useRuja } from '@/lib/ruja/context'
 import { upsertJovem } from '@/lib/ruja/queries'
 import { uploadFoto, removeFoto } from '@/lib/ruja/storage'
 import { Spinner } from '@/components/ui/spinner'
 import type { Jovem, Status, Batizado } from '@/lib/ruja/types'
+import type { DepartmentScope } from '@/lib/ruja/departments'
+import { activeOfficialDepartments, DEPARTMENT_LABELS } from '@/lib/ruja/departments'
 
-const DEPTOS = ['Teens', 'Simply', 'Up', 'Louvor', 'Mídia', 'Intercessão', 'Organização']
 const STATUS_OPTS: Status[] = ['Ativo', 'Oscilando', 'Ocioso', 'Em Risco']
 
 interface Props {
   jovem: Jovem | null
+  scope?: DepartmentScope
   onClose: () => void
   onSaved: () => void
 }
 
-export function RujaJovemForm({ jovem, onClose, onSaved }: Props) {
-  const { lideres } = useRuja()
+export function RujaJovemForm({ jovem, scope = 'all', onClose, onSaved }: Props) {
+  const { lideres, departamentos } = useRuja()
   const [saving,  setSaving]  = useState(false)
   const [error,   setError]   = useState('')
   const [fotoFile, setFotoFile] = useState<File | null>(null)
@@ -28,7 +30,7 @@ export function RujaJovemForm({ jovem, onClose, onSaved }: Props) {
     contato:     jovem?.contato     ?? '',
     instagram:   jovem?.instagram   ?? '',
     endereco:    jovem?.endereco    ?? '',
-    departamento:jovem?.departamento ?? '',
+    departamento:jovem?.departamento ?? (scope === 'all' ? '' : DEPARTMENT_LABELS[scope]),
     lider:       jovem?.lider       ?? '',
     status:      (jovem?.status     ?? 'Em Risco') as Status,
     entrada:     jovem?.entrada     ?? '',
@@ -41,10 +43,12 @@ export function RujaJovemForm({ jovem, onClose, onSaved }: Props) {
   const deptosSelecionados = form.departamento
     ? form.departamento.split(';').filter(Boolean)
     : []
+  const deptos = activeOfficialDepartments(departamentos)
 
   function toggleDepto(d: string) {
     const atual = new Set(deptosSelecionados)
-    atual.has(d) ? atual.delete(d) : atual.add(d)
+    if (atual.has(d)) atual.delete(d)
+    else atual.add(d)
     setForm(f => ({ ...f, departamento: Array.from(atual).join(';') }))
   }
 
@@ -151,15 +155,15 @@ export function RujaJovemForm({ jovem, onClose, onSaved }: Props) {
           {/* Departamentos */}
           <Field label="Departamentos">
             <div className="flex flex-wrap gap-2">
-              {DEPTOS.map(d => (
-                <button key={d} type="button"
-                  onClick={() => toggleDepto(d)}
+              {deptos.map(d => (
+                <button key={d.id} type="button"
+                  onClick={() => toggleDepto(d.nome)}
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold transition touch-manipulation
-                    ${deptosSelecionados.includes(d)
+                    ${deptosSelecionados.includes(d.nome)
                       ? 'bg-red-600 text-white'
                       : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
                 >
-                  {d}
+                  {d.nome}
                 </button>
               ))}
             </div>

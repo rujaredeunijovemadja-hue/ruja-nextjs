@@ -9,14 +9,15 @@ import { Spinner } from '@/components/ui/spinner'
 import { getFreqPct, getFaltasSeguidas, calcularStatus, getDiasParaAniversario } from '@/lib/ruja/calculos'
 
 const SUGESTOES = [
-  { icon: '📊', texto: 'Como está a frequência geral da juventude?' },
-  { icon: '🚨', texto: 'Quem está em risco e precisa de atenção urgente?' },
+  { icon: '📊', texto: 'Faça um resumo geral da RUJA.' },
+  { icon: '👦', texto: 'Como está o Teens?' },
+  { icon: '🌱', texto: 'Quem está em recuperação no Simply?' },
+  { icon: '🚨', texto: 'Quem está em risco no Teens?' },
   { icon: '📈', texto: 'Analise o crescimento do grupo nos últimos meses.' },
-  { icon: '🏛️', texto: 'Como estão os departamentos? Qual tem mais jovens ativos?' },
+  { icon: '🏛️', texto: 'Como estão os departamentos Teens e Simply?' },
   { icon: '🎯', texto: 'Estamos perto de bater as metas deste mês?' },
-  { icon: '🚑', texto: 'Qual é a situação atual da recuperação?' },
+  { icon: '🚑', texto: 'Quem está oscilando no Simply?' },
   { icon: '🎂', texto: 'Quem faz aniversário nos próximos 7 dias?' },
-  { icon: '📝', texto: 'Gere um resumo semanal completo da juventude.' },
 ]
 
 const COMO_USAR = [
@@ -27,6 +28,7 @@ const COMO_USAR = [
   'Como acompanhar recuperação?',
   'Como usar aniversários?',
   'Como usar metas?',
+  'Explique como aprovar um cadastro pendente.',
   'Como usar o sistema no celular?',
 ]
 
@@ -37,7 +39,7 @@ interface Mensagem {
 
 // ── Contexto comprimido — cabe em ~3k tokens ──────────────────
 function montarContexto(state: ReturnType<typeof useRuja>): string {
-  const { jovens, frequencias, departamentos, lideres, recuperacoes,
+  const { jovens, frequencias, eventosFrequencia, departamentos, lideres, recuperacoes,
           historicoMensal, regras, metas } = state
 
   const totalJovens = jovens.length
@@ -92,7 +94,18 @@ function montarContexto(state: ReturnType<typeof useRuja>): string {
   const top10 = jovensComFreq.slice(0, 10).map(j => `${j.nome}(${j.pct}%,${j.depto})`).join('; ')
   const bot10 = jovensComFreq.slice(-10).map(j => `${j.nome}(${j.pct}%,${j.depto})`).join('; ')
 
-  return `Você é o Analista IA do RUJA (Rede UniJovem ADJA). Analisa dados reais. NUNCA invente números. Apenas leitura — nunca altere dados. Responda em português, de forma pastoral e objetiva.
+  return `Você é a IA Nexus do RUJA (Rede UniJovem ADJA). Analisa dados reais. NUNCA invente números. Apenas leitura — nunca altere dados. Responda em português, de forma pastoral e objetiva.
+
+ESTRUTURA OFICIAL ATIVA: RUJA possui apenas os departamentos Teens e Simply.
+UP não existe como departamento ativo e nunca deve ser citado como opção de cadastro, filtro, permissão, relatório ou dashboard.
+Quando a pergunta citar Teens, analise apenas jovens/departamentos/líderes do Teens.
+Quando a pergunta citar Simply, analise apenas jovens/departamentos/líderes do Simply.
+Quando a pergunta citar RUJA ou visão geral, consolide Teens e Simply.
+
+MODELO OFICIAL DE FREQUÊNCIA: o histórico atual trabalha por evento. Cada evento tem nome, data, departamento, líder responsável, tipo e participantes presentes. Jovem presente possui registro em ruja_eventos_participantes. Jovem ausente é calculado por comparação entre jovens ativos do departamento e participantes do evento; não existe registro automático de falta. Registros antigos em ruja_frequencias são legado e não devem ser somados ao modelo novo.
+Você pode responder sobre último culto, participantes de uma reunião, maior presença, frequência mensal e faltas nos últimos eventos, sempre apenas em leitura.
+
+EVENTOS RECENTES: ${eventosFrequencia.slice(0, 8).map(e => `${e.nome}(${e.data},${e.participantes?.filter(p => p.presente).length ?? 0} presentes)`).join('; ') || 'Sem eventos novos'}
 
 Você também atua como instrutor oficial e secretária digital da liderança — explicando como usar o sistema RUJA.
 
@@ -116,10 +129,10 @@ REGRAS STATUS: Ativo≥${regras.ativo}% | Oscilando≥${regras.oscilando}% | Em 
 
 VISÃO GERAL:
 Total:${totalJovens} | Ativos:${ativos} | Oscilando:${oscilando} | EmRisco:${emRisco} | Ociosos:${ociosos} | Batizados:${batizados}
-Frequências registradas:${frequencias.length} | Recuperação ativa:${recuperacoes.filter(r => r.status === 'ativo').length}
+Eventos de frequência:${eventosFrequencia.length} | Registros legados:${frequencias.length} | Recuperação ativa:${recuperacoes.filter(r => r.status === 'ativo').length}
 METAS: Ativos depto:${ativos}/${metas.ativosDepto} | Batizados:${batizados}/${metas.batizadosDepto}
 
-DEPARTAMENTOS: ${deptosResumo || 'Nenhum'}
+DEPARTAMENTOS ATIVOS: ${deptosResumo || 'Nenhum'}
 LÍDERES(${lideres.length}): ${lideres.map(l => `${l.nome}(${l.funcao},${l.departamento})`).join('; ') || 'Nenhum'}
 
 EM RISCO: ${jovensEmRisco || 'Nenhum'}
@@ -195,7 +208,7 @@ export default function RujaAnalistaIA() {
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 bg-red-500/15 rounded-xl flex items-center justify-center text-lg shrink-0">🦁</div>
           <div>
-            <h1 className="text-white font-bold text-base leading-tight">Analista IA</h1>
+            <h1 className="text-white font-bold text-base leading-tight">IA Nexus</h1>
             <p className="text-gray-500 text-xs">Dados reais · Apenas leitura</p>
           </div>
         </div>

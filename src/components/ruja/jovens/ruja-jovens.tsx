@@ -8,13 +8,15 @@ import { FotoLightbox } from '@/components/ui/foto-lightbox'
 import { RujaJovemForm } from './ruja-jovem-form'
 import { RujaJovemDetalhe } from './ruja-jovem-detalhe'
 import { deleteJovem, auditLog } from '@/lib/ruja/queries'
-import type { Jovem, Status } from '@/lib/ruja/types'
+import type { Jovem } from '@/lib/ruja/types'
+import type { DepartmentScope } from '@/lib/ruja/departments'
+import { activeOfficialDepartments, DEPARTMENT_LABELS, filterJovensByScope, jovemMatchesDepartment } from '@/lib/ruja/departments'
 
 type Filtro = 'todos' | 'Ativo' | 'Oscilando' | 'Ocioso' | 'Em Risco'
-type Depto  = 'todos' | 'Teens' | 'Simply' | 'Up'
+type Depto  = 'todos' | DepartmentScope
 
-export default function RujaJovens() {
-  const { jovens, loading, reloadJovens } = useRuja()
+export default function RujaJovens({ scope = 'all' }: { scope?: DepartmentScope }) {
+  const { jovens, departamentos, loading, reloadJovens } = useRuja()
   const [busca,      setBusca]      = useState('')
   const [filtroStatus, setFiltroStatus] = useState<Filtro>('todos')
   const [filtroDepto,  setFiltroDepto]  = useState<Depto>('todos')
@@ -30,14 +32,16 @@ export default function RujaJovens() {
   }
 
   const filtrados = useMemo(() => {
-    return jovens.filter(j => {
+    return filterJovensByScope(jovens, scope).filter(j => {
       const matchBusca = !busca || j.nome.toLowerCase().includes(busca.toLowerCase()) ||
         j.contato.includes(busca) || j.departamento.toLowerCase().includes(busca.toLowerCase())
       const matchStatus = filtroStatus === 'todos' || j.status === filtroStatus
-      const matchDepto  = filtroDepto  === 'todos' || j.departamento.toLowerCase().includes(filtroDepto.toLowerCase())
+      const matchDepto  = filtroDepto === 'todos' || filtroDepto === 'all' || jovemMatchesDepartment(j, filtroDepto)
       return matchBusca && matchStatus && matchDepto
     })
-  }, [jovens, busca, filtroStatus, filtroDepto])
+  }, [jovens, busca, filtroStatus, filtroDepto, scope])
+
+  const officialDepartments = activeOfficialDepartments(departamentos)
 
   async function handleDelete() {
     if (!deletando) return
@@ -60,8 +64,10 @@ export default function RujaJovens() {
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-xl font-bold text-white">Jovens</h1>
-          <p className="text-gray-500 text-sm">{jovens.length} cadastrados · {filtrados.length} exibidos</p>
+          <h1 className="text-xl font-bold text-white">
+            Jovens{scope !== 'all' ? ` · ${DEPARTMENT_LABELS[scope]}` : ''}
+          </h1>
+          <p className="text-gray-500 text-sm">{filterJovensByScope(jovens, scope).length} cadastrados · {filtrados.length} exibidos</p>
         </div>
         <button
           onClick={() => setEditando('novo')}
@@ -92,15 +98,32 @@ export default function RujaJovens() {
           </button>
         ))}
         <div className="w-px bg-white/10 mx-1" />
-        {(['todos','Teens','Simply','Up'] as Depto[]).map(d => (
-          <button key={d}
-            onClick={() => setFiltroDepto(d)}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition touch-manipulation
-              ${filtroDepto === d ? 'bg-white/20 text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
-          >
-            {d === 'todos' ? 'Todos deptos' : d}
-          </button>
-        ))}
+        {scope === 'all' && (
+          <>
+            {(['todos'] as Depto[]).map(d => (
+              <button key={d}
+                onClick={() => setFiltroDepto(d)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition touch-manipulation
+                  ${filtroDepto === d ? 'bg-white/20 text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
+              >
+                Todos deptos
+              </button>
+            ))}
+            {officialDepartments.map(d => {
+              const slug = d.slug === 'teens' || d.slug === 'simply' ? d.slug : undefined
+              if (!slug) return null
+              return (
+                <button key={d.id}
+                  onClick={() => setFiltroDepto(slug)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold transition touch-manipulation
+                    ${filtroDepto === slug ? 'bg-white/20 text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
+                >
+                  {d.nome}
+                </button>
+              )
+            })}
+          </>
+        )}
       </div>
 
       {/* Lista */}
@@ -137,6 +160,7 @@ export default function RujaJovens() {
       {editando !== null && (
         <RujaJovemForm
           jovem={editando === 'novo' ? null : editando}
+          scope={scope}
           onClose={() => setEditando(null)}
           onSaved={() => { setEditando(null); reloadJovens(); showToast('Jovem salvo!') }}
         />

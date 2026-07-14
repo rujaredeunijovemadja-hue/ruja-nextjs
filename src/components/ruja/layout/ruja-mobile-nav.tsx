@@ -9,23 +9,23 @@ interface Props {
 }
 
 const MAIN_TABS: { page: RujaPage; icon: string; label: string }[] = [
-  { page: 'dashboard',   icon: '📊', label: 'Dashboard' },
-  { page: 'jovens',      icon: '👥', label: 'Jovens' },
-  { page: 'frequencia',  icon: '✅', label: 'Freq.' },
-  { page: 'aniversarios',icon: '🎂', label: 'Aniv.' },
+  { page: 'dashboard',   icon: '🏠', label: 'Geral' },
+  { page: 'teens',       icon: '👦', label: 'Teens' },
+  { page: 'simply',      icon: '🌱', label: 'Simply' },
+  { page: 'pendentes',   icon: '📋', label: 'Pendentes' },
 ]
 
 const MORE_PAGES: { page: RujaPage; icon: string; label: string }[] = [
-  { page: 'historico-frequencia', icon: '📋', label: 'Hist. Frequência' },
+  { page: 'analista-ia',   icon: '🤖', label: 'IA Nexus' },
+  { page: 'config',        icon: '⚙️', label: 'Configurações' },
+  { page: 'historico-frequencia', icon: '📋', label: 'Relatórios' },
+  { page: 'jovens',        icon: '👥', label: 'Jovens' },
+  { page: 'frequencia',    icon: '✅', label: 'Frequência' },
   { page: 'recuperacao',   icon: '🚑', label: 'Recuperação' },
-  { page: 'departamentos', icon: '🏛️', label: 'Departamentos' },
   { page: 'lideres',       icon: '⭐', label: 'Líderes' },
   { page: 'metas',         icon: '🎯', label: 'Metas' },
-  { page: 'alertas',       icon: '🚨', label: 'Alertas' },
-  { page: 'analista-ia',   icon: '🦁', label: 'Analista IA' },
-  { page: 'lidersupremo',  icon: '👑', label: 'Líder Supremo' },
+  { page: 'departamentos', icon: '🏛️', label: 'Departamentos' },
   { page: 'usuarios',       icon: '👤', label: 'Usuários' },
-  { page: 'config',        icon: '⚙️', label: 'Configurações' },
 ]
 
 export function RujaMobileNav({ current, onNavigate, onBusca }: Props) {

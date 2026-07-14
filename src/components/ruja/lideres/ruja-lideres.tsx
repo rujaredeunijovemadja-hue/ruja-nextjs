@@ -4,10 +4,12 @@ import { useRuja } from '@/lib/ruja/context'
 import { upsertLider, deleteLider, upsertJovem } from '@/lib/ruja/queries'
 import { Spinner } from '@/components/ui/spinner'
 import type { Lider } from '@/lib/ruja/types'
+import type { DepartmentScope } from '@/lib/ruja/departments'
+import { DEPARTMENT_LABELS, filterJovensByScope, jovemMatchesDepartment } from '@/lib/ruja/departments'
 
 const EMPTY = { nome:'', contato:'', departamento:'', funcao:'', data_nasc:'' }
 
-export default function RujaLideres() {
+export default function RujaLideres({ scope = 'all' }: { scope?: DepartmentScope }) {
   const { lideres, departamentos, jovens, loading, reload, reloadJovens } = useRuja()
   const [editando,  setEditando]  = useState<Lider | 'novo' | null>(null)
   const [deletando, setDeletando] = useState<Lider | null>(null)
@@ -64,13 +66,19 @@ export default function RujaLideres() {
   }
 
   if (loading) return <div className="flex-1 flex items-center justify-center"><Spinner /></div>
+  const lideresFiltrados = scope === 'all'
+    ? lideres
+    : lideres.filter(l => l.departamento.toLowerCase() === DEPARTMENT_LABELS[scope].toLowerCase())
+  const jovensEscopo = filterJovensByScope(jovens, scope)
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-xl font-bold text-white">Líderes</h1>
-          <p className="text-gray-500 text-sm">{lideres.length} líderes</p>
+          <h1 className="text-xl font-bold text-white">
+            Líderes{scope !== 'all' ? ` · ${DEPARTMENT_LABELS[scope]}` : ''}
+          </h1>
+          <p className="text-gray-500 text-sm">{lideresFiltrados.length} líderes</p>
         </div>
         <button onClick={() => openEdit('novo')}
           className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm touch-manipulation">
@@ -78,15 +86,15 @@ export default function RujaLideres() {
         </button>
       </div>
 
-      {lideres.length === 0 ? (
+      {lideresFiltrados.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
           <div className="text-4xl mb-3">⭐</div>
           <p>Nenhum líder cadastrado.</p>
         </div>
       ) : (
         <div className="space-y-2">
-          {lideres.map(l => {
-            const jovensLider = jovens.filter(j => j.lider === l.nome)
+          {lideresFiltrados.map(l => {
+            const jovensLider = jovensEscopo.filter(j => j.lider === l.nome)
             return (
               <div key={l.id} className="bg-[#111] border border-white/8 rounded-xl p-4 flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-400 font-bold text-sm flex-shrink-0">
@@ -135,7 +143,9 @@ export default function RujaLideres() {
                 <select value={form.departamento}
                   onChange={e => setForm(f => ({ ...f, departamento: e.target.value }))} className={INP}>
                   <option value="">— Selecionar</option>
-                  {departamentos.map(d => <option key={d.id} value={d.nome}>{d.nome}</option>)}
+                  {departamentos
+                    .filter(d => scope === 'all' || jovemMatchesDepartment({ departamento: d.nome }, scope))
+                    .map(d => <option key={d.id} value={d.nome}>{d.nome}</option>)}
                 </select>
               </div>
               {error && <div className="text-red-400 text-sm bg-red-500/10 rounded-xl px-4 py-3">{error}</div>}
