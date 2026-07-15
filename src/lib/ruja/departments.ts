@@ -55,13 +55,36 @@ export function activeOfficialDepartments(departamentos: Departamento[]) {
   })
 }
 
+export function activeDepartments(departamentos: Departamento[]) {
+  return departamentos
+    .filter(department => department.ativo !== false)
+    .map(department => ({ ...department, slug: departmentSlug(department) }))
+    .sort((a, b) => {
+      const aOfficial = OFFICIAL_DEPARTMENT_SLUGS.indexOf(a.slug as DepartmentSlug)
+      const bOfficial = OFFICIAL_DEPARTMENT_SLUGS.indexOf(b.slug as DepartmentSlug)
+      if (aOfficial !== -1 || bOfficial !== -1) {
+        if (aOfficial === -1) return 1
+        if (bOfficial === -1) return -1
+        return aOfficial - bOfficial
+      }
+      return a.nome.localeCompare(b.nome, 'pt-BR')
+    })
+}
+
 export function departmentNameFromScope(scope: DepartmentScope) {
   return scope === 'all' ? null : DEPARTMENT_LABELS[scope]
 }
 
 export function jovemMatchesDepartment(jovem: Pick<Jovem, 'departamento'>, scope: DepartmentScope) {
   if (scope === 'all') return true
-  const expected = DEPARTMENT_LABELS[scope].toLowerCase()
+  return jovemMatchesDepartmentName(jovem, DEPARTMENT_LABELS[scope])
+}
+
+export function jovemMatchesDepartmentName(
+  jovem: Pick<Jovem, 'departamento'>,
+  departmentName: string
+) {
+  const expected = departmentName.trim().toLowerCase()
   return jovem.departamento
     .split(';')
     .map((item) => item.trim().toLowerCase())

@@ -1,24 +1,25 @@
 # PROGRAMAS_INFO — RUJA Nexus
 
-Atualizado em: 2026-07-13 (frequência por evento)
+Atualizado em: 2026-07-15 (departamentos completos e frequência por evento)
 
 Documento operacional do sistema RUJA/Nexus.
 
 ## Estrutura oficial
 
-A RUJA possui apenas dois departamentos ativos:
+A RUJA mantém Teens e Simply como áreas com navegação dedicada. Os demais
+departamentos e ministérios são registros ativos na mesma estrutura, incluindo
+os nomes já vinculados aos jovens no banco.
 
-- Teens
-- Simply
-
-UP não é departamento ativo e não deve aparecer como opção visual, filtro,
-cadastro, relatório, dashboard, permissão ou resposta da IA Nexus.
+- Teens e Simply: áreas dedicadas.
+- Louvor, Mídia, Recepção, Intercessão, Comunicação, Organização e demais
+  vínculos reais: disponíveis em Departamentos, Jovens, Eventos e Relatórios.
 
 ## Navegação oficial
 
 - Dashboard Geral
 - Teens
 - Simply
+- Eventos Gerais
 - Cadastros Pendentes
 - IA Nexus
 - Configurações

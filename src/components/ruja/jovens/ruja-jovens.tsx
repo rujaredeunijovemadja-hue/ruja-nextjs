@@ -10,10 +10,10 @@ import { RujaJovemDetalhe } from './ruja-jovem-detalhe'
 import { deleteJovem, auditLog } from '@/lib/ruja/queries'
 import type { Jovem } from '@/lib/ruja/types'
 import type { DepartmentScope } from '@/lib/ruja/departments'
-import { activeOfficialDepartments, DEPARTMENT_LABELS, filterJovensByScope, jovemMatchesDepartment } from '@/lib/ruja/departments'
+import { activeDepartments, DEPARTMENT_LABELS, filterJovensByScope, jovemMatchesDepartmentName } from '@/lib/ruja/departments'
 
 type Filtro = 'todos' | 'Ativo' | 'Oscilando' | 'Ocioso' | 'Em Risco'
-type Depto  = 'todos' | DepartmentScope
+type Depto = 'todos' | string
 
 export default function RujaJovens({ scope = 'all' }: { scope?: DepartmentScope }) {
   const { jovens, departamentos, loading, reloadJovens } = useRuja()
@@ -36,12 +36,12 @@ export default function RujaJovens({ scope = 'all' }: { scope?: DepartmentScope 
       const matchBusca = !busca || j.nome.toLowerCase().includes(busca.toLowerCase()) ||
         j.contato.includes(busca) || j.departamento.toLowerCase().includes(busca.toLowerCase())
       const matchStatus = filtroStatus === 'todos' || j.status === filtroStatus
-      const matchDepto  = filtroDepto === 'todos' || filtroDepto === 'all' || jovemMatchesDepartment(j, filtroDepto)
+      const matchDepto = filtroDepto === 'todos' || jovemMatchesDepartmentName(j, filtroDepto)
       return matchBusca && matchStatus && matchDepto
     })
   }, [jovens, busca, filtroStatus, filtroDepto, scope])
 
-  const officialDepartments = activeOfficialDepartments(departamentos)
+  const availableDepartments = activeDepartments(departamentos)
 
   async function handleDelete() {
     if (!deletando) return
@@ -109,19 +109,15 @@ export default function RujaJovens({ scope = 'all' }: { scope?: DepartmentScope 
                 Todos deptos
               </button>
             ))}
-            {officialDepartments.map(d => {
-              const slug = d.slug === 'teens' || d.slug === 'simply' ? d.slug : undefined
-              if (!slug) return null
-              return (
+            {availableDepartments.map(d => (
                 <button key={d.id}
-                  onClick={() => setFiltroDepto(slug)}
+                  onClick={() => setFiltroDepto(d.nome)}
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold transition touch-manipulation
-                    ${filtroDepto === slug ? 'bg-white/20 text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
+                    ${filtroDepto === d.nome ? 'bg-white/20 text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
                 >
                   {d.nome}
                 </button>
-              )
-            })}
+            ))}
           </>
         )}
       </div>

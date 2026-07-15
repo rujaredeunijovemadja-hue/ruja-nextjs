@@ -7,6 +7,7 @@ import { useState, useRef, useEffect, useMemo } from 'react'
 import { useRuja } from '@/lib/ruja/context'
 import { Spinner } from '@/components/ui/spinner'
 import { getFreqPct, getFaltasSeguidas, calcularStatus, getDiasParaAniversario } from '@/lib/ruja/calculos'
+import { jovemMatchesDepartmentName } from '@/lib/ruja/departments'
 
 const SUGESTOES = [
   { icon: '📊', texto: 'Faça um resumo geral da RUJA.' },
@@ -14,7 +15,7 @@ const SUGESTOES = [
   { icon: '🌱', texto: 'Quem está em recuperação no Simply?' },
   { icon: '🚨', texto: 'Quem está em risco no Teens?' },
   { icon: '📈', texto: 'Analise o crescimento do grupo nos últimos meses.' },
-  { icon: '🏛️', texto: 'Como estão os departamentos Teens e Simply?' },
+  { icon: '🏛️', texto: 'Como estão os departamentos da RUJA?' },
   { icon: '🎯', texto: 'Estamos perto de bater as metas deste mês?' },
   { icon: '🚑', texto: 'Quem está oscilando no Simply?' },
   { icon: '🎂', texto: 'Quem faz aniversário nos próximos 7 dias?' },
@@ -64,7 +65,7 @@ function montarContexto(state: ReturnType<typeof useRuja>): string {
 
   // Frequência por departamento
   const deptosResumo = departamentos.map(d => {
-    const membros = jovens.filter(j => j.departamento?.includes(d.nome))
+    const membros = jovens.filter(j => jovemMatchesDepartmentName(j, d.nome))
     const atv = membros.filter(j => calcularStatus(j.id, frequencias, regras) === 'Ativo').length
     const osc = membros.filter(j => calcularStatus(j.id, frequencias, regras) === 'Oscilando').length
     const rsk = membros.filter(j => calcularStatus(j.id, frequencias, regras) === 'Em Risco').length
@@ -96,11 +97,12 @@ function montarContexto(state: ReturnType<typeof useRuja>): string {
 
   return `Você é a IA Nexus do RUJA (Rede UniJovem ADJA). Analisa dados reais. NUNCA invente números. Apenas leitura — nunca altere dados. Responda em português, de forma pastoral e objetiva.
 
-ESTRUTURA OFICIAL ATIVA: RUJA possui apenas os departamentos Teens e Simply.
-UP não existe como departamento ativo e nunca deve ser citado como opção de cadastro, filtro, permissão, relatório ou dashboard.
+ESTRUTURA ATIVA: Teens e Simply possuem áreas de navegação dedicadas. Os demais departamentos e ministérios cadastrados também fazem parte da RUJA e devem ser considerados em cadastros, eventos, filtros e relatórios.
+DEPARTAMENTOS CADASTRADOS: ${departamentos.map(d => d.nome).join(', ') || 'Nenhum departamento cadastrado'}.
 Quando a pergunta citar Teens, analise apenas jovens/departamentos/líderes do Teens.
 Quando a pergunta citar Simply, analise apenas jovens/departamentos/líderes do Simply.
-Quando a pergunta citar RUJA ou visão geral, consolide Teens e Simply.
+Quando a pergunta citar outro departamento, use os vínculos reais desse departamento.
+Quando a pergunta citar RUJA ou visão geral, consolide todos os departamentos cadastrados.
 
 MODELO OFICIAL DE FREQUÊNCIA: o histórico atual trabalha por evento. Cada evento tem nome, data, departamento, líder responsável, tipo e participantes presentes. Jovem presente possui registro em ruja_eventos_participantes. Jovem ausente é calculado por comparação entre jovens ativos do departamento e participantes do evento; não existe registro automático de falta. Registros antigos em ruja_frequencias são legado e não devem ser somados ao modelo novo.
 Você pode responder sobre último culto, participantes de uma reunião, maior presença, frequência mensal e faltas nos últimos eventos, sempre apenas em leitura.

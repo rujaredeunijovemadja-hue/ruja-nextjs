@@ -1,17 +1,20 @@
 # BANCO DE DADOS RUJA
 
-Atualizado em: 2026-07-13
+Atualizado em: 2026-07-15
 
 ## Departamentos
 
 Tabela fonte oficial: `ruja_departamentos`.
 
-Departamentos ativos oficiais:
+Áreas com navegação dedicada:
 
 - `Teens` com slug `teens`
 - `Simply` com slug `simply`
 
-UP não é departamento ativo.
+Os demais ministérios também são registros ativos. A migration
+`migration_departamentos_pendentes.sql` separa os valores existentes em
+`ruja_jovens.departamento` por `;`, normaliza o slug e cria os departamentos
+ausentes sem remover ou reatribuir vínculos.
 
 ## Frequência por evento
 

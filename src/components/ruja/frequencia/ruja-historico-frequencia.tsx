@@ -6,7 +6,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { departamentoNomePorId } from '@/lib/ruja/calculos'
 import type { EventoFrequencia, EventoFrequenciaInput, StatusEvento, TipoEventoFrequencia } from '@/lib/ruja/types'
 import { getRujaErrorMessage } from '@/lib/ruja/errors'
-import { filterJovensByScope, isOfficialDepartmentSlug, jovemMatchesDepartment, departmentSlug } from '@/lib/ruja/departments'
+import { jovemMatchesDepartmentName } from '@/lib/ruja/departments'
 
 type Filtro = { data: string; departamentoId: string; liderId: string }
 const TIPOS: TipoEventoFrequencia[] = ['Culto', 'Reunião', 'Ensaio', 'Conexão', 'Congresso', 'Vigília', 'Evangelismo', 'Outro']
@@ -39,9 +39,7 @@ export default function RujaHistoricoFrequencia() {
   function jovensEsperados(evento: EventoFrequencia) {
     const depto = departamentos.find(d => String(d.id) === String(evento.departamento_id))
     if (!depto) return jovens
-    const slug = departmentSlug(depto)
-    if (!isOfficialDepartmentSlug(slug)) return []
-    return filterJovensByScope(jovens, slug).filter(j => jovemMatchesDepartment(j, slug))
+    return jovens.filter(j => jovemMatchesDepartmentName(j, depto.nome))
   }
 
   function participantes(evento: EventoFrequencia) {

@@ -1,7 +1,7 @@
 // ─── CÁLCULOS CENTRALIZADOS DO RUJA ───────────────────────────
 
 import type { Departamento, EventoFrequencia, Frequencia, Jovem, Regras, Status } from './types'
-import { departmentSlug, isOfficialDepartmentSlug, jovemMatchesDepartment } from './departments'
+import { jovemMatchesDepartmentName } from './departments'
 
 export function getDiasParaAniversario(dataNasc: string): number {
   if (!dataNasc) return 999
@@ -75,9 +75,7 @@ export function eventosDoDepartamento(
     if (!evento.departamento_id) return true
     const departamento = departamentos.find(d => String(d.id) === String(evento.departamento_id))
     if (!departamento) return false
-    const slug = departmentSlug(departamento)
-    if (!isOfficialDepartmentSlug(slug)) return false
-    return jovemMatchesDepartment(jovem, slug)
+    return jovemMatchesDepartmentName(jovem, departamento.nome)
   })
 }
 

@@ -1,5 +1,14 @@
 # CHANGELOG RUJA
 
+## 2026-07-15 — Departamentos completos
+
+- Removido o filtro que escondia departamentos diferentes de Teens e Simply.
+- Vínculos existentes dos jovens são sincronizados como departamentos reais.
+- Eventos, frequência, jovens, relatórios e IA Nexus reconhecem qualquer
+  departamento ativo.
+- Teens e Simply permanecem com navegação dedicada.
+- A migration de departamentos passou a ser idempotente e deduplica slugs.
+
 ## 2026-07-13 — Reestruturação do Histórico de Frequência por evento
 
 ## Módulo

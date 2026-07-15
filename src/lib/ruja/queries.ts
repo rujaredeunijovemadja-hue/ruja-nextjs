@@ -5,7 +5,7 @@ import type {
   Jovem, Lider, Departamento, Frequencia, EventoFrequencia, EventoFrequenciaInput,
   Recuperacao, HistoricoMensal, Regras, Metas, LiderSupremo, CadastroPendente
 } from './types'
-import { activeOfficialDepartments, departmentSlug, isOfficialDepartmentSlug } from './departments'
+import { activeDepartments, departmentSlug } from './departments'
 
 export async function fetchJovens(): Promise<Jovem[]> {
   const sb = createClient()
@@ -55,14 +55,11 @@ export async function fetchDepartamentos(): Promise<Departamento[]> {
   const sb = createClient()
   const { data, error } = await sb.from('ruja_departamentos').select('*').order('nome')
   if (error) throw error
-  return activeOfficialDepartments((data ?? []) as Departamento[])
+  return activeDepartments((data ?? []) as Departamento[])
 }
 
 export async function upsertDepartamento(d: Partial<Departamento> & { id: string }): Promise<void> {
   const slug = d.slug ?? (d.nome ? departmentSlug({ nome: d.nome }) : undefined)
-  if (slug && !isOfficialDepartmentSlug(slug)) {
-    throw new Error('A estrutura oficial atual permite apenas Teens e Simply.')
-  }
   const sb = createClient()
   const { error } = await sb.from('ruja_departamentos').upsert({
     ...d,

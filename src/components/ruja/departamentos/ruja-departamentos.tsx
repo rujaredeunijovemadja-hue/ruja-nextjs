@@ -1,9 +1,10 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useRuja } from '@/lib/ruja/context'
 import { upsertDepartamento, deleteDepartamento } from '@/lib/ruja/queries'
 import { Spinner } from '@/components/ui/spinner'
 import type { Departamento } from '@/lib/ruja/types'
+import { jovemMatchesDepartmentName } from '@/lib/ruja/departments'
 
 const EMPTY: Omit<Departamento, 'id'> = { nome:'', icone:'🏛️', lider:'', capacidade:0, descricao:'' }
 
@@ -83,7 +84,7 @@ export default function RujaDepartamentos() {
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
           {departamentos.map(d => {
-            const membros = jovens.filter(j => j.departamento.includes(d.nome))
+            const membros = jovens.filter(j => jovemMatchesDepartmentName(j, d.nome))
             const ativos  = membros.filter(j => j.status === 'Ativo')
             return (
               <div key={d.id} className="bg-[#111] border border-white/8 rounded-xl p-4">

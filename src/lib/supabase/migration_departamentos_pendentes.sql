@@ -4,7 +4,9 @@
 -- Data: 2026-07-03
 -- ════════════════════════════════════════════════════════════════
 
--- Departamentos oficiais atuais: Teens e Simply. UP não é departamento ativo.
+-- Teens e Simply têm navegação dedicada; os demais ministérios também são ativos.
+CREATE EXTENSION IF NOT EXISTS unaccent;
+
 ALTER TABLE ruja_departamentos
   ADD COLUMN IF NOT EXISTS slug text,
   ADD COLUMN IF NOT EXISTS ativo boolean DEFAULT true,
@@ -32,8 +34,54 @@ SET nome = EXCLUDED.nome,
     ativo = true,
     updated_at = now();
 
--- Não desativa, migra nem remove UP automaticamente.
--- Antes de qualquer ação sobre dados reais de UP, consulte a view de impacto abaixo.
+-- Converte todos os vínculos legados dos jovens em departamentos reais.
+-- O id usa o slug para que a operação seja estável e possa ser repetida.
+WITH nomes AS (
+  SELECT DISTINCT trim(nome_departamento) AS nome
+  FROM ruja_jovens
+  CROSS JOIN LATERAL regexp_split_to_table(coalesce(departamento, ''), ';') AS nome_departamento
+  WHERE trim(nome_departamento) <> ''
+),
+normalizados_brutos AS (
+  SELECT
+    nome,
+    regexp_replace(lower(unaccent(nome)), '[^a-z0-9]+', '-', 'g') AS slug
+  FROM nomes
+),
+normalizados AS (
+  SELECT min(nome) AS nome, slug
+  FROM normalizados_brutos
+  WHERE slug <> ''
+  GROUP BY slug
+)
+INSERT INTO ruja_departamentos (id, nome, slug, descricao, ativo, icone, lider, capacidade)
+SELECT
+  slug,
+  nome,
+  slug,
+  'Departamento importado dos vínculos atuais dos jovens.',
+  true,
+  CASE slug
+    WHEN 'teens' THEN '👦'
+    WHEN 'simply' THEN '🌱'
+    WHEN 'louvor' THEN '🎵'
+    WHEN 'midia' THEN '📷'
+    WHEN 'recepcao' THEN '🤝'
+    WHEN 'intercessao' THEN '🙏'
+    WHEN 'comunicacao' THEN '📣'
+    WHEN 'organizacao' THEN '📋'
+    ELSE '🏛️'
+  END,
+  '',
+  0
+FROM normalizados
+ON CONFLICT (slug) WHERE slug IS NOT NULL DO UPDATE
+SET nome = EXCLUDED.nome,
+    ativo = true,
+    updated_at = now();
+
+-- Não remove nem reatribui vínculos existentes. O relatório de UP permanece
+-- disponível para conferência dos dados legados.
 
 CREATE TABLE IF NOT EXISTS ruja_cadastros_pendentes (
   id text primary key,
@@ -65,6 +113,7 @@ ON ruja_cadastros_pendentes(departamento_id);
 
 ALTER TABLE ruja_cadastros_pendentes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "cadastros_pendentes_public_insert" ON ruja_cadastros_pendentes;
 CREATE POLICY "cadastros_pendentes_public_insert" ON ruja_cadastros_pendentes
   FOR INSERT TO anon, authenticated
   WITH CHECK (
@@ -78,10 +127,12 @@ CREATE POLICY "cadastros_pendentes_public_insert" ON ruja_cadastros_pendentes
     )
   );
 
+DROP POLICY IF EXISTS "cadastros_pendentes_select_auth" ON ruja_cadastros_pendentes;
 CREATE POLICY "cadastros_pendentes_select_auth" ON ruja_cadastros_pendentes
   FOR SELECT TO authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "cadastros_pendentes_update_auth" ON ruja_cadastros_pendentes;
 CREATE POLICY "cadastros_pendentes_update_auth" ON ruja_cadastros_pendentes
   FOR UPDATE TO authenticated
   USING (true)

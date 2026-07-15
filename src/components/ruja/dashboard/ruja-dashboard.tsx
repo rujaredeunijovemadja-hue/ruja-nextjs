@@ -57,7 +57,7 @@ export default function RujaDashboard({ scope = 'all', title }: Props) {
           {title ?? (scope === 'all' ? 'Dashboard Geral' : `Dashboard ${DEPARTMENT_LABELS[scope]}`)}
         </h1>
         <p className="text-gray-500 text-sm">
-          {scope === 'all' ? 'Visão consolidada da RUJA: Teens e Simply.' : `Dados filtrados apenas por ${DEPARTMENT_LABELS[scope]}.`}
+          {scope === 'all' ? 'Visão consolidada de todos os departamentos da RUJA.' : `Dados filtrados apenas por ${DEPARTMENT_LABELS[scope]}.`}
         </p>
       </div>
 

@@ -4,12 +4,15 @@ Atualizado em: 2026-07-13
 
 ## Estrutura oficial
 
-Departamentos ativos:
+Áreas com navegação dedicada:
 
 - Teens
 - Simply
 
-UP não é opção ativa.
+Os demais departamentos e ministérios são cadastrados em
+`ruja_departamentos` e reutilizam a estrutura geral de jovens, eventos e
+relatórios. A migration de departamentos converte os vínculos já existentes
+nos jovens em registros reais, sem apagar associações legadas.
 
 ## Perfis
 

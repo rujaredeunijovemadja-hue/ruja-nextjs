@@ -6,7 +6,7 @@ import { uploadFoto, removeFoto } from '@/lib/ruja/storage'
 import { Spinner } from '@/components/ui/spinner'
 import type { Jovem, Status, Batizado } from '@/lib/ruja/types'
 import type { DepartmentScope } from '@/lib/ruja/departments'
-import { activeOfficialDepartments, DEPARTMENT_LABELS } from '@/lib/ruja/departments'
+import { activeDepartments, DEPARTMENT_LABELS } from '@/lib/ruja/departments'
 
 const STATUS_OPTS: Status[] = ['Ativo', 'Oscilando', 'Ocioso', 'Em Risco']
 
@@ -43,7 +43,7 @@ export function RujaJovemForm({ jovem, scope = 'all', onClose, onSaved }: Props)
   const deptosSelecionados = form.departamento
     ? form.departamento.split(';').filter(Boolean)
     : []
-  const deptos = activeOfficialDepartments(departamentos)
+  const deptos = activeDepartments(departamentos)
 
   function toggleDepto(d: string) {
     const atual = new Set(deptosSelecionados)

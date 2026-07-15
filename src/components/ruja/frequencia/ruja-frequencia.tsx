@@ -7,7 +7,7 @@ import { getEventoFreqPct, getFreqPct } from '@/lib/ruja/calculos'
 import { getRujaErrorMessage } from '@/lib/ruja/errors'
 import type { EventoFrequenciaInput, StatusEvento, TipoEventoFrequencia } from '@/lib/ruja/types'
 import type { DepartmentScope } from '@/lib/ruja/departments'
-import { activeOfficialDepartments, DEPARTMENT_LABELS, filterJovensByScope, isOfficialDepartmentSlug, jovemMatchesDepartment } from '@/lib/ruja/departments'
+import { activeDepartments, DEPARTMENT_LABELS, filterJovensByScope, jovemMatchesDepartmentName } from '@/lib/ruja/departments'
 
 const TIPOS: TipoEventoFrequencia[] = ['Culto', 'Reunião', 'Ensaio', 'Conexão', 'Congresso', 'Vigília', 'Evangelismo', 'Outro']
 const STATUS_EVENTO: StatusEvento[] = ['Agendado', 'Em andamento', 'Finalizado', 'Cancelado']
@@ -23,12 +23,12 @@ export default function RujaFrequencia({
   allowMixedDepartments?: boolean
 }) {
   const { jovens, lideres, departamentos, frequencias, eventosFrequencia, loading, reload, recalcularStatus } = useRuja()
-  const officialDepartments = activeOfficialDepartments(departamentos)
+  const availableDepartments = activeDepartments(departamentos)
   const defaultDepto = allowMixedDepartments
     ? ''
     : scope === 'all'
-      ? (officialDepartments[0]?.id ?? '')
-      : (officialDepartments.find(d => d.slug === scope)?.id ?? '')
+      ? (availableDepartments[0]?.id ?? '')
+      : (availableDepartments.find(d => d.slug === scope)?.id ?? '')
 
   const [nome, setNome] = useState('')
   const [data, setData] = useState(new Date().toISOString().slice(0, 10))
@@ -47,12 +47,13 @@ export default function RujaFrequencia({
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState('')
 
-  const selectedDepto = officialDepartments.find(d => d.id === departamentoId)
-  const selectedScope: DepartmentScope = selectedDepto?.slug && isOfficialDepartmentSlug(selectedDepto.slug) ? selectedDepto.slug : scope
-  const selectedLabel = allowMixedDepartments && !selectedDepto ? 'Toda RUJA' : selectedScope === 'all' ? 'Geral' : DEPARTMENT_LABELS[selectedScope]
+  const selectedDepto = availableDepartments.find(d => d.id === departamentoId)
+  const selectedLabel = allowMixedDepartments && !selectedDepto
+    ? 'Toda RUJA'
+    : selectedDepto?.nome ?? (scope === 'all' ? 'Geral' : DEPARTMENT_LABELS[scope])
   const departmentOptions = Array.from(new Set([
     'Todos',
-    ...officialDepartments.map(d => d.nome),
+    ...availableDepartments.map(d => d.nome),
     ...MINISTERIOS_BASE,
     ...jovens.flatMap(j => j.departamento.split(';').map(d => d.trim()).filter(Boolean)),
   ])).filter(Boolean)
@@ -62,8 +63,10 @@ export default function RujaFrequencia({
         const tags = j.departamento.split(';').map(d => d.trim().toLowerCase())
         return departamentosEnvolvidos.some(d => tags.includes(d.toLowerCase()))
       })
-    : filterJovensByScope(jovens, selectedScope)
-  const jovensBase = selectedDepto ? scopedJovens.filter(j => jovemMatchesDepartment(j, selectedScope)) : scopedJovens
+    : filterJovensByScope(jovens, scope)
+  const jovensBase = selectedDepto
+    ? scopedJovens.filter(j => jovemMatchesDepartmentName(j, selectedDepto.nome))
+    : scopedJovens
   const termoBusca = busca.trim().toLowerCase()
   const jovensDepto = termoBusca ? jovensBase.filter(j => j.nome.toLowerCase().includes(termoBusca)) : jovensBase
   const lideresDepto = selectedDepto
@@ -184,7 +187,7 @@ export default function RujaFrequencia({
             <label className={LBL}>{allowMixedDepartments ? 'Abrangência' : 'Departamento'}</label>
             <select value={departamentoId} onChange={e => { setDepartamentoId(e.target.value); setPresentes(new Set()) }} className={INP}>
               <option value="">{allowMixedDepartments ? 'Toda RUJA / vários departamentos' : 'Selecione'}</option>
-              {(scope === 'all' ? officialDepartments : officialDepartments.filter(d => d.slug === scope)).map(d => (
+              {(scope === 'all' ? availableDepartments : availableDepartments.filter(d => d.slug === scope)).map(d => (
                 <option key={d.id} value={d.id}>{d.nome}</option>
               ))}
             </select>
