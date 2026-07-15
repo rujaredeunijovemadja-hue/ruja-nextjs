@@ -128,7 +128,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // ── 6. Audit log ─────────────────────────────────────────
-    await admin
+    const { error: auditError } = await admin
       .from('ruja_audit_logs')
       .insert({
         usuario_id:   caller.id,
@@ -138,7 +138,9 @@ export async function PATCH(request: NextRequest) {
         dados_antes:  { role: targetProfile.role, nome: targetProfile.nome },
         dados_depois: { ...updates, editado_por: callerProfile.nome },
       })
-      .catch(() => {})
+    if (auditError) {
+      console.error('[API /users/update] Audit error:', auditError.message)
+    }
 
     return NextResponse.json({ ok: true })
 

@@ -12,6 +12,8 @@
   `ruja_profiles`, incluindo bootstrap do primeiro Líder Supremo.
 - Eventos Gerais agora possui abas para criar e consultar eventos; após salvar,
   o histórico com participantes, edição e exclusão é aberto automaticamente.
+- Corrigido erro interno após criar ou alterar usuário quando o audit log não
+  podia ser gravado; a operação principal agora retorna sucesso normalmente.
 
 ## 2026-07-13 — Reestruturação do Histórico de Frequência por evento
 

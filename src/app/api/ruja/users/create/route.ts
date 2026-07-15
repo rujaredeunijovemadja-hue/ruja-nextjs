@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ── 6. Audit log (silencioso) ────────────────────────────
-    await admin
+    const { error: auditError } = await admin
       .from('ruja_audit_logs')
       .insert({
         usuario_id:   caller.id,
@@ -174,7 +174,9 @@ export async function POST(request: NextRequest) {
           criado_por:     callerProfile.nome,
         },
       })
-      .catch(() => {})
+    if (auditError) {
+      console.error('[API /users/create] Audit error:', auditError.message)
+    }
 
     // ── 7. Retornar — senha só aparece se foi gerada pelo server
     const resposta: Record<string, unknown> = {
