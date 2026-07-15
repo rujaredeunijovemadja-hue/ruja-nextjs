@@ -26,7 +26,7 @@ INSERT INTO ruja_departamentos (id, nome, slug, descricao, ativo, icone, lider, 
 VALUES
   ('teens', 'Teens', 'teens', 'Departamento Teens da RUJA', true, '👦', '', 0),
   ('simply', 'Simply', 'simply', 'Departamento Simply da RUJA', true, '🌱', '', 0)
-ON CONFLICT (slug) DO UPDATE
+ON CONFLICT (slug) WHERE slug IS NOT NULL DO UPDATE
 SET nome = EXCLUDED.nome,
     descricao = COALESCE(ruja_departamentos.descricao, EXCLUDED.descricao),
     ativo = true,
