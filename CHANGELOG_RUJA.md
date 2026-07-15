@@ -1,5 +1,29 @@
 # CHANGELOG RUJA
 
+## 2026-07-15 — Cadastro público e aprovação por departamento
+
+- Formulário `/cadastro` ampliado com dados pessoais, vínculo, batismo,
+  responsável para menores, consentimento, foto e confirmação por protocolo.
+- Envio público movido para API server-side com sanitização, limite de tamanho,
+  conversão WebP, token idempotente e detecção de possíveis duplicidades.
+- Criadas APIs autenticadas de análise, aprovação, rejeição, correção, foto e
+  observação administrativa, todas validadas por cargo e departamento.
+- Aprovação cria o jovem com ID determinístico, copia a foto para o caminho
+  definitivo e é segura para repetição.
+- Painel interno ganhou KPIs, filtros, status completos, fotos privadas,
+  registros semelhantes e histórico de ações.
+- Nova migration `migration_cadastro_publico_aprovacao.sql` remove insert
+  anônimo direto, cria o bucket privado e adiciona RLS e auditoria.
+
+### Riscos e testes
+
+- A migration deve ser aplicada antes do deploy usar as novas colunas.
+- O bucket definitivo de jovens e `SUPABASE_SERVICE_ROLE_KEY` precisam existir
+  na Vercel.
+- Testar envio Teens/Simply, menor com e sem responsável, foto acima de 5 MB,
+  duplicidade por telefone, aprovação repetida, rejeição, correção e isolamento
+  entre líderes Teens/Simply.
+
 ## 2026-07-15 — Cargos e permissões por departamento
 
 - Padronizados os cargos `lider_supremo`, `administrador`,

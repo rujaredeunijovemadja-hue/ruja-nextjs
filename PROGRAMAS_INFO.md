@@ -98,6 +98,22 @@ visualizadores ficam presos a Teens ou Simply. Menus desktop/mobile e ações da
 interface acompanham o perfil, enquanto o banco aplica a proteção efetiva por
 RLS.
 
+## Cadastro público
+
+O fluxo público oficial começa em `/cadastro` e grava exclusivamente por
+`POST /api/ruja/cadastros-pendentes`. O navegador nunca cria jovem, nunca lista
+dados internos e não recebe a chave `service_role`.
+
+O formulário aceita Teens ou Simply, valida os campos obrigatórios, aplica as
+regras de responsável para menores, converte fotos JPG/PNG/WEBP para WebP e
+retorna um protocolo. Um token por envio impede duplicação causada por clique
+repetido.
+
+A liderança analisa no painel interno. Aprovação, rejeição, solicitação de
+correção e observação administrativa passam por APIs autenticadas. A aprovação
+usa o ID determinístico `cad_<cadastro_id>`, tornando a criação do jovem
+idempotente.
+
 ## Banco
 
 Migrations locais:
@@ -106,6 +122,7 @@ Migrations locais:
 - `src/lib/supabase/migration_eventos_frequencia.sql`
 - `src/lib/supabase/migration_profiles.sql`
 - `src/lib/supabase/migration_cargos_permissoes.sql`
+- `src/lib/supabase/migration_cadastro_publico_aprovacao.sql`
 
 Tabelas principais do novo modelo:
 

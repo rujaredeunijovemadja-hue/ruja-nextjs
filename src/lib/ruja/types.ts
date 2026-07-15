@@ -66,14 +66,26 @@ export interface CadastroPendente {
   nome: string
   telefone: string
   email: string
-  data_nascimento: string
+  data_nascimento: string | null
   departamento_id: string
   departamento?: Departamento | null
   foto_path: string | null
   responsavel_nome: string
   responsavel_telefone: string
   observacoes: string
-  status: 'pendente' | 'aprovado' | 'rejeitado'
+  endereco: string
+  tempo_ruja: string
+  batizado: boolean
+  data_batismo: string | null
+  consentimento_dados: boolean
+  autorizacao_responsavel: boolean
+  status: import('./cadastro-publico').CadastroStatus
+  possivel_duplicidade: boolean
+  duplicidade_detalhes: Array<{ origem: 'pendente' | 'jovem'; id: string; nome: string; motivos: string[] }> | null
+  solicitacao_correcao: string | null
+  campos_correcao: string[] | null
+  observacao_administrativa: string | null
+  jovem_id_criado: string | null
   aprovado_por: string | null
   aprovado_em: string | null
   rejeitado_por: string | null
@@ -81,6 +93,20 @@ export interface CadastroPendente {
   motivo_rejeicao: string | null
   created_at: string
   updated_at: string
+  acoes?: CadastroAcao[]
+}
+
+export interface CadastroAcao {
+  id: string
+  cadastro_id: string
+  acao: 'cadastro_publico_enviado' | 'cadastro_em_analise' | 'cadastro_aprovado' | 'cadastro_rejeitado' | 'correcao_solicitada' | 'duplicidade_identificada'
+  usuario_id: string | null
+  jovem_id: string | null
+  departamento_id: string | null
+  motivo: string | null
+  dados_antes: unknown
+  dados_depois: unknown
+  created_at: string
 }
 
 export interface Frequencia {

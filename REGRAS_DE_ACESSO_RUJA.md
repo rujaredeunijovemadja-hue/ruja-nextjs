@@ -63,6 +63,23 @@ As ações do novo fluxo registram `ruja_audit_logs`:
 - `adicionar_participante`
 - `remover_participante`
 
+## Cadastro público e aprovação
+
+- `/cadastro` não exige login e envia somente para a API pública de pendências.
+- A API valida e sanitiza os campos, limita a foto a 5 MB, converte para WebP,
+  verifica Teens/Simply e marca possíveis duplicidades.
+- Líder Supremo e Administrador gerenciam Teens e Simply.
+- Líder de Departamento gerencia somente o próprio departamento.
+- Voluntário e Visualizador não aprovam, rejeitam ou solicitam correção.
+- Aprovação repetida devolve o jovem já criado e não cria outra pessoa.
+- Rejeição mantém o registro e a foto privada para histórico.
+- RLS permite leitura interna conforme escopo; escritas de decisão usam apenas
+  APIs server-side autenticadas.
+
+Ações auditadas: `cadastro_publico_enviado`, `cadastro_em_analise`,
+`cadastro_aprovado`, `cadastro_rejeitado`, `correcao_solicitada` e
+`duplicidade_identificada`.
+
 ## IA Nexus
 
 A API valida sessão e perfil ativo, rejeita contexto enviado pelo navegador e

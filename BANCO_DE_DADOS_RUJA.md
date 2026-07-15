@@ -116,8 +116,28 @@ Tabela: `ruja_cadastros_pendentes`.
 Status permitidos:
 
 - `pendente`
+- `em_analise`
+- `correcao_solicitada`
 - `aprovado`
 - `rejeitado`
+
+A migration `migration_cadastro_publico_aprovacao.sql` converte o identificador
+para UUID, a data de nascimento para `date` e acrescenta consentimentos,
+endereço, tempo de RUJA, batismo, duplicidade, correção, observação
+administrativa, token idempotente e `jovem_id_criado`.
+
+Tabela de histórico: `ruja_cadastro_acoes`.
+
+Bucket privado: `ruja-cadastros-pendentes`.
+
+- caminho temporário: `cadastros-pendentes/{cadastro_id}/foto.webp`;
+- caminho definitivo: `jovens/{jovem_id}/perfil.webp` no bucket de jovens;
+- fotos rejeitadas permanecem no bucket privado para retenção administrativa;
+- nenhuma foto pendente possui URL pública.
+
+Índices de nome+nascimento, telefone, email, status e duplicidade apoiam a
+triagem. O formulário público perdeu o privilégio direto de `INSERT`; somente a
+API server-side escreve com `service_role`.
 
 ## Migrations
 
@@ -126,3 +146,4 @@ Status permitidos:
 - `src/lib/supabase/migration_eventos_entidade_completa.sql`
 - `src/lib/supabase/migration_profiles.sql`
 - `src/lib/supabase/migration_cargos_permissoes.sql`
+- `src/lib/supabase/migration_cadastro_publico_aprovacao.sql`

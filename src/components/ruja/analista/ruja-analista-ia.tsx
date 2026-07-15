@@ -28,6 +28,9 @@ const COMO_USAR = [
   'Como usar aniversários?',
   'Como usar metas?',
   'Explique como aprovar um cadastro pendente.',
+  'Como verificar uma possível duplicidade?',
+  'Como solicitar correção em um cadastro?',
+  'Por que um cadastro ainda não virou jovem?',
   'Como usar o sistema no celular?',
 ]
 

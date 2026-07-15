@@ -113,30 +113,15 @@ ON ruja_cadastros_pendentes(departamento_id);
 
 ALTER TABLE ruja_cadastros_pendentes ENABLE ROW LEVEL SECURITY;
 
+-- O envio publico passa exclusivamente por POST /api/ruja/cadastros-pendentes.
 DROP POLICY IF EXISTS "cadastros_pendentes_public_insert" ON ruja_cadastros_pendentes;
-CREATE POLICY "cadastros_pendentes_public_insert" ON ruja_cadastros_pendentes
-  FOR INSERT TO anon, authenticated
-  WITH CHECK (
-    status = 'pendente'
-    AND EXISTS (
-      SELECT 1
-      FROM ruja_departamentos d
-      WHERE d.id = departamento_id
-        AND d.ativo = true
-        AND d.slug IN ('teens', 'simply')
-    )
-  );
 
 DROP POLICY IF EXISTS "cadastros_pendentes_select_auth" ON ruja_cadastros_pendentes;
-CREATE POLICY "cadastros_pendentes_select_auth" ON ruja_cadastros_pendentes
-  FOR SELECT TO authenticated
-  USING (true);
-
 DROP POLICY IF EXISTS "cadastros_pendentes_update_auth" ON ruja_cadastros_pendentes;
-CREATE POLICY "cadastros_pendentes_update_auth" ON ruja_cadastros_pendentes
-  FOR UPDATE TO authenticated
-  USING (true)
-  WITH CHECK (status IN ('pendente', 'aprovado', 'rejeitado'));
+
+-- As politicas de leitura por departamento sao criadas em
+-- migration_cargos_permissoes.sql. Decisoes usam apenas APIs server-side.
+REVOKE INSERT, UPDATE, DELETE ON ruja_cadastros_pendentes FROM anon, authenticated;
 
 CREATE OR REPLACE VIEW ruja_up_impact_report AS
 SELECT

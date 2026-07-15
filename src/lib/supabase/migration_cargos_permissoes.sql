@@ -227,16 +227,14 @@ CREATE POLICY recuperacoes_delete_access ON public.ruja_recuperacoes FOR DELETE 
   public.is_ruja_admin() OR (public.current_ruja_role() = 'lider_departamento' AND EXISTS (SELECT 1 FROM public.ruja_jovens j WHERE j.id = jovem_id))
 );
 
--- Cadastros pendentes: preserva o INSERT publico e restringe a gestao.
+-- Cadastros pendentes: leitura por escopo; decisoes passam pelas APIs server-side.
 ALTER TABLE public.ruja_cadastros_pendentes ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS cadastros_pendentes_select_auth ON public.ruja_cadastros_pendentes;
 DROP POLICY IF EXISTS cadastros_pendentes_update_auth ON public.ruja_cadastros_pendentes;
 CREATE POLICY cadastros_pendentes_select_auth ON public.ruja_cadastros_pendentes FOR SELECT TO authenticated USING (
   public.is_ruja_admin() OR (public.current_ruja_role() = 'lider_departamento' AND public.can_access_departamento(departamento_id))
 );
-CREATE POLICY cadastros_pendentes_update_auth ON public.ruja_cadastros_pendentes FOR UPDATE TO authenticated
-USING (public.is_ruja_admin() OR (public.current_ruja_role() = 'lider_departamento' AND public.can_access_departamento(departamento_id)))
-WITH CHECK (public.is_ruja_admin() OR (public.current_ruja_role() = 'lider_departamento' AND public.can_access_departamento(departamento_id)));
+REVOKE INSERT, UPDATE, DELETE ON public.ruja_cadastros_pendentes FROM anon, authenticated;
 
 -- Dados auxiliares usados pelo painel.
 ALTER TABLE public.ruja_lideres ENABLE ROW LEVEL SECURITY;

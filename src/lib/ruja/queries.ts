@@ -86,64 +86,48 @@ export async function fetchCadastrosPendentes(): Promise<CadastroPendente[]> {
     .select('*, departamento:ruja_departamentos(*)')
     .order('created_at', { ascending: false })
   if (error) throw error
-  return (data ?? []) as CadastroPendente[]
+  const cadastros = (data ?? []) as CadastroPendente[]
+  if (!cadastros.length) return cadastros
+  const { data: acoes } = await sb
+    .from('ruja_cadastro_acoes')
+    .select('*')
+    .in('cadastro_id', cadastros.map(cadastro => cadastro.id))
+    .order('created_at', { ascending: false })
+  return cadastros.map(cadastro => ({
+    ...cadastro,
+    acoes: (acoes ?? []).filter(acao => acao.cadastro_id === cadastro.id),
+  }))
 }
 
-export async function aprovarCadastroPendente(cadastro: CadastroPendente): Promise<void> {
-  const sb = createClient()
-  const { data: { session } } = await sb.auth.getSession()
-  const departamento = cadastro.departamento?.nome ?? ''
-
-  if (!departamento) throw new Error('Cadastro sem departamento válido.')
-
-  const jovemId = `cad_${cadastro.id}`
-  const { error: jovemError } = await sb.from('ruja_jovens').upsert({
-    id: jovemId,
-    nome: cadastro.nome,
-    contato: cadastro.telefone,
-    instagram: '',
-    endereco: '',
-    departamento,
-    lider: '',
-    status: 'Em Risco',
-    entrada: new Date().toISOString().slice(0, 10),
-    batizado: 'nao',
-    data_batismo: '',
-    data_nasc: cadastro.data_nascimento,
-    obs: cadastro.observacoes,
-    foto_path: cadastro.foto_path ?? '',
-    foto_url: '',
-    idade: 0,
-    atualizado_em: new Date().toISOString(),
-  })
-  if (jovemError) throw jovemError
-
-  const { error } = await sb
-    .from('ruja_cadastros_pendentes')
-    .update({
-      status: 'aprovado',
-      aprovado_por: session?.user?.id ?? null,
-      aprovado_em: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', cadastro.id)
-  if (error) throw error
+export async function aprovarCadastroPendente(cadastro: CadastroPendente): Promise<{ jovem_id: string; ja_aprovado: boolean }> {
+  return cadastroRequest(cadastro.id, 'aprovar')
 }
 
 export async function rejeitarCadastroPendente(id: string, motivo: string): Promise<void> {
-  const sb = createClient()
-  const { data: { session } } = await sb.auth.getSession()
-  const { error } = await sb
-    .from('ruja_cadastros_pendentes')
-    .update({
-      status: 'rejeitado',
-      rejeitado_por: session?.user?.id ?? null,
-      rejeitado_em: new Date().toISOString(),
-      motivo_rejeicao: motivo,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', id)
-  if (error) throw error
+  await cadastroRequest(id, 'rejeitar', { motivo })
+}
+
+export async function analisarCadastroPendente(id: string): Promise<void> {
+  await cadastroRequest(id, 'analisar')
+}
+
+export async function solicitarCorrecaoCadastro(id: string, motivo: string, campos: string[]): Promise<void> {
+  await cadastroRequest(id, 'correcao', { motivo, campos })
+}
+
+export async function salvarObservacaoCadastro(id: string, observacao: string): Promise<void> {
+  await cadastroRequest(id, 'observacao', { observacao })
+}
+
+async function cadastroRequest<T = { ok: boolean }>(id: string, action: string, body?: unknown): Promise<T> {
+  const response = await fetch(`/api/ruja/cadastros-pendentes/${id}/${action}`, {
+    method: 'POST',
+    headers: body ? { 'Content-Type': 'application/json' } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  })
+  const data = await response.json()
+  if (!response.ok) throw new Error(data.error ?? 'Não foi possível concluir a ação.')
+  return data as T
 }
 
 export async function fetchFrequencias(): Promise<Frequencia[]> {
