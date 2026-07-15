@@ -8,12 +8,14 @@ import { getRujaErrorMessage } from '@/lib/ruja/errors'
 import type { EventoFrequenciaInput, StatusEvento, TipoEventoFrequencia } from '@/lib/ruja/types'
 import type { DepartmentScope } from '@/lib/ruja/departments'
 import { activeDepartments, DEPARTMENT_LABELS, filterJovensByScope, jovemMatchesDepartmentName } from '@/lib/ruja/departments'
+import RujaHistoricoFrequencia from './ruja-historico-frequencia'
 
 const TIPOS: TipoEventoFrequencia[] = ['Culto', 'Reunião', 'Ensaio', 'Conexão', 'Congresso', 'Vigília', 'Evangelismo', 'Outro']
 const STATUS_EVENTO: StatusEvento[] = ['Agendado', 'Em andamento', 'Finalizado', 'Cancelado']
 const MINISTERIOS_BASE = ['Louvor', 'Mídia', 'Recepção', 'Intercessão', 'Comunicação', 'Organização']
 const LBL = 'block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5'
 const INP = 'w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-red-500/40 transition touch-manipulation'
+type EventosGeraisView = 'novo' | 'historico'
 
 export default function RujaFrequencia({
   scope = 'all',
@@ -46,6 +48,7 @@ export default function RujaFrequencia({
   const [presentes, setPresentes] = useState<Set<string>>(new Set())
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState('')
+  const [eventosGeraisView, setEventosGeraisView] = useState<EventosGeraisView>('novo')
 
   const selectedDepto = availableDepartments.find(d => d.id === departamentoId)
   const selectedLabel = allowMixedDepartments && !selectedDepto
@@ -148,6 +151,7 @@ export default function RujaFrequencia({
       setDepartamentosEnvolvidos(allowMixedDepartments ? ['Todos'] : [])
       setPresentes(new Set())
       setBusca('')
+      if (allowMixedDepartments) setEventosGeraisView('historico')
     } catch (e) {
       showToast('Erro ao salvar evento: ' + getRujaErrorMessage(e))
     } finally {
@@ -157,8 +161,30 @@ export default function RujaFrequencia({
 
   if (loading) return <div className="flex-1 flex items-center justify-center"><Spinner /></div>
 
+  if (allowMixedDepartments && eventosGeraisView === 'historico') {
+    return (
+      <div className="pt-4 md:pt-6">
+        <div className="px-4 md:px-6 max-w-5xl mx-auto">
+          <EventosGeraisTabs
+            active={eventosGeraisView}
+            eventCount={eventosFrequencia.length}
+            onChange={setEventosGeraisView}
+          />
+        </div>
+        <RujaHistoricoFrequencia />
+      </div>
+    )
+  }
+
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto">
+      {allowMixedDepartments && (
+        <EventosGeraisTabs
+          active={eventosGeraisView}
+          eventCount={eventosFrequencia.length}
+          onChange={setEventosGeraisView}
+        />
+      )}
       <div className="flex items-start justify-between gap-3 mb-5">
         <div>
           <h1 className="text-xl font-bold text-white">{allowMixedDepartments ? 'Eventos Gerais da RUJA' : `Eventos ${selectedLabel}`}</h1>
@@ -297,6 +323,47 @@ export default function RujaFrequencia({
       </button>
 
       {toast && <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-gray-800 text-white text-sm px-5 py-2.5 rounded-full shadow-lg">{toast}</div>}
+    </div>
+  )
+}
+
+function EventosGeraisTabs({
+  active,
+  eventCount,
+  onChange,
+}: {
+  active: EventosGeraisView
+  eventCount: number
+  onChange: (view: EventosGeraisView) => void
+}) {
+  return (
+    <div className="flex gap-5 border-b border-white/10 mb-5" role="tablist" aria-label="Eventos Gerais">
+      <button
+        type="button"
+        role="tab"
+        aria-selected={active === 'novo'}
+        onClick={() => onChange('novo')}
+        className={`pb-3 text-sm font-semibold border-b-2 transition-colors ${
+          active === 'novo'
+            ? 'border-red-500 text-white'
+            : 'border-transparent text-gray-500 hover:text-gray-300'
+        }`}
+      >
+        Novo evento
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={active === 'historico'}
+        onClick={() => onChange('historico')}
+        className={`pb-3 text-sm font-semibold border-b-2 transition-colors ${
+          active === 'historico'
+            ? 'border-red-500 text-white'
+            : 'border-transparent text-gray-500 hover:text-gray-300'
+        }`}
+      >
+        Eventos criados ({eventCount})
+      </button>
     </div>
   )
 }

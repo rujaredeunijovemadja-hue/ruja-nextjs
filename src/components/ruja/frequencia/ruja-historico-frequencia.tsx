@@ -121,7 +121,7 @@ export default function RujaHistoricoFrequencia() {
       </div>
 
       {eventos.length === 0 ? (
-        <div className="text-center py-16 text-gray-600 text-sm">Nenhum evento encontrado. Use “Frequência” para criar o primeiro evento.</div>
+        <div className="text-center py-16 text-gray-600 text-sm">Nenhum evento encontrado. Use “Novo evento” para criar o primeiro.</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {eventos.map(evento => {

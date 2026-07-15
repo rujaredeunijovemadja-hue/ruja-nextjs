@@ -10,6 +10,8 @@
 - A migration de departamentos passou a ser idempotente e deduplica slugs.
 - Perfis existentes do Supabase Auth passam a ser sincronizados com
   `ruja_profiles`, incluindo bootstrap do primeiro Líder Supremo.
+- Eventos Gerais agora possui abas para criar e consultar eventos; após salvar,
+  o histórico com participantes, edição e exclusão é aberto automaticamente.
 
 ## 2026-07-13 — Reestruturação do Histórico de Frequência por evento
 
