@@ -4,6 +4,7 @@
 // Layout: h-full + overflow-y-auto no nav para scroll interno correto.
 
 import type { RujaPage } from './ruja-layout'
+import type { RujaAccessProfile } from '@/lib/ruja/access'
 
 interface Props {
   current:    RujaPage
@@ -11,6 +12,8 @@ interface Props {
   onNavigate: (page: RujaPage) => void
   onLogout:   () => void
   onBusca:    () => void
+  profile: RujaAccessProfile
+  allowedPages: RujaPage[]
 }
 
 const NAV_ITEMS: { page: RujaPage; icon: string; label: string }[] = [
@@ -25,7 +28,13 @@ const NAV_ITEMS: { page: RujaPage; icon: string; label: string }[] = [
   { page: 'usuarios',      icon: '👤', label: 'Usuários' },
 ]
 
-export function RujaSidebar({ current, userName, onNavigate, onLogout, onBusca }: Props) {
+export function RujaSidebar({ current, userName, onNavigate, onLogout, onBusca, profile, allowedPages }: Props) {
+  const scopedDepartment = profile.departamento_id === 'simply' ? 'Simply' : 'Teens'
+  const items = NAV_ITEMS
+    .map(item => profile.role !== 'lider_supremo' && profile.role !== 'administrador' && item.page === 'eventos'
+      ? { ...item, page: 'frequencia' as RujaPage, label: `Eventos ${scopedDepartment}` }
+      : item)
+    .filter(item => allowedPages.includes(item.page))
   return (
     <aside className="hidden md:flex flex-col w-60 bg-[#111] border-r border-white/8 h-full shrink-0">
 
@@ -58,7 +67,7 @@ export function RujaSidebar({ current, userName, onNavigate, onLogout, onBusca }
 
       {/* ── NAV ── */}
       <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
-        {NAV_ITEMS.map(item => (
+        {items.map(item => (
           <button
             key={item.page}
             onClick={() => onNavigate(item.page)}
@@ -81,6 +90,7 @@ export function RujaSidebar({ current, userName, onNavigate, onLogout, onBusca }
           </div>
           <div className="min-w-0 flex-1">
             <div className="text-white text-sm font-medium truncate">{userName}</div>
+            <div className="text-gray-600 text-[10px] truncate">{profile.role.replaceAll('_', ' ')}</div>
           </div>
         </div>
         <button

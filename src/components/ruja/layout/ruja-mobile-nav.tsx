@@ -1,11 +1,14 @@
 'use client'
 import { useState } from 'react'
 import type { RujaPage } from './ruja-layout'
+import type { RujaAccessProfile } from '@/lib/ruja/access'
 
 interface Props {
   current: RujaPage
   onNavigate: (page: RujaPage) => void
   onBusca: () => void
+  profile: RujaAccessProfile
+  allowedPages: RujaPage[]
 }
 
 const MAIN_TABS: { page: RujaPage; icon: string; label: string }[] = [
@@ -29,15 +32,22 @@ const MORE_PAGES: { page: RujaPage; icon: string; label: string }[] = [
   { page: 'usuarios',       icon: '👤', label: 'Usuários' },
 ]
 
-export function RujaMobileNav({ current, onNavigate, onBusca }: Props) {
+export function RujaMobileNav({ current, onNavigate, onBusca, profile, allowedPages }: Props) {
   const [showMore, setShowMore] = useState(false)
+  const scopedDepartment = profile.departamento_id === 'simply' ? 'Simply' : 'Teens'
+  const mainTabs = MAIN_TABS
+    .map(item => profile.role !== 'lider_supremo' && profile.role !== 'administrador' && item.page === 'eventos'
+      ? { ...item, page: 'frequencia' as RujaPage, label: `Eventos ${scopedDepartment}` }
+      : item)
+    .filter(item => allowedPages.includes(item.page))
+  const morePages = MORE_PAGES.filter(item => allowedPages.includes(item.page))
 
   return (
     <>
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#111]/95 backdrop-blur border-t border-white/8"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <div className="flex items-stretch h-16">
-          {MAIN_TABS.map(t => (
+          {mainTabs.map(t => (
             <button key={t.page} onClick={() => onNavigate(t.page)}
               className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-xs font-medium transition touch-manipulation
                 ${current === t.page ? 'text-red-500' : 'text-gray-500 hover:text-gray-300'}`}>
@@ -69,7 +79,7 @@ export function RujaMobileNav({ current, onNavigate, onBusca }: Props) {
             </div>
 
             <div className="grid grid-cols-4 gap-1 px-2 pb-2">
-              {MORE_PAGES.map(p => (
+              {morePages.map(p => (
                 <button key={p.page}
                   onClick={() => { onNavigate(p.page); setShowMore(false) }}
                   className={`flex flex-col items-center gap-1.5 p-3 rounded-xl text-xs font-medium transition touch-manipulation

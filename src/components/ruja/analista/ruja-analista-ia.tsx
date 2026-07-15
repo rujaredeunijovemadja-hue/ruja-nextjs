@@ -3,22 +3,20 @@
 // Layout: flex-col direto, funciona dentro de overflow-hidden no pai.
 // Contexto: comprimido para caber dentro do limite do Groq (~4k tokens).
 
-import { useState, useRef, useEffect, useMemo } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRuja } from '@/lib/ruja/context'
 import { Spinner } from '@/components/ui/spinner'
-import { getFreqPct, getFaltasSeguidas, calcularStatus, getDiasParaAniversario } from '@/lib/ruja/calculos'
-import { jovemMatchesDepartmentName } from '@/lib/ruja/departments'
 
 const SUGESTOES = [
-  { icon: '📊', texto: 'Faça um resumo geral da RUJA.' },
-  { icon: '👦', texto: 'Como está o Teens?' },
-  { icon: '🌱', texto: 'Quem está em recuperação no Simply?' },
-  { icon: '🚨', texto: 'Quem está em risco no Teens?' },
-  { icon: '📈', texto: 'Analise o crescimento do grupo nos últimos meses.' },
-  { icon: '🏛️', texto: 'Como estão os departamentos da RUJA?' },
-  { icon: '🎯', texto: 'Estamos perto de bater as metas deste mês?' },
-  { icon: '🚑', texto: 'Quem está oscilando no Simply?' },
-  { icon: '🎂', texto: 'Quem faz aniversário nos próximos 7 dias?' },
+  { icon: '📊', texto: 'Como consultar o dashboard do meu departamento?' },
+  { icon: '👦', texto: 'Como cadastrar um jovem no Teens?' },
+  { icon: '🌱', texto: 'Como registrar um evento do Simply?' },
+  { icon: '✅', texto: 'Como registrar e corrigir frequência?' },
+  { icon: '📈', texto: 'Como consultar os relatórios de eventos?' },
+  { icon: '🏛️', texto: 'Como funcionam os departamentos no RUJA?' },
+  { icon: '🎯', texto: 'Como configurar e acompanhar metas?' },
+  { icon: '🚑', texto: 'Como criar um plano de recuperação?' },
+  { icon: '📋', texto: 'Como aprovar um cadastro pendente?' },
 ]
 
 const COMO_USAR = [
@@ -38,115 +36,6 @@ interface Mensagem {
   content: string
 }
 
-// ── Contexto comprimido — cabe em ~3k tokens ──────────────────
-function montarContexto(state: ReturnType<typeof useRuja>): string {
-  const { jovens, frequencias, eventosFrequencia, departamentos, lideres, recuperacoes,
-          historicoMensal, regras, metas } = state
-
-  const totalJovens = jovens.length
-  const ativos      = jovens.filter(j => calcularStatus(j.id, frequencias, regras) === 'Ativo').length
-  const oscilando   = jovens.filter(j => calcularStatus(j.id, frequencias, regras) === 'Oscilando').length
-  const emRisco     = jovens.filter(j => calcularStatus(j.id, frequencias, regras) === 'Em Risco').length
-  const ociosos     = jovens.filter(j => calcularStatus(j.id, frequencias, regras) === 'Ocioso').length
-  const batizados   = jovens.filter(j => j.batizado === 'sim').length
-
-  // Jovens em risco (máx 10 — mais relevantes para alerta)
-  const jovensEmRisco = jovens
-    .filter(j => calcularStatus(j.id, frequencias, regras) === 'Em Risco')
-    .map(j => `${j.nome}(${getFaltasSeguidas(j.id, frequencias)}f seguidas,${j.departamento || 'sem depto'})`)
-    .slice(0, 10)
-    .join('; ')
-
-  // Aniversariantes próximos 7 dias
-  const aniversariantes = jovens
-    .filter(j => getDiasParaAniversario(j.data_nasc) <= 7)
-    .map(j => `${j.nome}(${getDiasParaAniversario(j.data_nasc) === 0 ? 'hoje' : getDiasParaAniversario(j.data_nasc) + 'd'})`)
-    .join('; ')
-
-  // Frequência por departamento
-  const deptosResumo = departamentos.map(d => {
-    const membros = jovens.filter(j => jovemMatchesDepartmentName(j, d.nome))
-    const atv = membros.filter(j => calcularStatus(j.id, frequencias, regras) === 'Ativo').length
-    const osc = membros.filter(j => calcularStatus(j.id, frequencias, regras) === 'Oscilando').length
-    const rsk = membros.filter(j => calcularStatus(j.id, frequencias, regras) === 'Em Risco').length
-    return `${d.nome}:${membros.length}total,${atv}ativos,${osc}oscilando,${rsk}risco`
-  }).join(' | ')
-
-  // Recuperação ativa
-  const recuperacaoAtiva = recuperacoes
-    .filter(r => r.status === 'ativo')
-    .map(r => {
-      const nome = jovens.find(j => j.id === r.jovem_id)?.nome ?? '?'
-      return `${nome}(${r.motivo},líder:${r.lider_resp})`
-    }).join('; ')
-
-  // Histórico mensal comprimido
-  const historico = historicoMensal
-    .slice(-6)
-    .map(h => `${h.mes}:${h.total}t,${h.ativos_depto}a,${h.batizados_depto}b`)
-    .join(' | ')
-
-  // Top jovens por frequência (10 melhores e 10 piores)
-  const jovensComFreq = jovens
-    .map(j => ({ nome: j.nome, pct: getFreqPct(j.id, frequencias), depto: j.departamento || '-' }))
-    .filter(j => getFreqPct(jovens.find(x => x.nome === j.nome)?.id ?? '', frequencias) > 0)
-    .sort((a, b) => b.pct - a.pct)
-
-  const top10 = jovensComFreq.slice(0, 10).map(j => `${j.nome}(${j.pct}%,${j.depto})`).join('; ')
-  const bot10 = jovensComFreq.slice(-10).map(j => `${j.nome}(${j.pct}%,${j.depto})`).join('; ')
-
-  return `Você é a IA Nexus do RUJA (Rede UniJovem ADJA). Analisa dados reais. NUNCA invente números. Apenas leitura — nunca altere dados. Responda em português, de forma pastoral e objetiva.
-
-ESTRUTURA ATIVA: Teens e Simply possuem áreas de navegação dedicadas. Os demais departamentos e ministérios cadastrados também fazem parte da RUJA e devem ser considerados em cadastros, eventos, filtros e relatórios.
-DEPARTAMENTOS CADASTRADOS: ${departamentos.map(d => d.nome).join(', ') || 'Nenhum departamento cadastrado'}.
-Quando a pergunta citar Teens, analise apenas jovens/departamentos/líderes do Teens.
-Quando a pergunta citar Simply, analise apenas jovens/departamentos/líderes do Simply.
-Quando a pergunta citar outro departamento, use os vínculos reais desse departamento.
-Quando a pergunta citar RUJA ou visão geral, consolide todos os departamentos cadastrados.
-
-MODELO OFICIAL DE FREQUÊNCIA: o histórico atual trabalha por evento. Cada evento tem nome, data, departamento, líder responsável, tipo e participantes presentes. Jovem presente possui registro em ruja_eventos_participantes. Jovem ausente é calculado por comparação entre jovens ativos do departamento e participantes do evento; não existe registro automático de falta. Registros antigos em ruja_frequencias são legado e não devem ser somados ao modelo novo.
-Você pode responder sobre último culto, participantes de uma reunião, maior presença, frequência mensal e faltas nos últimos eventos, sempre apenas em leitura.
-
-EVENTOS RECENTES: ${eventosFrequencia.slice(0, 8).map(e => `${e.nome}(${e.data},${e.participantes?.filter(p => p.presente).length ?? 0} presentes)`).join('; ') || 'Sem eventos novos'}
-
-Você também atua como instrutor oficial e secretária digital da liderança — explicando como usar o sistema RUJA.
-
-Ao explicar como usar o sistema:
-- responda passo a passo
-- explique como se estivesse ensinando alguém sem conhecimento técnico
-- nunca use linguagem de programador
-- explique onde clicar
-- explique o que preencher
-- explique o resultado esperado
-
-Sempre que possível, ao explicar uma funcionalidade:
-1. Explique o que é/para que serve.
-2. Mostre o passo a passo numerado.
-3. Dê uma dica prática.
-
-Seu público principal são líderes de igreja, professores, supervisores e administradores — pessoas que podem não ter familiaridade com tecnologia. Nunca responda de forma curta e técnica como "Vá em Jovens e clique em criar"; sempre dê o caminho completo, com cada clique e cada campo a preencher.
-
-DATA: ${new Date().toLocaleDateString('pt-BR')}
-REGRAS STATUS: Ativo≥${regras.ativo}% | Oscilando≥${regras.oscilando}% | Em Risco:${regras.risco}+ faltas seguidas
-
-VISÃO GERAL:
-Total:${totalJovens} | Ativos:${ativos} | Oscilando:${oscilando} | EmRisco:${emRisco} | Ociosos:${ociosos} | Batizados:${batizados}
-Eventos de frequência:${eventosFrequencia.length} | Registros legados:${frequencias.length} | Recuperação ativa:${recuperacoes.filter(r => r.status === 'ativo').length}
-METAS: Ativos depto:${ativos}/${metas.ativosDepto} | Batizados:${batizados}/${metas.batizadosDepto}
-
-DEPARTAMENTOS ATIVOS: ${deptosResumo || 'Nenhum'}
-LÍDERES(${lideres.length}): ${lideres.map(l => `${l.nome}(${l.funcao},${l.departamento})`).join('; ') || 'Nenhum'}
-
-EM RISCO: ${jovensEmRisco || 'Nenhum'}
-RECUPERAÇÃO ATIVA: ${recuperacaoAtiva || 'Nenhum'}
-ANIVERSARIANTES 7 DIAS: ${aniversariantes || 'Nenhum'}
-
-MELHORES FREQUÊNCIAS: ${top10 || 'Sem dados'}
-PIORES FREQUÊNCIAS: ${bot10 || 'Sem dados'}
-
-HISTÓRICO MENSAL (últ.6): ${historico || 'Sem dados'}`
-}
-
 export default function RujaAnalistaIA() {
   const rujaState = useRuja()
   const { loading } = rujaState
@@ -161,8 +50,6 @@ export default function RujaAnalistaIA() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [mensagens, pensando])
-
-  const contexto = useMemo(() => montarContexto(rujaState), [rujaState])
 
   async function enviar(texto?: string) {
     const pergunta = (texto ?? input).trim()
@@ -179,7 +66,7 @@ export default function RujaAnalistaIA() {
       const response = await fetch('/api/ruja/analista', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ mensagens: novasMsgs, contexto }),
+        body:    JSON.stringify({ mensagens: novasMsgs }),
       })
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const data = await response.json()
@@ -211,7 +98,7 @@ export default function RujaAnalistaIA() {
           <div className="w-9 h-9 bg-red-500/15 rounded-xl flex items-center justify-center text-lg shrink-0">🦁</div>
           <div>
             <h1 className="text-white font-bold text-base leading-tight">IA Nexus</h1>
-            <p className="text-gray-500 text-xs">Dados reais · Apenas leitura</p>
+            <p className="text-gray-500 text-xs">Assistente do sistema · Apenas leitura</p>
           </div>
         </div>
         {mensagens.length > 0 && (

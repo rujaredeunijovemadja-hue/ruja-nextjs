@@ -25,6 +25,24 @@ cria automaticamente perfis para novos logins e promove o usuário mais antigo
 a `lider_supremo` apenas quando ainda não existe nenhum Líder Supremo ativo.
 Alterações de cargo, departamento e status passam pelas APIs server-side.
 
+Cargos oficiais:
+
+- `lider_supremo`
+- `administrador`
+- `lider_departamento`
+- `voluntario`
+- `visualizador`
+
+Antes de aplicar as políticas, consulte:
+
+```sql
+select * from public.ruja_profiles_access_impact_report;
+```
+
+A migration `migration_cargos_permissoes.sql` normaliza o cargo legado
+`admin`, cria as funções auxiliares de autorização e ativa RLS por departamento
+nas tabelas operacionais.
+
 ## Frequência por evento
 
 Tabela: `ruja_eventos_frequencia`.
@@ -106,3 +124,5 @@ Status permitidos:
 - `src/lib/supabase/migration_departamentos_pendentes.sql`
 - `src/lib/supabase/migration_eventos_frequencia.sql`
 - `src/lib/supabase/migration_eventos_entidade_completa.sql`
+- `src/lib/supabase/migration_profiles.sql`
+- `src/lib/supabase/migration_cargos_permissoes.sql`

@@ -24,7 +24,8 @@ export default function RujaFrequencia({
   scope?: DepartmentScope
   allowMixedDepartments?: boolean
 }) {
-  const { jovens, lideres, departamentos, frequencias, eventosFrequencia, loading, reload, recalcularStatus } = useRuja()
+  const { jovens, lideres, departamentos, frequencias, eventosFrequencia, loading, reload, recalcularStatus, can } = useRuja()
+  const canManageEvents = can('manage_department')
   const availableDepartments = activeDepartments(departamentos)
   const defaultDepto = allowMixedDepartments
     ? ''
@@ -160,6 +161,8 @@ export default function RujaFrequencia({
   }
 
   if (loading) return <div className="flex-1 flex items-center justify-center"><Spinner /></div>
+
+  if (!canManageEvents) return <RujaHistoricoFrequencia />
 
   if (allowMixedDepartments && eventosGeraisView === 'historico') {
     return (

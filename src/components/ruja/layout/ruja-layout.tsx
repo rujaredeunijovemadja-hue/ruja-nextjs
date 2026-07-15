@@ -13,6 +13,7 @@ import { RujaBusca } from '../busca/ruja-busca'
 import dynamic from 'next/dynamic'
 import type { DepartmentScope } from '@/lib/ruja/departments'
 import { DEPARTMENT_LABELS } from '@/lib/ruja/departments'
+import { departmentScopeFor, type RujaAccessProfile } from '@/lib/ruja/access'
 
 const RujaDashboard     = dynamic(() => import('../dashboard/ruja-dashboard'))
 const RujaJovens        = dynamic(() => import('../jovens/ruja-jovens'))
@@ -58,12 +59,30 @@ const PAGE_TITLES: Record<RujaPage, string> = {
 
 const FULL_HEIGHT_PAGES: RujaPage[] = ['analista-ia']
 
-interface Props { userName: string }
+interface Props { profile: RujaAccessProfile }
 
-export function RujaLayout({ userName }: Props) {
+function allowedPages(profile: RujaAccessProfile): RujaPage[] {
+  if (profile.role === 'lider_supremo') return Object.keys(PAGE_TITLES) as RujaPage[]
+  if (profile.role === 'administrador') {
+    return ['dashboard', 'teens', 'simply', 'eventos', 'jovens', 'frequencia', 'historico-frequencia', 'recuperacao', 'departamentos', 'lideres', 'metas', 'aniversarios', 'pendentes', 'alertas', 'analista-ia']
+  }
+  const department = profile.departamento_id === 'simply' ? 'simply' : 'teens'
+  if (profile.role === 'lider_departamento') {
+    return [department, 'jovens', 'frequencia', 'historico-frequencia', 'recuperacao', 'lideres', 'metas', 'pendentes', 'analista-ia']
+  }
+  if (profile.role === 'voluntario') {
+    return [department, 'jovens', 'frequencia', 'historico-frequencia', 'analista-ia']
+  }
+  return [department, 'jovens', 'frequencia', 'historico-frequencia']
+}
+
+export function RujaLayout({ profile }: Props) {
   const router = useRouter()
-  const [page,        setPage]        = useState<RujaPage>('dashboard')
-  const [departmentScope, setDepartmentScope] = useState<DepartmentScope>('all')
+  const permittedPages = allowedPages(profile)
+  const profileScope = departmentScopeFor(profile)
+  const initialPage: RujaPage = profileScope === 'all' ? 'dashboard' : profileScope
+  const [page,        setPage]        = useState<RujaPage>(initialPage)
+  const [departmentScope, setDepartmentScope] = useState<DepartmentScope>(profileScope)
   const [buscaAberta, setBuscaAberta] = useState(false)
 
   async function handleLogout() {
@@ -73,18 +92,21 @@ export function RujaLayout({ userName }: Props) {
   }
 
   function handleNavigate(nextPage: RujaPage) {
+    if (!permittedPages.includes(nextPage)) return
     if (nextPage === 'teens') {
       setDepartmentScope('teens')
     } else if (nextPage === 'simply') {
       setDepartmentScope('simply')
-    } else if (nextPage === 'dashboard' || nextPage === 'eventos') {
+    } else if ((nextPage === 'dashboard' || nextPage === 'eventos') && profileScope === 'all') {
       setDepartmentScope('all')
     }
     setPage(nextPage)
   }
 
   const activeScope: DepartmentScope =
-    page === 'teens' ? 'teens' : page === 'simply' ? 'simply' : departmentScope
+    profileScope !== 'all'
+      ? profileScope
+      : page === 'teens' ? 'teens' : page === 'simply' ? 'simply' : departmentScope
 
   const PAGES: Record<RujaPage, React.ReactNode> = {
     dashboard:     <RujaDashboard scope="all" />,
@@ -110,7 +132,7 @@ export function RujaLayout({ userName }: Props) {
   const isFull = FULL_HEIGHT_PAGES.includes(page)
 
   return (
-    <RujaProvider>
+    <RujaProvider profile={profile}>
       {/*
         ─── ESTRUTURA DE LAYOUT DESKTOP ─────────────────────────
         h-dvh no container raiz + overflow-hidden garante que
@@ -122,7 +144,9 @@ export function RujaLayout({ userName }: Props) {
         {/* ── SIDEBAR DESKTOP (hidden no mobile) ── */}
         <RujaSidebar
           current={page}
-          userName={userName}
+          userName={profile.nome}
+          profile={profile}
+          allowedPages={permittedPages}
           onNavigate={handleNavigate}
           onLogout={handleLogout}
           onBusca={() => setBuscaAberta(true)}
@@ -169,6 +193,8 @@ export function RujaLayout({ userName }: Props) {
         {/* ── BOTTOM NAV MOBILE ── */}
         <RujaMobileNav
           current={page}
+          profile={profile}
+          allowedPages={permittedPages}
           onNavigate={handleNavigate}
           onBusca={() => setBuscaAberta(true)}
         />

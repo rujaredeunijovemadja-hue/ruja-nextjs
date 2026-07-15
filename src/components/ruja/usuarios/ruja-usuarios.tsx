@@ -71,16 +71,13 @@ export default function RujaUsuarios() {
     void Promise.resolve().then(loadData)
   }, [loadData])
 
-  const canCreate = myProfile?.role === 'lider_supremo' || myProfile?.role === 'admin'
+  const canCreate = myProfile?.role === 'lider_supremo'
 
   // Verifica se pode editar um perfil alvo
   function canEdit(target: RujaProfile): boolean {
     if (!myProfile) return false
     if (target.id === myProfile.id) return false // não edita a si mesmo
     if (myProfile.role === 'lider_supremo') return true
-    if (myProfile.role === 'admin') {
-      return !['lider_supremo', 'admin'].includes(target.role)
-    }
     return false
   }
 
@@ -339,10 +336,11 @@ export default function RujaUsuarios() {
                   onChange={e => setForm(f => ({ ...f, role: e.target.value as RujaProfile['role'] }))}
                   className={INP}>
                   <option value="voluntario">🙋 Voluntário</option>
+                  <option value="visualizador">👁 Visualizador</option>
                   <option value="lider_departamento">⭐ Líder de Departamento</option>
                   {myProfile?.role === 'lider_supremo' && (
                     <>
-                      <option value="admin">🔑 Administrador</option>
+                      <option value="administrador">🔑 Administrador</option>
                       <option value="lider_supremo">👑 Líder Supremo</option>
                     </>
                   )}
@@ -356,7 +354,7 @@ export default function RujaUsuarios() {
                   onChange={e => setForm(f => ({ ...f, departamento_id: e.target.value }))}
                   className={INP}>
                   <option value="">— Sem departamento</option>
-                  {departamentos.map(d => (
+                  {departamentos.filter(d => ['teens', 'simply'].includes(d.id)).map(d => (
                     <option key={d.id} value={d.id}>{d.icone} {d.nome}</option>
                   ))}
                 </select>
@@ -437,10 +435,11 @@ export default function RujaUsuarios() {
                   onChange={e => setEditForm(f => ({ ...f, role: e.target.value as RujaProfile['role'] }))}
                   className={INP}>
                   <option value="voluntario">🙋 Voluntário</option>
+                  <option value="visualizador">👁 Visualizador</option>
                   <option value="lider_departamento">⭐ Líder de Departamento</option>
                   {myProfile?.role === 'lider_supremo' && (
                     <>
-                      <option value="admin">🔑 Administrador</option>
+                      <option value="administrador">🔑 Administrador</option>
                       <option value="lider_supremo">👑 Líder Supremo</option>
                     </>
                   )}
@@ -454,7 +453,7 @@ export default function RujaUsuarios() {
                   onChange={e => setEditForm(f => ({ ...f, departamento_id: e.target.value }))}
                   className={INP}>
                   <option value="">— Sem departamento</option>
-                  {departamentos.map(d => (
+                  {departamentos.filter(d => ['teens', 'simply'].includes(d.id)).map(d => (
                     <option key={d.id} value={d.id}>{d.icone} {d.nome}</option>
                   ))}
                 </select>

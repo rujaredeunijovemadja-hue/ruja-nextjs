@@ -16,7 +16,8 @@ type Filtro = 'todos' | 'Ativo' | 'Oscilando' | 'Ocioso' | 'Em Risco'
 type Depto = 'todos' | string
 
 export default function RujaJovens({ scope = 'all' }: { scope?: DepartmentScope }) {
-  const { jovens, departamentos, loading, reloadJovens } = useRuja()
+  const { jovens, departamentos, loading, reloadJovens, can } = useRuja()
+  const canManage = can('manage_department')
   const [busca,      setBusca]      = useState('')
   const [filtroStatus, setFiltroStatus] = useState<Filtro>('todos')
   const [filtroDepto,  setFiltroDepto]  = useState<Depto>('todos')
@@ -69,12 +70,12 @@ export default function RujaJovens({ scope = 'all' }: { scope?: DepartmentScope 
           </h1>
           <p className="text-gray-500 text-sm">{filterJovensByScope(jovens, scope).length} cadastrados · {filtrados.length} exibidos</p>
         </div>
-        <button
+        {canManage && <button
           onClick={() => setEditando('novo')}
           className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 touch-manipulation"
         >
           <span className="text-base">+</span> Novo
-        </button>
+        </button>}
       </div>
 
       {/* Busca */}
@@ -138,6 +139,7 @@ export default function RujaJovens({ scope = 'all' }: { scope?: DepartmentScope 
               onEdit={() => setEditando(j)}
               onDelete={() => setDeletando(j)}
               onExpandFoto={() => setFotoExpandida({ url: j.foto_url, nome: j.nome })}
+              canManage={canManage}
             />
           ))}
         </div>
@@ -148,7 +150,7 @@ export default function RujaJovens({ scope = 'all' }: { scope?: DepartmentScope 
         <RujaJovemDetalhe
           jovem={detalhe}
           onClose={() => setDetalhe(null)}
-          onEdit={() => { setEditando(detalhe); setDetalhe(null) }}
+          onEdit={canManage ? () => { setEditando(detalhe); setDetalhe(null) } : undefined}
         />
       )}
 
@@ -199,12 +201,13 @@ export default function RujaJovens({ scope = 'all' }: { scope?: DepartmentScope 
   )
 }
 
-function JovemCard({ jovem, onView, onEdit, onDelete, onExpandFoto }: {
+function JovemCard({ jovem, onView, onEdit, onDelete, onExpandFoto, canManage }: {
   jovem: Jovem
   onView: () => void
   onEdit: () => void
   onDelete: () => void
   onExpandFoto: () => void
+  canManage: boolean
 }) {
   const deptos = jovem.departamento ? jovem.departamento.split(';').filter(Boolean) : []
 
@@ -238,7 +241,7 @@ function JovemCard({ jovem, onView, onEdit, onDelete, onExpandFoto }: {
       </div>
 
       {/* Ações */}
-      <div className="flex gap-1 flex-shrink-0">
+      {canManage && <div className="flex gap-1 flex-shrink-0">
         <button onClick={e => { e.stopPropagation(); onEdit() }}
           className="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition touch-manipulation text-base">
           ✏️
@@ -247,7 +250,7 @@ function JovemCard({ jovem, onView, onEdit, onDelete, onExpandFoto }: {
           className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition touch-manipulation text-base">
           🗑️
         </button>
-      </div>
+      </div>}
     </div>
   )
 }

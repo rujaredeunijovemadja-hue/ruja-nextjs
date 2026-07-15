@@ -62,23 +62,18 @@ BEGIN
   END IF;
 END $$;
 
+ALTER TABLE public.ruja_profiles DROP CONSTRAINT IF EXISTS ruja_profiles_role_check;
+
+UPDATE public.ruja_profiles SET role = 'administrador' WHERE role = 'admin';
+
 UPDATE public.ruja_profiles
 SET role = 'voluntario'
 WHERE role IS NULL
-   OR role NOT IN ('lider_supremo', 'admin', 'lider_departamento', 'voluntario');
+   OR role NOT IN ('lider_supremo', 'administrador', 'lider_departamento', 'voluntario', 'visualizador');
 
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint
-    WHERE conrelid = 'public.ruja_profiles'::regclass
-      AND conname = 'ruja_profiles_role_check'
-  ) THEN
-    ALTER TABLE public.ruja_profiles
-      ADD CONSTRAINT ruja_profiles_role_check
-      CHECK (role IN ('lider_supremo', 'admin', 'lider_departamento', 'voluntario'));
-  END IF;
-END $$;
+ALTER TABLE public.ruja_profiles
+  ADD CONSTRAINT ruja_profiles_role_check
+  CHECK (role IN ('lider_supremo', 'administrador', 'lider_departamento', 'voluntario', 'visualizador'));
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_ruja_profiles_email
   ON public.ruja_profiles(lower(email));
@@ -110,7 +105,8 @@ SELECT
   ),
   COALESCE(u.email, u.id::text || '@sem-email.local'),
   CASE
-    WHEN u.raw_user_meta_data ->> 'role' IN ('lider_supremo', 'admin', 'lider_departamento', 'voluntario')
+    WHEN u.raw_user_meta_data ->> 'role' = 'admin' THEN 'administrador'
+    WHEN u.raw_user_meta_data ->> 'role' IN ('lider_supremo', 'administrador', 'lider_departamento', 'voluntario', 'visualizador')
       THEN u.raw_user_meta_data ->> 'role'
     ELSE 'voluntario'
   END,
@@ -172,7 +168,8 @@ BEGIN
     ),
     COALESCE(NEW.email, NEW.id::text || '@sem-email.local'),
     CASE
-      WHEN NEW.raw_user_meta_data ->> 'role' IN ('lider_supremo', 'admin', 'lider_departamento', 'voluntario')
+      WHEN NEW.raw_user_meta_data ->> 'role' = 'admin' THEN 'administrador'
+      WHEN NEW.raw_user_meta_data ->> 'role' IN ('lider_supremo', 'administrador', 'lider_departamento', 'voluntario', 'visualizador')
         THEN NEW.raw_user_meta_data ->> 'role'
       ELSE 'voluntario'
     END,
@@ -234,7 +231,7 @@ AS $$
     SELECT 1
     FROM public.ruja_profiles
     WHERE id = auth.uid()
-      AND role IN ('lider_supremo', 'admin')
+      AND role IN ('lider_supremo', 'administrador')
       AND ativo = true
   );
 $$;

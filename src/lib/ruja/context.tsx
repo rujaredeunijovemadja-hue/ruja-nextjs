@@ -12,8 +12,11 @@ import {
 import { calcularStatus, calcularStatusEventos } from './calculos'
 import type { RujaState, Jovem } from './types'
 import { DEFAULT_REGRAS, DEFAULT_METAS } from './types'
+import { hasCapability, type RujaAccessProfile, type RujaCapability } from './access'
 
 interface RujaContextValue extends RujaState {
+  profile: RujaAccessProfile
+  can: (capability: RujaCapability) => boolean
   loading: boolean
   error: string | null
   reload: () => Promise<void>
@@ -24,7 +27,7 @@ interface RujaContextValue extends RujaState {
 
 const RujaContext = createContext<RujaContextValue | null>(null)
 
-export function RujaProvider({ children }: { children: ReactNode }) {
+export function RujaProvider({ children, profile }: { children: ReactNode; profile: RujaAccessProfile }) {
   const [loading, setLoading]   = useState(true)
   const [error, setError]       = useState<string | null>(null)
   const [state, setState]       = useState<RujaState>({
@@ -105,7 +108,7 @@ export function RujaProvider({ children }: { children: ReactNode }) {
   }, [reload])
 
   return (
-    <RujaContext.Provider value={{ ...state, loading, error, reload, reloadJovens, setJovens, recalcularStatus }}>
+    <RujaContext.Provider value={{ ...state, profile, can: capability => hasCapability(profile, capability), loading, error, reload, reloadJovens, setJovens, recalcularStatus }}>
       {children}
     </RujaContext.Provider>
   )

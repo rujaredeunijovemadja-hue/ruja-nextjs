@@ -12,7 +12,7 @@ import type { Jovem } from '@/lib/ruja/types'
 interface Props {
   jovem: Jovem
   onClose: () => void
-  onEdit: () => void
+  onEdit?: () => void
 }
 
 export function RujaJovemDetalhe({ jovem, onClose, onEdit }: Props) {
@@ -51,7 +51,7 @@ export function RujaJovemDetalhe({ jovem, onClose, onEdit }: Props) {
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/8 flex-shrink-0">
           <h2 className="text-white font-bold truncate">Perfil do Jovem</h2>
           <div className="flex gap-2 flex-shrink-0">
-            <button onClick={onEdit} className="p-2 text-gray-400 hover:text-white bg-white/5 rounded-lg touch-manipulation">✏️</button>
+            {onEdit && <button onClick={onEdit} className="p-2 text-gray-400 hover:text-white bg-white/5 rounded-lg touch-manipulation">✏️</button>}
             <button onClick={onClose} className="p-2 text-gray-400 hover:text-white text-xl touch-manipulation">✕</button>
           </div>
         </div>

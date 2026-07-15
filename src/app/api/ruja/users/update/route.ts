@@ -1,8 +1,7 @@
 // src/app/api/ruja/users/update/route.ts
 // ─── API ROUTE: EDITAR USUÁRIO ────────────────────────────────
 // Permite editar: role, departamento_id, ativo, nome.
-// Apenas lider_supremo e admin podem alterar.
-// lider_supremo é o único que pode ativar/desativar admin/lider_supremo.
+// Apenas lider_supremo pode alterar cargos e status de outras contas.
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient }     from '@/lib/supabase/server'
@@ -10,8 +9,8 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AdminClient = any
 
-const ROLES_COM_PERMISSAO = ['lider_supremo', 'admin'] as const
-const ROLES_VALIDAS       = ['lider_supremo', 'admin', 'lider_departamento', 'voluntario'] as const
+const ROLES_COM_PERMISSAO = ['lider_supremo'] as const
+const ROLES_VALIDAS       = ['lider_supremo', 'administrador', 'lider_departamento', 'voluntario', 'visualizador'] as const
 
 export async function PATCH(request: NextRequest) {
   let admin: AdminClient
@@ -58,23 +57,12 @@ export async function PATCH(request: NextRequest) {
     // Buscar perfil alvo
     const { data: targetProfile } = await admin
       .from('ruja_profiles')
-      .select('role, nome, email')
+      .select('role, nome, email, departamento_id')
       .eq('id', targetId)
-      .single() as { data: { role: string; nome: string; email: string } | null }
+      .single() as { data: { role: string; nome: string; email: string; departamento_id: string | null } | null }
 
     if (!targetProfile) {
       return NextResponse.json({ error: 'Usuário não encontrado.' }, { status: 404 })
-    }
-
-    // Admin não pode editar lider_supremo nem outro admin
-    if (
-      callerProfile.role === 'admin' &&
-      ['lider_supremo', 'admin'].includes(targetProfile.role)
-    ) {
-      return NextResponse.json(
-        { error: 'Apenas o Líder Supremo pode alterar este usuário.' },
-        { status: 403 }
-      )
     }
 
     // Validar novo role se fornecido
@@ -82,7 +70,7 @@ export async function PATCH(request: NextRequest) {
       if (!ROLES_VALIDAS.includes(novoRole)) {
         return NextResponse.json({ error: `Cargo inválido: ${novoRole}` }, { status: 400 })
       }
-      if (['lider_supremo', 'admin'].includes(novoRole) && callerProfile.role !== 'lider_supremo') {
+      if (['lider_supremo', 'administrador'].includes(novoRole) && callerProfile.role !== 'lider_supremo') {
         return NextResponse.json(
           { error: 'Apenas o Líder Supremo pode promover a Administrador.' },
           { status: 403 }
@@ -100,6 +88,14 @@ export async function PATCH(request: NextRequest) {
       if (!depto) {
         return NextResponse.json({ error: 'Departamento não encontrado.' }, { status: 400 })
       }
+    }
+    const roleFinal = novoRole ?? targetProfile.role
+    const departamentoFinal = departamento_id === undefined ? targetProfile.departamento_id : departamento_id
+    if (
+      ['lider_departamento', 'voluntario', 'visualizador'].includes(roleFinal) &&
+      !['teens', 'simply'].includes(departamentoFinal ?? '')
+    ) {
+      return NextResponse.json({ error: 'Este cargo exige Teens ou Simply.' }, { status: 400 })
     }
 
     // ── 4. Montar update ─────────────────────────────────────

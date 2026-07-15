@@ -85,9 +85,18 @@ departamentos ativos com `slug` `teens` ou `simply`.
 
 ## IA Nexus
 
-A IA Nexus é apenas leitura. Ela entende o modelo por evento e pode responder
-sobre último culto, participantes de reuniões, evento com maior presença,
-frequência mensal e faltas nos últimos eventos. Ela não altera dados.
+A IA Nexus é apenas leitura e sua API exige sessão com perfil ativo. O contexto
+livre enviado pelo navegador foi removido para impedir vazamento entre
+departamentos. Dados pessoais não são enviados ao provedor externo; enquanto
+não houver política formal de tratamento, a IA atua como instrutora do sistema.
+
+## Cargos e permissões
+
+O acesso usa os cargos `lider_supremo`, `administrador`,
+`lider_departamento`, `voluntario` e `visualizador`. Líderes, voluntários e
+visualizadores ficam presos a Teens ou Simply. Menus desktop/mobile e ações da
+interface acompanham o perfil, enquanto o banco aplica a proteção efetiva por
+RLS.
 
 ## Banco
 
@@ -95,6 +104,8 @@ Migrations locais:
 
 - `src/lib/supabase/migration_departamentos_pendentes.sql`
 - `src/lib/supabase/migration_eventos_frequencia.sql`
+- `src/lib/supabase/migration_profiles.sql`
+- `src/lib/supabase/migration_cargos_permissoes.sql`
 
 Tabelas principais do novo modelo:
 

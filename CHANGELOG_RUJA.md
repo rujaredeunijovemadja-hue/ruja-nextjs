@@ -1,5 +1,19 @@
 # CHANGELOG RUJA
 
+## 2026-07-15 — Cargos e permissões por departamento
+
+- Padronizados os cargos `lider_supremo`, `administrador`,
+  `lider_departamento`, `voluntario` e `visualizador`.
+- Criada `migration_cargos_permissoes.sql` com relatório de impacto, funções de
+  autorização e RLS para perfis, jovens, frequência, eventos, participantes,
+  recuperação, pendentes, líderes, departamentos e auditoria.
+- Navegação desktop/mobile agora é gerada conforme o perfil; usuários
+  departamentais ficam restritos a Teens ou Simply.
+- Usuários de leitura não recebem controles de alteração em jovens e eventos.
+- Gestão de usuários e cargos críticos ficou exclusiva do Líder Supremo.
+- IA Nexus agora exige sessão e perfil ativo, rejeita contexto do cliente e não
+  envia dados pessoais da RUJA ao provedor externo.
+
 ## 2026-07-15 — Departamentos completos
 
 - Removido o filtro que escondia departamentos diferentes de Teens e Simply.

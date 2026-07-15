@@ -1,6 +1,6 @@
 # REGRAS DE ACESSO RUJA
 
-Atualizado em: 2026-07-13
+Atualizado em: 2026-07-15
 
 ## Estrutura oficial
 
@@ -17,16 +17,22 @@ nos jovens em registros reais, sem apagar associações legadas.
 ## Perfis
 
 - `lider_supremo`: vê e gerencia toda a RUJA.
-- `admin`: vê e gerencia toda a RUJA.
-- `lider_departamento`: gerencia apenas eventos do próprio departamento.
-- `voluntario`: acesso limitado conforme configuração/RLS.
+- `administrador`: gestão operacional de Teens e Simply, sem cargos críticos.
+- `lider_departamento`: gerencia apenas Teens ou Simply conforme seu vínculo.
+- `voluntario`: leitura do próprio departamento e frequência quando autorizada.
+- `visualizador`: somente leitura do próprio departamento.
+
+O valor legado `admin` é convertido para `administrador` pela migration de
+permissões. Perfis departamentais precisam estar vinculados a `teens` ou
+`simply`; os demais ministérios continuam disponíveis em eventos e vínculos,
+mas não formam escopos autônomos de login.
 
 ## Frequência por evento
 
 Permissões esperadas:
 
 - líder supremo: cria, edita e exclui qualquer evento;
-- admin: cria, edita e exclui qualquer evento;
+- administrador: cria, edita e exclui qualquer evento;
 - líder de departamento: cria, edita e exclui eventos do próprio departamento;
 - voluntário: visualiza ou registra apenas quando políticas futuras permitirem.
 
@@ -36,11 +42,16 @@ tabelas `ruja_eventos_frequencia` e `ruja_eventos_participantes`.
 
 ## RLS
 
-A função `ruja_profile_can_manage_department(departamento_id)` valida:
+A migration `migration_cargos_permissoes.sql` fornece:
 
-- `lider_supremo` e `admin` ativos podem gerenciar todos;
-- `lider_departamento` ativo pode gerenciar quando o departamento do perfil
-  corresponde ao id, nome ou slug do departamento do evento.
+- `current_ruja_role()`;
+- `current_ruja_departamento_id()`;
+- `is_lider_supremo()`;
+- `is_ruja_admin()`;
+- `can_access_departamento(id)`.
+
+As políticas RLS usam essas funções como fonte de verdade. Usuário inativo não
+acessa dados protegidos e filtros visuais nunca substituem o RLS.
 
 ## Auditoria
 
@@ -54,5 +65,7 @@ As ações do novo fluxo registram `ruja_audit_logs`:
 
 ## IA Nexus
 
-A IA Nexus é somente leitura. Ela pode analisar eventos e ausências implícitas,
-mas não cria, edita, exclui ou registra frequência.
+A API valida sessão e perfil ativo, rejeita contexto enviado pelo navegador e
+não transmite nomes, presenças, contatos ou recuperação ao provedor externo.
+Ela atua como instrutora do sistema. Análises nominais permanecem indisponíveis
+até existir consentimento e política formal de tratamento desses dados.

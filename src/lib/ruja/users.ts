@@ -4,12 +4,13 @@
 // e departamento_id (FK para ruja_departamentos).
 
 import { createClient } from '../supabase/client'
+import { normalizeRujaRole, type RujaRole } from './access'
 
 export interface RujaProfile {
   id:               string
   nome:             string
   email:            string
-  role:             'lider_supremo' | 'admin' | 'lider_departamento' | 'voluntario'
+  role:             RujaRole
   departamento_id:  string | null   // FK para ruja_departamentos.id
   ativo:            boolean
   created_at:       string
@@ -18,9 +19,10 @@ export interface RujaProfile {
 
 export const ROLE_LABELS: Record<RujaProfile['role'], string> = {
   lider_supremo:      '👑 Líder Supremo',
-  admin:              '🔑 Administrador',
+  administrador:      '🔑 Administrador',
   lider_departamento: '⭐ Líder de Departamento',
   voluntario:         '🙋 Voluntário',
+  visualizador:       '👁 Visualizador',
 }
 
 // ── Leitura ────────────────────────────────────────────────────
@@ -31,7 +33,10 @@ export async function fetchProfiles(): Promise<RujaProfile[]> {
     .select('*')
     .order('created_at', { ascending: false })
   if (error) throw error
-  return (data ?? []) as RujaProfile[]
+  return (data ?? []).map(profile => ({
+    ...profile,
+    role: normalizeRujaRole(profile.role),
+  })) as RujaProfile[]
 }
 
 export async function fetchMyProfile(): Promise<RujaProfile | null> {
@@ -44,7 +49,7 @@ export async function fetchMyProfile(): Promise<RujaProfile | null> {
     .eq('id', user.id)
     .single()
   if (error) throw error
-  return (data as RujaProfile) ?? null
+  return data ? ({ ...data, role: normalizeRujaRole(data.role) } as RujaProfile) : null
 }
 
 // ── Criação ────────────────────────────────────────────────────

@@ -8,8 +8,8 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AdminClient = any
 
-const ROLES_COM_PERMISSAO = ['lider_supremo', 'admin'] as const
-const ROLES_VALIDAS       = ['lider_supremo', 'admin', 'lider_departamento', 'voluntario'] as const
+const ROLES_COM_PERMISSAO = ['lider_supremo'] as const
+const ROLES_VALIDAS       = ['lider_supremo', 'administrador', 'lider_departamento', 'voluntario', 'visualizador'] as const
 
 function gerarSenha(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$'
@@ -85,8 +85,8 @@ export async function POST(request: NextRequest) {
     if (!ROLES_VALIDAS.includes(novoRole))
       return NextResponse.json({ error: `Cargo inválido: ${novoRole}` }, { status: 400 })
 
-    // Apenas lider_supremo cria admin/lider_supremo
-    if (['lider_supremo', 'admin'].includes(novoRole) && callerProfile.role !== 'lider_supremo') {
+    // Apenas lider_supremo cria administrador/lider_supremo
+    if (['lider_supremo', 'administrador'].includes(novoRole) && callerProfile.role !== 'lider_supremo') {
       return NextResponse.json(
         { error: 'Apenas o Líder Supremo pode criar Administradores.' },
         { status: 403 }
@@ -103,6 +103,9 @@ export async function POST(request: NextRequest) {
       if (!depto) {
         return NextResponse.json({ error: 'Departamento não encontrado.' }, { status: 400 })
       }
+    }
+    if (['lider_departamento', 'voluntario', 'visualizador'].includes(novoRole) && !['teens', 'simply'].includes(departamento_id)) {
+      return NextResponse.json({ error: 'Este cargo exige Teens ou Simply.' }, { status: 400 })
     }
 
     // Senha

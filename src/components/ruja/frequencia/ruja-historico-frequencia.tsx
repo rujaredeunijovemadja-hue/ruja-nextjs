@@ -15,7 +15,8 @@ const LBL = 'block text-xs font-semibold text-gray-400 uppercase tracking-wider 
 const INP = 'w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-red-500/40 transition touch-manipulation'
 
 export default function RujaHistoricoFrequencia() {
-  const { jovens, lideres, departamentos, eventosFrequencia, loading, reload, recalcularStatus } = useRuja()
+  const { jovens, lideres, departamentos, eventosFrequencia, loading, reload, recalcularStatus, can } = useRuja()
+  const canManage = can('manage_department')
   const [filtro, setFiltro] = useState<Filtro>({ data: '', departamentoId: '', liderId: '' })
   const [aberto, setAberto] = useState<EventoFrequencia | null>(null)
   const [editando, setEditando] = useState<EventoFrequencia | null>(null)
@@ -158,8 +159,8 @@ export default function RujaHistoricoFrequencia() {
                 </div>
                 <div className="flex gap-2 mt-4">
                   <button onClick={() => { setAberto(evento); setBusca('') }} className="flex-1 py-2 rounded-lg bg-white/8 text-gray-200 text-xs font-semibold touch-manipulation">Ver participantes</button>
-                  <button onClick={() => setEditando(evento)} className="px-3 py-2 rounded-lg bg-blue-500/15 text-blue-300 text-xs font-semibold touch-manipulation">Editar</button>
-                  <button onClick={() => setConfirmDel(evento)} className="px-3 py-2 rounded-lg bg-red-500/15 text-red-300 text-xs font-semibold touch-manipulation">Excluir</button>
+                  {canManage && <button onClick={() => setEditando(evento)} className="px-3 py-2 rounded-lg bg-blue-500/15 text-blue-300 text-xs font-semibold touch-manipulation">Editar</button>}
+                  {canManage && <button onClick={() => setConfirmDel(evento)} className="px-3 py-2 rounded-lg bg-red-500/15 text-red-300 text-xs font-semibold touch-manipulation">Excluir</button>}
                 </div>
               </div>
             )
@@ -202,7 +203,7 @@ export default function RujaHistoricoFrequencia() {
               {participantes(aberto).length === 0 && <div className="text-gray-600 text-sm text-center py-10">Nenhum participante encontrado.</div>}
             </div>
             <div className="p-5 border-t border-white/8 flex gap-2">
-              <button onClick={() => setEditando(aberto)} className="flex-1 py-3 rounded-xl bg-blue-500/15 text-blue-300 text-sm font-bold">Editar evento</button>
+              {canManage && <button onClick={() => setEditando(aberto)} className="flex-1 py-3 rounded-xl bg-blue-500/15 text-blue-300 text-sm font-bold">Editar evento</button>}
             </div>
           </div>
         </div>
