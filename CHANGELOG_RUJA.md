@@ -8,6 +8,8 @@
   departamento ativo.
 - Teens e Simply permanecem com navegação dedicada.
 - A migration de departamentos passou a ser idempotente e deduplica slugs.
+- Perfis existentes do Supabase Auth passam a ser sincronizados com
+  `ruja_profiles`, incluindo bootstrap do primeiro Líder Supremo.
 
 ## 2026-07-13 — Reestruturação do Histórico de Frequência por evento
 

@@ -38,11 +38,12 @@ export async function fetchMyProfile(): Promise<RujaProfile | null> {
   const sb = createClient()
   const { data: { user } } = await sb.auth.getUser()
   if (!user) return null
-  const { data } = await sb
+  const { data, error } = await sb
     .from('ruja_profiles')
     .select('*')
     .eq('id', user.id)
     .single()
+  if (error) throw error
   return (data as RujaProfile) ?? null
 }
 

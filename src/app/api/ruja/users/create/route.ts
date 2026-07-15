@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
     // ── 5. Criar ruja_profiles (schema real) ─────────────────
     const { error: profInsertErr } = await admin
       .from('ruja_profiles')
-      .insert({
+      .upsert({
         id:              uid,
         nome:            nome.trim(),
         email:           email.trim().toLowerCase(),
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
         ativo:           true,
         created_at:      now,
         updated_at:      now,
-      })
+      }, { onConflict: 'id' })
 
     if (profInsertErr) {
       // Rollback: deletar usuário Auth

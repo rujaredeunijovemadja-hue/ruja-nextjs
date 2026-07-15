@@ -10,6 +10,7 @@ import {
   fetchProfiles, fetchMyProfile, createUser, updateProfile,
   ROLE_LABELS, type RujaProfile,
 } from '@/lib/ruja/users'
+import { getRujaErrorMessage } from '@/lib/ruja/errors'
 
 // ── Estado do form de criação ──────────────────────────────────
 const FORM_INICIAL = {
@@ -30,6 +31,7 @@ export default function RujaUsuarios() {
   const [showForm,      setShowForm]      = useState(false)
   const [saving,        setSaving]        = useState(false)
   const [toast,         setToast]         = useState('')
+  const [loadError,     setLoadError]     = useState('')
   const [senhaCopiada,  setSenhaCopiada]  = useState(false)
   const [resultado,     setResultado]     = useState<{
     nome: string; email: string; senha: string; role: string
@@ -51,12 +53,15 @@ export default function RujaUsuarios() {
 
   const loadData = useCallback(async () => {
     setLoading(true)
+    setLoadError('')
     try {
       const [profs, mine] = await Promise.all([fetchProfiles(), fetchMyProfile()])
       setProfiles(profs)
       setMyProfile(mine)
-    } catch {
-      showToast('Erro ao carregar usuários.')
+    } catch (error) {
+      const message = getRujaErrorMessage(error, 'Erro ao carregar usuários.')
+      setLoadError(message)
+      showToast(message)
     } finally {
       setLoading(false)
     }
@@ -177,7 +182,7 @@ export default function RujaUsuarios() {
             {profiles.length} usuário{profiles.length !== 1 ? 's' : ''} ·{' '}
             {myProfile
               ? <span className="text-gray-400">{ROLE_LABELS[myProfile.role]}</span>
-              : 'carregando...'}
+              : loadError ? 'perfil indisponível' : 'perfil não configurado'}
           </p>
         </div>
         {canCreate && (
@@ -189,6 +194,12 @@ export default function RujaUsuarios() {
           </button>
         )}
       </div>
+
+      {loadError && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-4">
+          <p className="text-red-400 text-sm">{loadError}</p>
+        </div>
+      )}
 
       {/* Aviso sem permissão */}
       {!canCreate && myProfile && (

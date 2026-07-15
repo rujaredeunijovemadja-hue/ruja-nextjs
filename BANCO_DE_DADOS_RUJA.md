@@ -16,6 +16,15 @@ Os demais ministérios também são registros ativos. A migration
 `ruja_jovens.departamento` por `;`, normaliza o slug e cria os departamentos
 ausentes sem remover ou reatribuir vínculos.
 
+## Perfis de acesso
+
+Tabela: `ruja_profiles`.
+
+A migration `migration_profiles.sql` sincroniza logins antigos de `auth.users`,
+cria automaticamente perfis para novos logins e promove o usuário mais antigo
+a `lider_supremo` apenas quando ainda não existe nenhum Líder Supremo ativo.
+Alterações de cargo, departamento e status passam pelas APIs server-side.
+
 ## Frequência por evento
 
 Tabela: `ruja_eventos_frequencia`.
