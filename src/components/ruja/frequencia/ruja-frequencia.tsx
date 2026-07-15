@@ -4,6 +4,7 @@ import { useRuja } from '@/lib/ruja/context'
 import { criarEventoFrequencia } from '@/lib/ruja/queries'
 import { Spinner } from '@/components/ui/spinner'
 import { getEventoFreqPct, getFreqPct } from '@/lib/ruja/calculos'
+import { getRujaErrorMessage } from '@/lib/ruja/errors'
 import type { EventoFrequenciaInput, StatusEvento, TipoEventoFrequencia } from '@/lib/ruja/types'
 import type { DepartmentScope } from '@/lib/ruja/departments'
 import { activeOfficialDepartments, DEPARTMENT_LABELS, filterJovensByScope, isOfficialDepartmentSlug, jovemMatchesDepartment } from '@/lib/ruja/departments'
@@ -117,9 +118,23 @@ export default function RujaFrequencia({
         participantes: Array.from(presentes).map(jovem_id => ({ jovem_id })),
       }
       await criarEventoFrequencia(input)
-      for (const id of presentes) await recalcularStatus(id)
-      await reload()
-      showToast(`${presentes.size} presença(s) salvas no evento.`)
+
+      const recalculos = await Promise.allSettled(
+        Array.from(presentes, id => recalcularStatus(id))
+      )
+      const houveFalhaNoRecalculo = recalculos.some(resultado => resultado.status === 'rejected')
+      let houveFalhaNoReload = false
+      try {
+        await reload()
+      } catch {
+        houveFalhaNoReload = true
+      }
+
+      showToast(
+        houveFalhaNoRecalculo || houveFalhaNoReload
+          ? `${presentes.size} presença(s) salvas. Atualize a página para conferir os indicadores.`
+          : `${presentes.size} presença(s) salvas no evento.`
+      )
       setNome('')
       setObservacao('')
       setHoraInicio('')
@@ -131,7 +146,7 @@ export default function RujaFrequencia({
       setPresentes(new Set())
       setBusca('')
     } catch (e) {
-      showToast('Erro: ' + (e instanceof Error ? e.message : 'desconhecido'))
+      showToast('Erro ao salvar evento: ' + getRujaErrorMessage(e))
     } finally {
       setSaving(false)
     }

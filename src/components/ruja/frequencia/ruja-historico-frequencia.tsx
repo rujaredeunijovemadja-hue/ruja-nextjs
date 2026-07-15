@@ -5,6 +5,7 @@ import { atualizarEventoFrequencia, excluirEventoFrequencia } from '@/lib/ruja/q
 import { Spinner } from '@/components/ui/spinner'
 import { departamentoNomePorId } from '@/lib/ruja/calculos'
 import type { EventoFrequencia, EventoFrequenciaInput, StatusEvento, TipoEventoFrequencia } from '@/lib/ruja/types'
+import { getRujaErrorMessage } from '@/lib/ruja/errors'
 import { filterJovensByScope, isOfficialDepartmentSlug, jovemMatchesDepartment, departmentSlug } from '@/lib/ruja/departments'
 
 type Filtro = { data: string; departamentoId: string; liderId: string }
@@ -67,7 +68,7 @@ export default function RujaHistoricoFrequencia() {
       setAberto(null)
       showToast('Evento atualizado.')
     } catch (e) {
-      showToast('Erro: ' + (e instanceof Error ? e.message : 'desconhecido'))
+      showToast('Erro: ' + getRujaErrorMessage(e))
     } finally {
       setSaving(false)
     }
@@ -83,7 +84,7 @@ export default function RujaHistoricoFrequencia() {
       setAberto(null)
       showToast('Evento excluído.')
     } catch (e) {
-      showToast('Erro: ' + (e instanceof Error ? e.message : 'desconhecido'))
+      showToast('Erro: ' + getRujaErrorMessage(e))
     } finally {
       setSaving(false)
     }
