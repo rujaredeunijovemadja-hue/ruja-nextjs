@@ -161,6 +161,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao criar perfil.' }, { status: 500 })
     }
 
+    // O acesso Nexus e criado automaticamente; acessos a outras plataformas
+    // continuam sendo concedidos separadamente pelo catalogo de plataformas.
+    const { data: nexus } = await admin
+      .from('ruja_plataformas')
+      .select('id')
+      .eq('slug', 'nexus')
+      .maybeSingle()
+    if (nexus?.id) {
+      await admin.from('ruja_usuario_plataformas').upsert({
+        user_id: uid,
+        plataforma_id: nexus.id,
+        role: novoRole === 'lider_supremo' ? 'owner' : novoRole === 'administrador' ? 'admin' : novoRole === 'lider_departamento' ? 'gestor' : novoRole === 'voluntario' ? 'operador' : 'visualizador',
+        departamento_id: departamento_id ?? null,
+        ativo: true,
+      }, { onConflict: 'user_id,plataforma_id' })
+    }
+
     // ── 6. Audit log (silencioso) ────────────────────────────
     const { error: auditError } = await admin
       .from('ruja_audit_logs')

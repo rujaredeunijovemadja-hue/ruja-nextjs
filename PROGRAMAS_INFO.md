@@ -1,18 +1,21 @@
 # PROGRAMAS_INFO — RUJA Nexus
 
-Atualizado em: 2026-07-15 (departamentos completos e frequência por evento)
+Atualizado em: 2026-08-06 (camada de plataformas operacionais)
 
 Documento operacional do sistema RUJA/Nexus.
 
 ## Estrutura oficial
 
-A RUJA mantém Teens e Simply como áreas com navegação dedicada. Os demais
-departamentos e ministérios são registros ativos na mesma estrutura, incluindo
-os nomes já vinculados aos jovens no banco.
+A RUJA possui o Nexus como núcleo global e catálogo de plataformas operacionais.
+Teens e Simply continuam como áreas de juventude dentro do Nexus. As demais
+plataformas possuem acesso, módulos e dados próprios quando ativadas.
 
-- Teens e Simply: áreas dedicadas.
-- Louvor, Mídia, Recepção, Intercessão, Comunicação, Organização e demais
-  vínculos reais: disponíveis em Departamentos, Jovens, Eventos e Relatórios.
+- Nexus: núcleo global, usuários, permissões, jovens e governança.
+- Mídia: primeiro piloto operacional, com solicitações, produção, aprovação e arquivos.
+- Altar, PodSimply, Happy Hour, Central EBD, Redação, Palestras e Contabilidade:
+  catalogadas, mas inativas até aprovação de seus fluxos.
+- Departamentos continuam representando vínculos ministeriais e não substituem
+  plataformas operacionais.
 
 ## Navegação oficial
 
@@ -23,6 +26,9 @@ os nomes já vinculados aos jovens no banco.
 - Cadastros Pendentes
 - IA Nexus
 - Configurações
+
+Plataformas autorizadas também aparecem na navegação, sem alterar o catálogo
+fechado de páginas do núcleo legado.
 
 As áreas Teens e Simply usam os mesmos módulos operacionais com filtro por
 departamento:
@@ -123,6 +129,7 @@ Migrations locais:
 - `src/lib/supabase/migration_profiles.sql`
 - `src/lib/supabase/migration_cargos_permissoes.sql`
 - `src/lib/supabase/migration_cadastro_publico_aprovacao.sql`
+- `src/lib/supabase/migration_plataformas.sql`
 
 Tabelas principais do novo modelo:
 

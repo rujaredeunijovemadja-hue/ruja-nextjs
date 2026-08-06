@@ -5,6 +5,7 @@ const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
 const GROQ_MODEL = 'llama-3.3-70b-versatile'
 
 type ChatMessage = { role: 'user' | 'assistant'; content: string }
+type PlatformSlug = 'nexus' | 'midia' | 'altar' | 'podsimply' | 'happy-hour' | 'central-ebd' | 'redacao' | 'palestras' | 'contabilidade'
 
 function validMessages(value: unknown): value is ChatMessage[] {
   return Array.isArray(value) && value.length > 0 && value.length <= 30 && value.every(message => {
@@ -26,19 +27,35 @@ export async function POST(request: NextRequest) {
 
     const { data: profile } = await sb
       .from('ruja_profiles')
-      .select('ativo')
+      .select('ativo,role')
       .eq('id', user.id)
       .single()
     if (!profile?.ativo) return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 })
 
     const body = await request.json().catch(() => null)
+    const plataforma = (body?.plataforma ?? 'nexus') as PlatformSlug
+    const plataformasValidas: PlatformSlug[] = ['nexus', 'midia', 'altar', 'podsimply', 'happy-hour', 'central-ebd', 'redacao', 'palestras', 'contabilidade']
+    if (!plataformasValidas.includes(plataforma)) {
+      return NextResponse.json({ error: 'Plataforma inválida.' }, { status: 400 })
+    }
+
+    if (plataforma !== 'nexus') {
+      const { data: platform } = await sb.from('ruja_plataformas').select('id').eq('slug', plataforma).eq('ativo', true).maybeSingle()
+      const { data: membership } = platform?.id
+        ? await sb.from('ruja_usuario_plataformas').select('user_id').eq('user_id', user.id).eq('plataforma_id', platform.id).eq('ativo', true).maybeSingle()
+        : { data: null }
+      if (!membership && !['lider_supremo', 'administrador'].includes(profile.role)) {
+        return NextResponse.json({ error: 'Sem acesso à plataforma.' }, { status: 403 })
+      }
+    }
+
     if (!validMessages(body?.mensagens)) {
       return NextResponse.json({ error: 'Mensagens inválidas.' }, { status: 400 })
     }
 
     // Não aceita contexto fornecido pelo cliente e não envia dados pessoais da
     // RUJA ao provedor externo. A rota atua somente como instrutora do sistema.
-    const contexto = `Você é a IA Nexus do sistema RUJA. Responda em português, de forma pastoral, objetiva e didática. Explique como usar os módulos de jovens, eventos, frequência, recuperação, cadastros e relatórios. Nunca solicite, invente ou revele nomes, contatos, presenças, dados de recuperação ou informações de outro departamento. Quando pedirem análise de dados reais, informe que essa análise está indisponível neste canal por proteção de privacidade. Você é somente leitura.`
+    const contexto = `Você é a IA da plataforma ${plataforma} do sistema RUJA. Responda em português, de forma objetiva e didática. Use somente o contexto funcional dessa plataforma. Nunca solicite, invente ou revele dados pessoais, financeiros, pastorais ou de outra plataforma. Quando pedirem análise de dados reais, informe que essa análise está indisponível neste canal por proteção de privacidade. Você é somente leitura.`
 
     const response = await fetch(GROQ_URL, {
       method: 'POST',

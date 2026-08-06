@@ -1,4 +1,5 @@
 import type { DepartmentScope } from './departments'
+import type { PlatformAccess } from './platforms'
 
 export type RujaRole =
   | 'lider_supremo'
@@ -14,6 +15,7 @@ export interface RujaAccessProfile {
   role: RujaRole
   departamento_id: string | null
   ativo: boolean
+  platforms?: PlatformAccess[]
 }
 
 export type RujaCapability =

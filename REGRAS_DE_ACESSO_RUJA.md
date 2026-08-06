@@ -1,6 +1,36 @@
 # REGRAS DE ACESSO RUJA
 
-Atualizado em: 2026-07-15
+Atualizado em: 2026-08-06
+
+## Acesso por plataforma
+
+O acesso novo é composto por usuário, plataforma, papel e módulos habilitados.
+Uma pessoa pode participar de várias plataformas com papéis diferentes.
+
+- `owner`: administração total da plataforma;
+- `admin`: gestão administrativa;
+- `gestor`: coordenação operacional;
+- `editor`: produção e alteração de conteúdo;
+- `operador`: execução de tarefas;
+- `visualizador`: somente leitura.
+
+O Líder Supremo e o Administrador continuam com acesso global no modelo atual.
+Os demais usuários dependem de uma linha ativa em `ruja_usuario_plataformas`.
+O Nexus é criado automaticamente para perfis existentes e novos durante a
+transição.
+
+As funções `ruja_has_platform_access` e `ruja_has_platform_module` são a base
+para as políticas RLS das novas tabelas. Não se deve usar apenas a sidebar para
+proteger dados.
+
+## Decisões arquiteturais
+
+- Nexus é o núcleo global e também uma plataforma especial do catálogo.
+- Mídia é o primeiro piloto operacional.
+- Eventos institucionais são compartilhados; eventos de produção e operação
+  pertencem à plataforma correspondente.
+- A IA é um serviço único com contexto de plataforma validado no servidor.
+- Dados financeiros, pastorais e de produção terão tabelas e políticas próprias.
 
 ## Estrutura oficial
 

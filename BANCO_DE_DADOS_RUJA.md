@@ -1,6 +1,29 @@
 # BANCO DE DADOS RUJA
 
-Atualizado em: 2026-07-15
+Atualizado em: 2026-08-06
+
+## Plataformas operacionais
+
+Migration: `migration_plataformas.sql`.
+
+- `ruja_plataformas`: catálogo, status, ordem e identidade visual.
+- `ruja_modulos`: catálogo reutilizável de capacidades.
+- `ruja_plataforma_modulos`: módulos habilitados por plataforma.
+- `ruja_usuario_plataformas`: acesso múltiplo, papel, departamento opcional e
+  permissões específicas por usuário.
+
+O Nexus é a plataforma especial de governança. O vínculo legado em
+`ruja_profiles.departamento_id` continua sendo usado pelo Nexus durante a
+transição. Novas plataformas não devem reutilizar esse campo como controle de
+acesso.
+
+Plataformas ativas inicialmente: Nexus e Mídia. As demais permanecem no
+catálogo com `ativo = false`.
+
+Funções RLS principais:
+
+- `ruja_has_platform_access(uuid)`;
+- `ruja_has_platform_module(uuid, text)`.
 
 ## Departamentos
 
@@ -147,3 +170,4 @@ API server-side escreve com `service_role`.
 - `src/lib/supabase/migration_profiles.sql`
 - `src/lib/supabase/migration_cargos_permissoes.sql`
 - `src/lib/supabase/migration_cadastro_publico_aprovacao.sql`
+- `src/lib/supabase/migration_plataformas.sql`

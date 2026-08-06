@@ -14,6 +14,7 @@ import dynamic from 'next/dynamic'
 import type { DepartmentScope } from '@/lib/ruja/departments'
 import { DEPARTMENT_LABELS } from '@/lib/ruja/departments'
 import { departmentScopeFor, type RujaAccessProfile } from '@/lib/ruja/access'
+import type { PlatformAccess } from '@/lib/ruja/platforms'
 
 const RujaDashboard     = dynamic(() => import('../dashboard/ruja-dashboard'))
 const RujaJovens        = dynamic(() => import('../jovens/ruja-jovens'))
@@ -30,11 +31,13 @@ const RujaAlertas       = dynamic(() => import('../alertas/ruja-alertas'))
 const RujaUsuarios      = dynamic(() => import('../usuarios/ruja-usuarios'))
 const RujaAnalistaIA    = dynamic(() => import('../analista/ruja-analista-ia'))
 const RujaCadastrosPendentes = dynamic(() => import('../pendentes/ruja-cadastros-pendentes'))
+const RujaMidia = dynamic(() => import('../midia/ruja-midia'))
 
 export type RujaPage =
   | 'dashboard' | 'teens' | 'simply' | 'eventos' | 'jovens' | 'frequencia' | 'historico-frequencia' | 'recuperacao'
   | 'departamentos' | 'lideres' | 'metas' | 'aniversarios'
   | 'pendentes' | 'config' | 'lidersupremo' | 'alertas' | 'usuarios' | 'analista-ia'
+  | 'midia'
 
 const PAGE_TITLES: Record<RujaPage, string> = {
   dashboard:     'Dashboard Geral',
@@ -55,30 +58,32 @@ const PAGE_TITLES: Record<RujaPage, string> = {
   alertas:       'Alertas',
   usuarios:      'Usuários',
   'analista-ia': 'IA Nexus',
+  midia:          'Mídia',
 }
 
 const FULL_HEIGHT_PAGES: RujaPage[] = ['analista-ia']
 
-interface Props { profile: RujaAccessProfile }
+interface Props { profile: RujaAccessProfile; platforms: PlatformAccess[] }
 
-function allowedPages(profile: RujaAccessProfile): RujaPage[] {
+function allowedPages(profile: RujaAccessProfile, platforms: PlatformAccess[]): RujaPage[] {
+  const hasMidia = platforms.some(platform => platform.slug === 'midia')
   if (profile.role === 'lider_supremo') return Object.keys(PAGE_TITLES) as RujaPage[]
   if (profile.role === 'administrador') {
-    return ['dashboard', 'teens', 'simply', 'eventos', 'jovens', 'frequencia', 'historico-frequencia', 'recuperacao', 'departamentos', 'lideres', 'metas', 'aniversarios', 'pendentes', 'alertas', 'analista-ia']
+    return ['dashboard', 'teens', 'simply', 'eventos', 'jovens', 'frequencia', 'historico-frequencia', 'recuperacao', 'departamentos', 'lideres', 'metas', 'aniversarios', 'pendentes', 'alertas', 'analista-ia', ...(hasMidia ? ['midia' as RujaPage] : [])]
   }
   const department = profile.departamento_id === 'simply' ? 'simply' : 'teens'
   if (profile.role === 'lider_departamento') {
-    return [department, 'jovens', 'frequencia', 'historico-frequencia', 'recuperacao', 'lideres', 'metas', 'pendentes', 'analista-ia']
+    return [department, 'jovens', 'frequencia', 'historico-frequencia', 'recuperacao', 'lideres', 'metas', 'pendentes', 'analista-ia', ...(hasMidia ? ['midia' as RujaPage] : [])]
   }
   if (profile.role === 'voluntario') {
-    return [department, 'jovens', 'frequencia', 'historico-frequencia', 'analista-ia']
+    return [department, 'jovens', 'frequencia', 'historico-frequencia', 'analista-ia', ...(hasMidia ? ['midia' as RujaPage] : [])]
   }
-  return [department, 'jovens', 'frequencia', 'historico-frequencia']
+  return [department, 'jovens', 'frequencia', 'historico-frequencia', ...(hasMidia ? ['midia' as RujaPage] : [])]
 }
 
-export function RujaLayout({ profile }: Props) {
+export function RujaLayout({ profile, platforms }: Props) {
   const router = useRouter()
-  const permittedPages = allowedPages(profile)
+  const permittedPages = allowedPages(profile, platforms)
   const profileScope = departmentScopeFor(profile)
   const initialPage: RujaPage = profileScope === 'all' ? 'dashboard' : profileScope
   const [page,        setPage]        = useState<RujaPage>(initialPage)
@@ -127,6 +132,7 @@ export function RujaLayout({ profile }: Props) {
     alertas:       <RujaAlertas />,
     usuarios:      <RujaUsuarios />,
     'analista-ia': <RujaAnalistaIA />,
+    midia:          <RujaMidia access={platforms.find(platform => platform.slug === 'midia') ?? platforms[0]} />,
   }
 
   const isFull = FULL_HEIGHT_PAGES.includes(page)
@@ -150,6 +156,7 @@ export function RujaLayout({ profile }: Props) {
           onNavigate={handleNavigate}
           onLogout={handleLogout}
           onBusca={() => setBuscaAberta(true)}
+          platforms={platforms}
         />
 
         {/* ── COLUNA DIREITA ── */}
@@ -197,6 +204,7 @@ export function RujaLayout({ profile }: Props) {
           allowedPages={permittedPages}
           onNavigate={handleNavigate}
           onBusca={() => setBuscaAberta(true)}
+          platforms={platforms}
         />
 
         {/* ── BUSCA GLOBAL ── */}

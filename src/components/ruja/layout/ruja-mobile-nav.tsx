@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import type { RujaPage } from './ruja-layout'
 import type { RujaAccessProfile } from '@/lib/ruja/access'
+import type { PlatformAccess } from '@/lib/ruja/platforms'
 
 interface Props {
   current: RujaPage
@@ -9,6 +10,7 @@ interface Props {
   onBusca: () => void
   profile: RujaAccessProfile
   allowedPages: RujaPage[]
+  platforms: PlatformAccess[]
 }
 
 const MAIN_TABS: { page: RujaPage; icon: string; label: string }[] = [
@@ -32,7 +34,7 @@ const MORE_PAGES: { page: RujaPage; icon: string; label: string }[] = [
   { page: 'usuarios',       icon: '👤', label: 'Usuários' },
 ]
 
-export function RujaMobileNav({ current, onNavigate, onBusca, profile, allowedPages }: Props) {
+export function RujaMobileNav({ current, onNavigate, onBusca, profile, allowedPages, platforms }: Props) {
   const [showMore, setShowMore] = useState(false)
   const scopedDepartment = profile.departamento_id === 'simply' ? 'Simply' : 'Teens'
   const mainTabs = MAIN_TABS
@@ -40,7 +42,10 @@ export function RujaMobileNav({ current, onNavigate, onBusca, profile, allowedPa
       ? { ...item, page: 'frequencia' as RujaPage, label: `Eventos ${scopedDepartment}` }
       : item)
     .filter(item => allowedPages.includes(item.page))
-  const morePages = MORE_PAGES.filter(item => allowedPages.includes(item.page))
+  const platformPages = platforms
+    .filter(platform => platform.slug !== 'nexus')
+    .map(platform => ({ page: platform.slug as RujaPage, icon: platform.slug === 'midia' ? '🎥' : '🧩', label: platform.slug === 'midia' ? 'Mídia' : platform.slug }))
+  const morePages = [...MORE_PAGES, ...platformPages].filter(item => allowedPages.includes(item.page))
 
   return (
     <>

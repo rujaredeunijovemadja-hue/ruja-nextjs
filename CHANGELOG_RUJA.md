@@ -1,5 +1,21 @@
 # CHANGELOG RUJA
 
+## 2026-08-06 — Camada de plataformas operacionais
+
+- Criado catálogo de plataformas, módulos e acessos múltiplos por usuário.
+- Nexus passou a ser tratado como núcleo global e plataforma especial.
+- Mídia foi ativada como primeiro piloto, com fluxo operacional visual inicial.
+- Navegação desktop/mobile passa a exibir plataformas autorizadas.
+- Novos usuários recebem acesso Nexus automaticamente quando a migration está aplicada.
+- IA recebe a plataforma no contrato do servidor e valida o vínculo antes de responder.
+- Adicionada `migration_plataformas.sql` com funções e políticas RLS próprias.
+
+### Aplicação
+
+Aplicar depois de `migration_profiles.sql` e `migration_cargos_permissoes.sql`.
+Depois, conceder acessos adicionais em `ruja_usuario_plataformas` para usuários
+que participarão da Mídia ou de outras plataformas.
+
 ## 2026-07-15 — Cadastro público e aprovação por departamento
 
 - Formulário `/cadastro` ampliado com dados pessoais, vínculo, batismo,

@@ -69,7 +69,7 @@ export default function RujaAnalistaIA() {
       const response = await fetch('/api/ruja/analista', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ mensagens: novasMsgs }),
+        body:    JSON.stringify({ plataforma: 'nexus', mensagens: novasMsgs }),
       })
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const data = await response.json()

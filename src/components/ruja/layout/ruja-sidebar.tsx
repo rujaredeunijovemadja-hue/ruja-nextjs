@@ -5,6 +5,7 @@
 
 import type { RujaPage } from './ruja-layout'
 import type { RujaAccessProfile } from '@/lib/ruja/access'
+import type { PlatformAccess } from '@/lib/ruja/platforms'
 
 interface Props {
   current:    RujaPage
@@ -14,6 +15,7 @@ interface Props {
   onBusca:    () => void
   profile: RujaAccessProfile
   allowedPages: RujaPage[]
+  platforms: PlatformAccess[]
 }
 
 const NAV_ITEMS: { page: RujaPage; icon: string; label: string }[] = [
@@ -28,9 +30,12 @@ const NAV_ITEMS: { page: RujaPage; icon: string; label: string }[] = [
   { page: 'usuarios',      icon: '👤', label: 'Usuários' },
 ]
 
-export function RujaSidebar({ current, userName, onNavigate, onLogout, onBusca, profile, allowedPages }: Props) {
+export function RujaSidebar({ current, userName, onNavigate, onLogout, onBusca, profile, allowedPages, platforms }: Props) {
   const scopedDepartment = profile.departamento_id === 'simply' ? 'Simply' : 'Teens'
-  const items = NAV_ITEMS
+  const platformItems = platforms
+    .filter(platform => platform.slug !== 'nexus')
+    .map(platform => ({ page: platform.slug as RujaPage, icon: platform.slug === 'midia' ? '🎥' : '🧩', label: platform.slug === 'midia' ? 'Mídia' : platform.slug }))
+  const items = [...NAV_ITEMS, ...platformItems]
     .map(item => profile.role !== 'lider_supremo' && profile.role !== 'administrador' && item.page === 'eventos'
       ? { ...item, page: 'frequencia' as RujaPage, label: `Eventos ${scopedDepartment}` }
       : item)
