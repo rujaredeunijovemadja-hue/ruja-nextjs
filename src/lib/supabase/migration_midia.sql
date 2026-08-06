@@ -65,6 +65,16 @@ CREATE INDEX IF NOT EXISTS idx_ruja_midia_tarefas_solicitacao
 CREATE INDEX IF NOT EXISTS idx_ruja_midia_aprovacoes_solicitacao
   ON public.ruja_midia_aprovacoes(solicitacao_id, status);
 
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'ruja-midia-arquivos', 'ruja-midia-arquivos', false, 52428800,
+  ARRAY['image/jpeg', 'image/png', 'image/webp', 'application/pdf', 'video/mp4', 'audio/mpeg']::text[]
+)
+ON CONFLICT (id) DO UPDATE SET
+  public = false,
+  file_size_limit = EXCLUDED.file_size_limit,
+  allowed_mime_types = EXCLUDED.allowed_mime_types;
+
 DO $$
 DECLARE table_name text;
 BEGIN
@@ -84,8 +94,8 @@ CREATE POLICY midia_solicitacoes_insert ON public.ruja_midia_solicitacoes FOR IN
 WITH CHECK (solicitante_id = auth.uid() AND public.ruja_has_platform_module(plataforma_id, 'dashboard'));
 DROP POLICY IF EXISTS midia_solicitacoes_update ON public.ruja_midia_solicitacoes;
 CREATE POLICY midia_solicitacoes_update ON public.ruja_midia_solicitacoes FOR UPDATE TO authenticated
-USING (public.ruja_has_platform_module(plataforma_id, 'producao'))
-WITH CHECK (public.ruja_has_platform_module(plataforma_id, 'producao'));
+USING (public.ruja_has_platform_module(plataforma_id, 'producao') OR public.ruja_has_platform_module(plataforma_id, 'aprovacoes'))
+WITH CHECK (public.ruja_has_platform_module(plataforma_id, 'producao') OR public.ruja_has_platform_module(plataforma_id, 'aprovacoes'));
 
 DROP POLICY IF EXISTS midia_tarefas_access ON public.ruja_midia_tarefas;
 CREATE POLICY midia_tarefas_access ON public.ruja_midia_tarefas FOR ALL TO authenticated
@@ -105,5 +115,26 @@ WITH CHECK (uploaded_by = auth.uid() OR public.ruja_has_platform_module(platafor
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.ruja_midia_solicitacoes,
   public.ruja_midia_tarefas, public.ruja_midia_aprovacoes,
   public.ruja_midia_arquivos TO authenticated;
+
+DROP POLICY IF EXISTS midia_storage_select ON storage.objects;
+CREATE POLICY midia_storage_select ON storage.objects FOR SELECT TO authenticated
+USING (
+  bucket_id = 'ruja-midia-arquivos'
+  AND public.ruja_has_platform_module(split_part(name, '/', 1)::uuid, 'arquivos')
+);
+
+DROP POLICY IF EXISTS midia_storage_insert ON storage.objects;
+CREATE POLICY midia_storage_insert ON storage.objects FOR INSERT TO authenticated
+WITH CHECK (
+  bucket_id = 'ruja-midia-arquivos'
+  AND public.ruja_has_platform_module(split_part(name, '/', 1)::uuid, 'arquivos')
+);
+
+DROP POLICY IF EXISTS midia_storage_delete ON storage.objects;
+CREATE POLICY midia_storage_delete ON storage.objects FOR DELETE TO authenticated
+USING (
+  bucket_id = 'ruja-midia-arquivos'
+  AND public.ruja_has_platform_module(split_part(name, '/', 1)::uuid, 'arquivos')
+);
 
 COMMENT ON TABLE public.ruja_midia_solicitacoes IS 'Solicitacoes do fluxo operacional da plataforma Midia.';

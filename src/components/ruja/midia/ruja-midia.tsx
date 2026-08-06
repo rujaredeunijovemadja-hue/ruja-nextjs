@@ -6,12 +6,23 @@ import { Spinner } from '@/components/ui/spinner'
 import type { PlatformAccess } from '@/lib/ruja/platforms'
 import {
   atualizarMidiaStatus,
+  atualizarMidiaTarefa,
+  criarMidiaTarefa,
   criarMidiaSolicitacao,
+  fetchMidiaAprovacao,
+  fetchMidiaArquivos,
   fetchMidiaSolicitacoes,
+  fetchMidiaTarefas,
   MIDIA_STATUS,
   MIDIA_TIPOS,
+  registrarMidiaAprovacao,
+  removeMidiaArquivo,
+  uploadMidiaArquivo,
   type MidiaPrioridade,
   type MidiaSolicitacao,
+  type MidiaAprovacao,
+  type MidiaArquivo,
+  type MidiaTarefa,
   type MidiaStatus,
 } from '@/lib/ruja/midia'
 
@@ -35,6 +46,12 @@ export default function RujaMidia({ access }: { access: PlatformAccess }) {
   const [showForm, setShowForm] = useState(false)
   const [filtro, setFiltro] = useState<MidiaStatus | 'todos'>('todos')
   const [form, setForm] = useState({ titulo: '', descricao: '', tipo: 'arte', prioridade: 'normal' as MidiaPrioridade, prazo: '' })
+  const [selected, setSelected] = useState<MidiaSolicitacao | null>(null)
+  const [tasks, setTasks] = useState<MidiaTarefa[]>([])
+  const [approval, setApproval] = useState<MidiaAprovacao | null>(null)
+  const [files, setFiles] = useState<MidiaArquivo[]>([])
+  const [detailLoading, setDetailLoading] = useState(false)
+  const [taskTitle, setTaskTitle] = useState('')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -83,6 +100,63 @@ export default function RujaMidia({ access }: { access: PlatformAccess }) {
     }
   }
 
+  async function openDetail(item: MidiaSolicitacao) {
+    setSelected(item)
+    setDetailLoading(true)
+    try {
+      const [nextTasks, nextApproval, nextFiles] = await Promise.all([fetchMidiaTarefas(item.id), fetchMidiaAprovacao(item.id), fetchMidiaArquivos(item.id)])
+      setTasks(nextTasks)
+      setApproval(nextApproval)
+      setFiles(nextFiles)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Não foi possível carregar o detalhe.')
+    } finally {
+      setDetailLoading(false)
+    }
+  }
+
+  async function uploadFile(file: File | undefined) {
+    if (!selected || !file) return
+    try {
+      await uploadMidiaArquivo(access.id, selected.id, file)
+      setFiles(await fetchMidiaArquivos(selected.id))
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Não foi possível enviar o arquivo.')
+    }
+  }
+
+  async function deleteFile(file: MidiaArquivo) {
+    try {
+      await removeMidiaArquivo(file)
+      setFiles(current => current.filter(row => row.id !== file.id))
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Não foi possível remover o arquivo.')
+    }
+  }
+
+  async function addTask() {
+    if (!selected || !taskTitle.trim()) return
+    try {
+      await criarMidiaTarefa({ plataforma_id: access.id, solicitacao_id: selected.id, titulo: taskTitle.trim() })
+      setTaskTitle('')
+      setTasks(await fetchMidiaTarefas(selected.id))
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Não foi possível criar a tarefa.')
+    }
+  }
+
+  async function decide(status: 'aprovada' | 'rejeitada') {
+    if (!selected) return
+    try {
+      await registrarMidiaAprovacao({ plataforma_id: access.id, solicitacao_id: selected.id, status, comentario: status === 'aprovada' ? 'Aprovado pela equipe.' : 'Solicitação devolvida para produção.' })
+      await load()
+      setSelected(current => current ? { ...current, status: status === 'aprovada' ? 'aprovada' : 'em_producao' } : current)
+      setApproval(await fetchMidiaAprovacao(selected.id))
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Não foi possível registrar a aprovação.')
+    }
+  }
+
   if (rujaLoading || loading) return <div className="flex-1 flex items-center justify-center"><Spinner /></div>
 
   return (
@@ -112,8 +186,10 @@ export default function RujaMidia({ access }: { access: PlatformAccess }) {
       {filtradas.length === 0 ? (
         <div className="bg-[#111] border border-white/8 rounded-xl p-12 text-center text-gray-500"><div className="text-4xl mb-3">🎬</div><p>Nenhuma solicitação nesta etapa.</p></div>
       ) : (
-        <div className="space-y-3">{filtradas.map(item => <RequestCard key={item.id} item={item} onAdvance={() => void advance(item)} />)}</div>
+        <div className="space-y-3">{filtradas.map(item => <RequestCard key={item.id} item={item} selected={selected?.id === item.id} onSelect={() => void openDetail(item)} onAdvance={() => void advance(item)} />)}</div>
       )}
+
+      {selected && <RequestDetail item={selected} tasks={tasks} approval={approval} files={files} loading={detailLoading} taskTitle={taskTitle} setTaskTitle={setTaskTitle} onAddTask={() => void addTask()} onUpload={file => void uploadFile(file)} onDeleteFile={file => void deleteFile(file)} onTaskStatus={async (task, status) => { await atualizarMidiaTarefa(task.id, status); setTasks(current => current.map(row => row.id === task.id ? { ...row, status } : row)) }} onDecide={status => void decide(status)} onClose={() => setSelected(null)} />}
 
       {showForm && <CreateModal form={form} setForm={setForm} saving={saving} onClose={() => setShowForm(false)} onSave={() => void handleCreate()} />}
     </div>
@@ -128,16 +204,20 @@ function FilterButton({ active, onClick, children }: { active: boolean; onClick:
   return <button onClick={onClick} className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${active ? 'bg-violet-600 text-white' : 'bg-white/5 text-gray-400'}`}>{children}</button>
 }
 
-function RequestCard({ item, onAdvance }: { item: MidiaSolicitacao; onAdvance: () => void }) {
+function RequestCard({ item, selected, onSelect, onAdvance }: { item: MidiaSolicitacao; selected: boolean; onSelect: () => void; onAdvance: () => void }) {
   const currentStep = STEPS.findIndex(step => step.value === item.status)
   const next = STEPS[currentStep + 1]
-  return <article className="bg-[#111] border border-white/8 rounded-xl p-4">
+  return <article className={`bg-[#111] border rounded-xl p-4 ${selected ? 'border-violet-500/50' : 'border-white/8'}`}>
     <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-      <div className="min-w-0"><div className="flex items-center gap-2 flex-wrap"><h2 className="text-white font-semibold">{item.titulo}</h2><span className="text-xs rounded-full px-2 py-0.5 bg-violet-500/15 text-violet-300">{item.tipo}</span><span className="text-xs rounded-full px-2 py-0.5 bg-white/5 text-gray-400">{item.prioridade}</span></div><p className="text-gray-500 text-sm mt-2 whitespace-pre-wrap">{item.descricao || 'Sem descrição.'}</p>{item.prazo && <p className="text-gray-600 text-xs mt-2">Prazo: {new Date(`${item.prazo}T12:00:00`).toLocaleDateString('pt-BR')}</p>}</div>
+      <div className="min-w-0"><button onClick={onSelect} className="text-left"><div className="flex items-center gap-2 flex-wrap"><h2 className="text-white font-semibold">{item.titulo}</h2><span className="text-xs rounded-full px-2 py-0.5 bg-violet-500/15 text-violet-300">{item.tipo}</span><span className="text-xs rounded-full px-2 py-0.5 bg-white/5 text-gray-400">{item.prioridade}</span></div><p className="text-gray-500 text-sm mt-2 whitespace-pre-wrap">{item.descricao || 'Sem descrição.'}</p>{item.prazo && <p className="text-gray-600 text-xs mt-2">Prazo: {new Date(`${item.prazo}T12:00:00`).toLocaleDateString('pt-BR')}</p>}</button></div>
       {next && item.status !== 'cancelada' && <button onClick={onAdvance} className="shrink-0 px-3 py-2 rounded-lg bg-violet-500/15 text-violet-300 text-xs font-semibold hover:bg-violet-500/25">Avançar para {next.label}</button>}
     </div>
     <div className="grid grid-cols-3 md:grid-cols-6 gap-1 mt-4">{STEPS.map((step, index) => <div key={step.value} className={`text-center py-2 rounded-lg text-[10px] ${index <= currentStep ? 'bg-violet-500/20 text-violet-200' : 'bg-white/5 text-gray-600'}`}><div>{step.icon}</div><div className="mt-1">{step.label}</div></div>)}</div>
   </article>
+}
+
+function RequestDetail({ item, tasks, approval, files, loading, taskTitle, setTaskTitle, onAddTask, onUpload, onDeleteFile, onTaskStatus, onDecide, onClose }: { item: MidiaSolicitacao; tasks: MidiaTarefa[]; approval: MidiaAprovacao | null; files: MidiaArquivo[]; loading: boolean; taskTitle: string; setTaskTitle: (value: string) => void; onAddTask: () => void; onUpload: (file: File | undefined) => void; onDeleteFile: (file: MidiaArquivo) => void; onTaskStatus: (task: MidiaTarefa, status: MidiaTarefa['status']) => Promise<void>; onDecide: (status: 'aprovada' | 'rejeitada') => void; onClose: () => void }) {
+  return <section className="bg-[#111] border border-violet-500/25 rounded-xl p-4 space-y-4"><div className="flex items-center justify-between"><div><p className="text-violet-300 text-xs uppercase tracking-wider">Detalhe da solicitação</p><h2 className="text-white font-bold mt-1">{item.titulo}</h2></div><button onClick={onClose} className="text-gray-500 hover:text-white">✕</button></div>{loading ? <Spinner /> : <><div><h3 className="text-white text-sm font-semibold mb-2">Tarefas</h3><div className="flex gap-2"><input value={taskTitle} onChange={event => setTaskTitle(event.target.value)} placeholder="Nova tarefa" className={INPUT} /><button onClick={onAddTask} className="px-3 rounded-xl bg-violet-600 text-white text-sm font-semibold">Adicionar</button></div><div className="space-y-2 mt-3">{tasks.length === 0 ? <p className="text-gray-600 text-sm">Nenhuma tarefa criada.</p> : tasks.map(task => <div key={task.id} className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2"><span className={`w-2 h-2 rounded-full ${task.status === 'concluida' ? 'bg-green-400' : 'bg-yellow-400'}`} /><span className={`flex-1 text-sm ${task.status === 'concluida' ? 'text-gray-500 line-through' : 'text-gray-300'}`}>{task.titulo}</span><button onClick={() => void onTaskStatus(task, task.status === 'concluida' ? 'pendente' : 'concluida')} className="text-xs text-violet-300">{task.status === 'concluida' ? 'Reabrir' : 'Concluir'}</button></div>)}</div></div><div className="border-t border-white/8 pt-4"><div className="flex items-center justify-between mb-3"><h3 className="text-white text-sm font-semibold">Arquivos</h3><label className="cursor-pointer px-3 py-1.5 rounded-lg bg-white/5 text-violet-300 text-xs"><input type="file" className="hidden" onChange={event => { onUpload(event.target.files?.[0]); event.currentTarget.value = '' }} />Adicionar arquivo</label></div>{files.length === 0 ? <p className="text-gray-600 text-sm">Nenhum arquivo anexado.</p> : <div className="space-y-2">{files.map(file => <div key={file.id} className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2"><a href={file.signed_url} target="_blank" rel="noreferrer" className="flex-1 text-sm text-gray-300 hover:text-violet-300 truncate">📎 {file.nome}</a><button onClick={() => onDeleteFile(file)} className="text-xs text-red-300">Remover</button></div>)}</div>}</div><div className="border-t border-white/8 pt-4"><div className="flex items-center justify-between"><h3 className="text-white text-sm font-semibold">Aprovação</h3>{approval && <span className={`text-xs ${approval.status === 'aprovada' ? 'text-green-300' : 'text-red-300'}`}>{approval.status}</span>}</div>{item.status === 'em_revisao' && <div className="flex gap-2 mt-3"><button onClick={() => onDecide('rejeitada')} className="flex-1 py-2 rounded-lg bg-red-500/15 text-red-300 text-sm">Devolver para produção</button><button onClick={() => onDecide('aprovada')} className="flex-1 py-2 rounded-lg bg-green-500/15 text-green-300 text-sm">Aprovar entrega</button></div>}</div></>}</section>
 }
 
 function CreateModal({ form, setForm, saving, onClose, onSave }: { form: { titulo: string; descricao: string; tipo: string; prioridade: MidiaPrioridade; prazo: string }; setForm: React.Dispatch<React.SetStateAction<{ titulo: string; descricao: string; tipo: string; prioridade: MidiaPrioridade; prazo: string }>>; saving: boolean; onClose: () => void; onSave: () => void }) {
