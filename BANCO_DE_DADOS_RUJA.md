@@ -6,6 +6,12 @@ Atualizado em: 2026-08-06
 
 Migration: `migration_plataformas.sql`.
 
+Migration do piloto: `migration_midia.sql`.
+
+O piloto cria `ruja_midia_solicitacoes`, `ruja_midia_tarefas`,
+`ruja_midia_aprovacoes` e `ruja_midia_arquivos`. Todas as tabelas possuem
+`plataforma_id` e RLS baseada nos módulos da Mídia.
+
 - `ruja_plataformas`: catálogo, status, ordem e identidade visual.
 - `ruja_modulos`: catálogo reutilizável de capacidades.
 - `ruja_plataforma_modulos`: módulos habilitados por plataforma.
@@ -171,3 +177,4 @@ API server-side escreve com `service_role`.
 - `src/lib/supabase/migration_cargos_permissoes.sql`
 - `src/lib/supabase/migration_cadastro_publico_aprovacao.sql`
 - `src/lib/supabase/migration_plataformas.sql`
+- `src/lib/supabase/migration_midia.sql`

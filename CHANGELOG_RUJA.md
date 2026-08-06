@@ -9,10 +9,14 @@
 - Novos usuários recebem acesso Nexus automaticamente quando a migration está aplicada.
 - IA recebe a plataforma no contrato do servidor e valida o vínculo antes de responder.
 - Adicionada `migration_plataformas.sql` com funções e políticas RLS próprias.
+- Adicionada `migration_midia.sql` com solicitações, tarefas, aprovações,
+  arquivos e fluxo de status da plataforma Mídia.
 
 ### Aplicação
 
-Aplicar depois de `migration_profiles.sql` e `migration_cargos_permissoes.sql`.
+Aplicar `migration_plataformas.sql` depois de `migration_profiles.sql` e
+`migration_cargos_permissoes.sql`. Aplicar `migration_midia.sql` depois da
+migration de plataformas.
 Depois, conceder acessos adicionais em `ruja_usuario_plataformas` para usuários
 que participarão da Mídia ou de outras plataformas.
 

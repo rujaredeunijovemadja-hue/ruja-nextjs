@@ -31,6 +31,8 @@ proteger dados.
   pertencem à plataforma correspondente.
 - A IA é um serviço único com contexto de plataforma validado no servidor.
 - Dados financeiros, pastorais e de produção terão tabelas e políticas próprias.
+- O piloto Mídia restringe solicitações, produção, tarefas, aprovações e arquivos
+  ao `plataforma_id` autorizado e aos módulos correspondentes.
 
 ## Estrutura oficial
 

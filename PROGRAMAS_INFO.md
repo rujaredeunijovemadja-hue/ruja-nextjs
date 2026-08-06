@@ -130,6 +130,7 @@ Migrations locais:
 - `src/lib/supabase/migration_cargos_permissoes.sql`
 - `src/lib/supabase/migration_cadastro_publico_aprovacao.sql`
 - `src/lib/supabase/migration_plataformas.sql`
+- `src/lib/supabase/migration_midia.sql`
 
 Tabelas principais do novo modelo:
 
