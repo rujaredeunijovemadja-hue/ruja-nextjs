@@ -12,6 +12,9 @@ O piloto cria `ruja_midia_solicitacoes`, `ruja_midia_tarefas`,
 `ruja_midia_aprovacoes` e `ruja_midia_arquivos`. Todas as tabelas possuem
 `plataforma_id` e RLS baseada nos módulos da Mídia.
 
+O núcleo inicial da Central EBD está em `migration_ebd.sql` e cria classes,
+professores e lições isolados pela plataforma.
+
 - `ruja_plataformas`: catálogo, status, ordem e identidade visual.
 - `ruja_modulos`: catálogo reutilizável de capacidades.
 - `ruja_plataforma_modulos`: módulos habilitados por plataforma.
@@ -178,3 +181,4 @@ API server-side escreve com `service_role`.
 - `src/lib/supabase/migration_cadastro_publico_aprovacao.sql`
 - `src/lib/supabase/migration_plataformas.sql`
 - `src/lib/supabase/migration_midia.sql`
+- `src/lib/supabase/migration_ebd.sql`

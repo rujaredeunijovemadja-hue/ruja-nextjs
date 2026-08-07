@@ -35,6 +35,7 @@ const RujaCadastrosPendentes = dynamic(() => import('../pendentes/ruja-cadastros
 const RujaMidia = dynamic(() => import('../midia/ruja-midia'))
 const RujaPlataformas = dynamic(() => import('../plataformas/ruja-plataformas'))
 const RujaPlataformaWorkspace = dynamic(() => import('../plataformas/ruja-plataforma-workspace'))
+const RujaEbd = dynamic(() => import('../plataformas/ruja-ebd'))
 
 export type RujaPage =
   | 'dashboard' | 'teens' | 'simply' | 'eventos' | 'jovens' | 'frequencia' | 'historico-frequencia' | 'recuperacao'
@@ -150,7 +151,9 @@ export function RujaLayout({ profile, platforms }: Props) {
   }
   for (const platform of platforms) {
     if (platform.slug === 'nexus' || platform.slug === 'midia') continue
-    PAGES[platform.slug as RujaPage] = <RujaPlataformaWorkspace access={platform} />
+    PAGES[platform.slug as RujaPage] = platform.slug === 'central-ebd'
+      ? <RujaEbd access={platform} />
+      : <RujaPlataformaWorkspace access={platform} />
   }
 
   const isFull = FULL_HEIGHT_PAGES.includes(page)

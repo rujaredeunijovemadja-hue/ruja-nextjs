@@ -13,6 +13,8 @@
   arquivos e fluxo de status da plataforma Mídia.
 - Criada administração protegida do catálogo de plataformas e dos vínculos de
   usuários, sem necessidade de SQL para conceder acessos.
+- Iniciado o segundo piloto, Central EBD, com classes e lições isoladas por
+  plataforma.
 
 ### Aplicação
 

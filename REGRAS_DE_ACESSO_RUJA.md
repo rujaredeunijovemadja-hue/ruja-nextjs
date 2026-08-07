@@ -36,6 +36,8 @@ proteger dados.
 - Dados financeiros, pastorais e de produção terão tabelas e políticas próprias.
 - O piloto Mídia restringe solicitações, produção, tarefas, aprovações e arquivos
   ao `plataforma_id` autorizado e aos módulos correspondentes.
+- A Central EBD usa tabelas próprias para classes, professores e lições; não
+  reutiliza dados pastorais ou frequência de jovens do Nexus.
 
 ## Estrutura oficial
 
