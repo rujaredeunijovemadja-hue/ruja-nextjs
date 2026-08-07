@@ -1,0 +1,6 @@
+# Local Supabase CLI configuration. The hosted project is selected by the
+# GitHub integration and by `supabase link` for manual deployments.
+project_id = "ruja-nextjs"
+
+[db]
+major_version = 15

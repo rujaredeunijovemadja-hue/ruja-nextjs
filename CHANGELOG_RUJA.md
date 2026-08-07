@@ -111,7 +111,7 @@ ausentes.
 - `src/lib/ruja/queries.ts`
 - `src/lib/ruja/calculos.ts`
 - `src/lib/ruja/types.ts`
-- `src/lib/supabase/migration_eventos_frequencia.sql`
+- `supabase/migrations/20260715020000_eventos_frequencia.sql`
 - `PROGRAMAS_INFO.md`
 - `BANCO_DE_DADOS_RUJA.md`
 - `REGRAS_DE_ACESSO_RUJA.md`
@@ -130,7 +130,7 @@ criar eventos canônicos e vincular somente registros presentes. A tabela
 - Cálculo de status passa a preferir eventos novos quando existem.
 
 ## Como testar
-1. Aplicar `src/lib/supabase/migration_eventos_frequencia.sql`.
+1. Aplicar `supabase/migrations/20260715020000_eventos_frequencia.sql`.
 2. Criar evento Teens e marcar somente presentes.
 3. Criar evento Simply e marcar somente presentes.
 4. Conferir que ausentes não criam linhas em `ruja_eventos_participantes`.
@@ -158,6 +158,6 @@ Eventos Gerais / Eventos departamentais / Histórico de Frequência
 - A edição e o detalhe do histórico preservam e exibem os novos dados do evento.
 
 ## Banco
-- Nova migration: `src/lib/supabase/migration_eventos_entidade_completa.sql`.
+- Nova migration: `supabase/migrations/20260715030000_eventos_entidade_completa.sql`.
 - Novas colunas em `ruja_eventos_frequencia`: `hora_inicio`, `hora_termino`,
   `local`, `descricao`, `status`, `departamentos_envolvidos`.

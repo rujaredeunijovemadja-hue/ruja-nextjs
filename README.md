@@ -34,3 +34,19 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Supabase migrations
+
+The repository uses the Supabase CLI layout under `supabase/`. Configure the
+Supabase GitHub integration with working directory `.` and production branch
+`main`, then enable deployment to production. Migrations in
+`supabase/migrations/` are applied in timestamp order when changes are merged
+into the configured branch.
+
+For manual deployment, authenticate and link the local project before pushing:
+
+```bash
+npx supabase login
+npx supabase link --project-ref YOUR_PROJECT_REF
+npx supabase db push
+```

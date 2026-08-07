@@ -127,14 +127,14 @@ idempotente.
 
 Migrations locais:
 
-- `src/lib/supabase/migration_departamentos_pendentes.sql`
-- `src/lib/supabase/migration_eventos_frequencia.sql`
-- `src/lib/supabase/migration_profiles.sql`
-- `src/lib/supabase/migration_cargos_permissoes.sql`
-- `src/lib/supabase/migration_cadastro_publico_aprovacao.sql`
-- `src/lib/supabase/migration_plataformas.sql`
-- `src/lib/supabase/migration_midia.sql`
-- `src/lib/supabase/migration_ebd.sql`
+- `supabase/migrations/20260703000000_departamentos_pendentes.sql`
+- `supabase/migrations/20260715020000_eventos_frequencia.sql`
+- `supabase/migrations/20260715000000_profiles.sql`
+- `supabase/migrations/20260715010000_cargos_permissoes.sql`
+- `supabase/migrations/20260715050000_cadastro_publico_aprovacao.sql`
+- `supabase/migrations/20260806000000_plataformas.sql`
+- `supabase/migrations/20260806010000_midia.sql`
+- `supabase/migrations/20260806020000_ebd.sql`
 
 Tabelas principais do novo modelo:
 
