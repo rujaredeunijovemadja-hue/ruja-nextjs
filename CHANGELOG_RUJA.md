@@ -11,6 +11,8 @@
 - Adicionada `migration_plataformas.sql` com funções e políticas RLS próprias.
 - Adicionada `migration_midia.sql` com solicitações, tarefas, aprovações,
   arquivos e fluxo de status da plataforma Mídia.
+- Criada administração protegida do catálogo de plataformas e dos vínculos de
+  usuários, sem necessidade de SQL para conceder acessos.
 
 ### Aplicação
 

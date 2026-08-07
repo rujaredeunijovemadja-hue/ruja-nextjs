@@ -19,6 +19,9 @@ Os demais usuários dependem de uma linha ativa em `ruja_usuario_plataformas`.
 O Nexus é criado automaticamente para perfis existentes e novos durante a
 transição.
 
+Somente o Líder Supremo pode ativar ou desativar plataformas no Catálogo de
+Plataformas e alterar os vínculos de acesso de outros usuários.
+
 As funções `ruja_has_platform_access` e `ruja_has_platform_module` são a base
 para as políticas RLS das novas tabelas. Não se deve usar apenas a sidebar para
 proteger dados.

@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import type { RujaPage } from './ruja-layout'
 import type { RujaAccessProfile } from '@/lib/ruja/access'
-import type { PlatformAccess } from '@/lib/ruja/platforms'
+import { platformDefinition, type PlatformAccess } from '@/lib/ruja/platforms'
 
 interface Props {
   current: RujaPage
@@ -32,6 +32,7 @@ const MORE_PAGES: { page: RujaPage; icon: string; label: string }[] = [
   { page: 'metas',         icon: '🎯', label: 'Metas' },
   { page: 'departamentos', icon: '🏛️', label: 'Departamentos' },
   { page: 'usuarios',       icon: '👤', label: 'Usuários' },
+  { page: 'plataformas',    icon: '🧩', label: 'Plataformas' },
 ]
 
 export function RujaMobileNav({ current, onNavigate, onBusca, profile, allowedPages, platforms }: Props) {
@@ -44,7 +45,7 @@ export function RujaMobileNav({ current, onNavigate, onBusca, profile, allowedPa
     .filter(item => allowedPages.includes(item.page))
   const platformPages = platforms
     .filter(platform => platform.slug !== 'nexus')
-    .map(platform => ({ page: platform.slug as RujaPage, icon: platform.slug === 'midia' ? '🎥' : '🧩', label: platform.slug === 'midia' ? 'Mídia' : platform.slug }))
+    .map(platform => ({ page: platform.slug as RujaPage, icon: platformDefinition(platform.slug)?.icon ?? '🧩', label: platformDefinition(platform.slug)?.label ?? platform.slug }))
   const morePages = [...MORE_PAGES, ...platformPages].filter(item => allowedPages.includes(item.page))
 
   return (

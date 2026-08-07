@@ -8,7 +8,8 @@ import { useRuja } from '@/lib/ruja/context'
 import { Spinner } from '@/components/ui/spinner'
 import {
   fetchProfiles, fetchMyProfile, createUser, updateProfile,
-  ROLE_LABELS, type RujaProfile,
+  fetchPlatformAccess, updatePlatformAccess,
+  ROLE_LABELS, type PlatformRole, type RujaPlatformOption, type RujaProfile,
 } from '@/lib/ruja/users'
 import { getRujaErrorMessage } from '@/lib/ruja/errors'
 
@@ -26,6 +27,8 @@ export default function RujaUsuarios() {
   const { departamentos } = useRuja()
 
   const [profiles,      setProfiles]      = useState<RujaProfile[]>([])
+  const [platforms,     setPlatforms]     = useState<RujaPlatformOption[]>([])
+  const [memberships,   setMemberships]   = useState<Array<{ user_id: string; plataforma_id: string; role: PlatformRole; departamento_id: string | null; ativo: boolean }>>([])
   const [myProfile,     setMyProfile]     = useState<RujaProfile | null>(null)
   const [loading,       setLoading]       = useState(true)
   const [showForm,      setShowForm]      = useState(false)
@@ -43,7 +46,8 @@ export default function RujaUsuarios() {
     role:            RujaProfile['role']
     departamento_id: string
     ativo:           boolean
-  }>({ role: 'voluntario', departamento_id: '', ativo: true })
+    platformAssignments: Record<string, { ativo: boolean; role: PlatformRole; departamento_id: string | null }>
+  }>({ role: 'voluntario', departamento_id: '', ativo: true, platformAssignments: {} })
   const [editSaving, setEditSaving] = useState(false)
 
   const [form,    setForm]    = useState(FORM_INICIAL)
@@ -58,6 +62,14 @@ export default function RujaUsuarios() {
       const [profs, mine] = await Promise.all([fetchProfiles(), fetchMyProfile()])
       setProfiles(profs)
       setMyProfile(mine)
+      try {
+        const platformAccess = await fetchPlatformAccess()
+        setPlatforms(platformAccess.plataformas)
+        setMemberships(platformAccess.acessos)
+      } catch {
+        setPlatforms([])
+        setMemberships([])
+      }
     } catch (error) {
       const message = getRujaErrorMessage(error, 'Erro ao carregar usuários.')
       setLoadError(message)
@@ -128,6 +140,10 @@ export default function RujaUsuarios() {
       role:            p.role,
       departamento_id: p.departamento_id ?? '',
       ativo:           p.ativo,
+      platformAssignments: Object.fromEntries(platforms.map(platform => {
+        const access = memberships.find(item => item.user_id === p.id && item.plataforma_id === platform.id)
+        return [platform.id, { ativo: access?.ativo ?? platform.slug === 'nexus', role: access?.role ?? 'visualizador', departamento_id: access?.departamento_id ?? p.departamento_id }]
+      })),
     })
   }
 
@@ -143,6 +159,12 @@ export default function RujaUsuarios() {
         ativo:           editForm.ativo,
       })
       if (!res.ok) { showToast(res.error ?? 'Erro ao atualizar.'); return }
+      if (platforms.length) {
+        await Promise.all(platforms.map(platform => {
+          const assignment = editForm.platformAssignments[platform.id] ?? { ativo: false, role: 'visualizador' as PlatformRole, departamento_id: null }
+          return updatePlatformAccess({ user_id: editando.id, plataforma_id: platform.id, role: assignment.role, departamento_id: assignment.departamento_id, ativo: assignment.ativo })
+        }))
+      }
       showToast('✅ Usuário atualizado com sucesso.')
       setEditando(null)
       await loadData()
@@ -459,7 +481,29 @@ export default function RujaUsuarios() {
                 </select>
               </div>
 
-              {/* Status ativo */}
+              {platforms.length > 0 && (
+                <div>
+                  <label className={LBL}>Plataformas autorizadas</label>
+                  <div className="space-y-2">
+                    {platforms.map(platform => {
+                      const assignment = editForm.platformAssignments[platform.id] ?? { ativo: false, role: 'visualizador' as PlatformRole, departamento_id: null }
+                      return (
+                        <div key={platform.id} className="bg-white/5 rounded-xl p-3">
+                          <div className="flex items-center gap-2">
+                            <input type="checkbox" checked={assignment.ativo} disabled={platform.slug === 'nexus'} onChange={event => setEditForm(current => ({ ...current, platformAssignments: { ...current.platformAssignments, [platform.id]: { ...assignment, ativo: event.target.checked } } }))} className="w-4 h-4" />
+                            <span className="text-white text-sm flex-1">{platform.icone} {platform.nome}</span>
+                            <select value={assignment.role} disabled={!assignment.ativo} onChange={event => setEditForm(current => ({ ...current, platformAssignments: { ...current.platformAssignments, [platform.id]: { ...assignment, role: event.target.value as PlatformRole } } }))} className="bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-gray-300 text-xs">
+                              <option value="owner">Owner</option><option value="admin">Admin</option><option value="gestor">Gestor</option><option value="editor">Editor</option><option value="operador">Operador</option><option value="visualizador">Visualizador</option>
+                            </select>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+               {/* Status ativo */}
               <div>
                 <label className={LBL}>Status da Conta</label>
                 <div className="flex gap-3">

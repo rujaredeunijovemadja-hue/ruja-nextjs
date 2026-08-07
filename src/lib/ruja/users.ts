@@ -17,6 +17,10 @@ export interface RujaProfile {
   updated_at:       string
 }
 
+export type PlatformRole = 'owner' | 'admin' | 'gestor' | 'editor' | 'operador' | 'visualizador'
+export interface RujaPlatformOption { id: string; nome: string; slug: string; icone: string | null; ativo: boolean }
+export interface RujaPlatformMembership { user_id: string; plataforma_id: string; role: PlatformRole; departamento_id: string | null; ativo: boolean }
+
 export const ROLE_LABELS: Record<RujaProfile['role'], string> = {
   lider_supremo:      '👑 Líder Supremo',
   administrador:      '🔑 Administrador',
@@ -87,4 +91,28 @@ export async function updateProfile(payload: {
     body:    JSON.stringify(payload),
   })
   return res.json()
+}
+
+export async function fetchPlatformAccess(): Promise<{ plataformas: RujaPlatformOption[]; acessos: RujaPlatformMembership[] }> {
+  const response = await fetch('/api/ruja/users/platforms')
+  const data = await response.json()
+  if (!response.ok) throw new Error(data.error ?? 'Não foi possível carregar acessos de plataformas.')
+  return data
+}
+
+export async function updatePlatformAccess(payload: {
+  user_id: string
+  plataforma_id: string
+  role: PlatformRole
+  departamento_id?: string | null
+  ativo: boolean
+}) {
+  const response = await fetch('/api/ruja/users/platforms', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  const data = await response.json()
+  if (!response.ok) throw new Error(data.error ?? 'Não foi possível atualizar o acesso.')
+  return data as { ok: boolean }
 }

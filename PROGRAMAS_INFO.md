@@ -30,6 +30,9 @@ plataformas possuem acesso, módulos e dados próprios quando ativadas.
 Plataformas autorizadas também aparecem na navegação, sem alterar o catálogo
 fechado de páginas do núcleo legado.
 
+O Líder Supremo também possui a área Catálogo de Plataformas para ativar ou
+desativar plataformas e consultar os módulos habilitados.
+
 As áreas Teens e Simply usam os mesmos módulos operacionais com filtro por
 departamento:
 
