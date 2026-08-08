@@ -15,6 +15,10 @@
   usuários, sem necessidade de SQL para conceder acessos.
 - Iniciado o segundo piloto, Central EBD, com classes e lições isoladas por
   plataforma.
+- Central EBD ganhou cadastro de alunos por classe, mantendo os jovens do Nexus
+  fora desse domínio.
+- Central EBD ganhou chamada por lição, com presença isolada por aluno e classe.
+- Central EBD ganhou materiais privados anexados às lições.
 
 ### Aplicação
 

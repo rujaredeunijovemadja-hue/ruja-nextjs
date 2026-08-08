@@ -135,6 +135,8 @@ Migrations locais:
 - `supabase/migrations/20260806000000_plataformas.sql`
 - `supabase/migrations/20260806010000_midia.sql`
 - `supabase/migrations/20260806020000_ebd.sql`
+- `supabase/migrations/20260806030000_ebd_presenca.sql`
+- `supabase/migrations/20260806040000_ebd_materiais.sql`
 
 Tabelas principais do novo modelo:
 

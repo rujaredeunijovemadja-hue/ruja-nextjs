@@ -38,6 +38,10 @@ proteger dados.
   ao `plataforma_id` autorizado e aos módulos correspondentes.
 - A Central EBD usa tabelas próprias para classes, professores e lições; não
   reutiliza dados pastorais ou frequência de jovens do Nexus.
+- A chamada da EBD usa o módulo `frequencia` da própria plataforma e não grava
+  presença nas tabelas de frequência do Nexus.
+- Materiais da EBD usam bucket privado próprio, sem compartilhar arquivos da
+  plataforma Mídia.
 
 ## Estrutura oficial
 
