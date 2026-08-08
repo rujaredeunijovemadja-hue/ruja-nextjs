@@ -5,6 +5,7 @@ export interface EbdTeacher { id: string; plataforma_id: string; nome: string; c
 export interface EbdStudent { id: string; plataforma_id: string; classe_id: string; nome: string; contato: string; ativo: boolean }
 export interface EbdPresence { aluno_id: string; presente: boolean; observacao: string }
 export interface EbdMaterial { id: string; licao_id: string; nome: string; storage_path: string; mime_type: string | null; signed_url?: string }
+export interface EbdAttendanceSummary { licao_id: string; presentes: number }
 export interface EbdLesson { id: string; plataforma_id: string; classe_id: string; titulo: string; data: string | null; status: 'planejada' | 'ministrada' | 'cancelada'; observacao: string }
 
 export async function fetchEbdClasses(platformId: string) {
@@ -74,6 +75,15 @@ export async function fetchEbdAttendance(lessonId: string) {
   const { data, error } = await sb.from('ruja_ebd_presencas').select('aluno_id,presente,observacao').eq('licao_id', lessonId)
   if (error) throw error
   return (data ?? []) as EbdPresence[]
+}
+
+export async function fetchEbdAttendanceSummary(platformId: string) {
+  const sb = createClient()
+  const { data, error } = await sb.from('ruja_ebd_presencas').select('licao_id,aluno_id').eq('plataforma_id', platformId).eq('presente', true)
+  if (error) throw error
+  const counts = new Map<string, number>()
+  for (const row of data ?? []) counts.set(row.licao_id, (counts.get(row.licao_id) ?? 0) + 1)
+  return Array.from(counts, ([licao_id, presentes]) => ({ licao_id, presentes })) as EbdAttendanceSummary[]
 }
 
 export async function saveEbdAttendance(input: { plataforma_id: string; licao_id: string; presentes: string[] }) {
