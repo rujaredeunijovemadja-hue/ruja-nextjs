@@ -76,6 +76,7 @@ export default function RujaMissoes({ access }: { access: PlatformAccess }) {
     <header className="flex flex-col md:flex-row md:items-center justify-between gap-4"><div className="flex items-center gap-3"><span className="text-3xl">🎯</span><div><h1 className="text-xl font-bold text-white">Missões</h1><p className="text-gray-500 text-sm">Painel exclusivo da liderança para acompanhar jovens e líderes.</p></div></div><button onClick={() => { setShowForm(true); setError('') }} className="bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm">+ Nova missão</button></header>
     {error && <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 text-red-300 text-sm">{error}</div>}
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3"><Metric label="Total" value={missions.length} /><Metric label="Em andamento" value={missions.filter(item => item.status === 'em_andamento').length} color="text-amber-300" /><Metric label="Concluídas" value={missions.filter(item => item.status === 'concluida').length} color="text-green-300" /><Metric label="Atrasadas" value={overdueCount} color="text-red-300" /></div>
+    <MissionSummary missions={missions} />
     <div className="flex gap-2 overflow-x-auto pb-1"><Filter active={filter === 'todas'} onClick={() => setFilter('todas')}>Todas</Filter>{STATUS.map(status => <Filter key={status.value} active={filter === status.value} onClick={() => setFilter(status.value)}>{status.label}</Filter>)}</div>
     {filtered.length === 0 ? <Empty /> : <div className="grid md:grid-cols-2 gap-3">{filtered.map(mission => <MissionCard key={mission.id} mission={mission} onUpdate={(status, progress, comment) => void update(mission, status, progress, comment)} />)}</div>}
     {showForm && <CreateModal form={form} setForm={setForm} targets={targets} departamentos={departamentos} saving={saving} onClose={() => setShowForm(false)} onSave={() => void create()} />}
@@ -114,6 +115,22 @@ function MissionCard({ mission, onUpdate }: { mission: Missao; onUpdate: (status
 function Metric({ label, value, color = 'text-white' }: { label: string; value: number; color?: string }) { return <div className="bg-[#111] border border-white/8 rounded-xl p-4"><div className={`text-2xl font-black ${color}`}>{value}</div><div className="text-gray-500 text-xs mt-1">{label}</div></div> }
 function Filter({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) { return <button onClick={onClick} className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${active ? 'bg-amber-600 text-white' : 'bg-white/5 text-gray-400'}`}>{children}</button> }
 function Empty() { return <div className="bg-[#111] border border-white/8 rounded-xl p-12 text-center text-gray-500"><div className="text-4xl mb-3">🎯</div><p>Nenhuma missão encontrada.</p></div> }
+
+function MissionSummary({ missions }: { missions: Missao[] }) {
+  const grouped = Array.from(missions.reduce((map, mission) => {
+    const current = map.get(mission.alvo_nome) ?? { total: 0, done: 0, active: 0 }
+    current.total += 1
+    if (mission.status === 'concluida') current.done += 1
+    if (mission.status === 'em_andamento') current.active += 1
+    map.set(mission.alvo_nome, current)
+    return map
+  }, new Map<string, { total: number; done: number; active: number }>()).entries())
+    .sort(([, a], [, b]) => (b.done / b.total) - (a.done / a.total))
+    .slice(0, 8)
+
+  if (!grouped.length) return null
+  return <section className="bg-[#111] border border-white/8 rounded-xl p-4"><div className="flex items-center justify-between mb-3"><h2 className="text-white font-semibold">Conclusão por responsável</h2><span className="text-gray-600 text-xs">até 8 responsáveis</span></div><div className="space-y-3">{grouped.map(([name, summary]) => { const percent = Math.round((summary.done / summary.total) * 100); return <div key={name}><div className="flex items-center justify-between text-xs mb-1"><span className="text-gray-300 truncate pr-3">{name}</span><span className="text-gray-500">{summary.done}/{summary.total} concluídas · {summary.active} em andamento</span></div><div className="h-2 bg-white/5 rounded-full"><div className="h-2 rounded-full bg-green-500" style={{ width: `${percent}%` }} /></div></div>})}</div></section>
+}
 
 type FormState = { titulo: string; descricao: string; alvo: string; departamento_id: string; prioridade: MissaoPrioridade; prazo: string }
 function CreateModal({ form, setForm, targets, departamentos, saving, onClose, onSave }: { form: FormState; setForm: Dispatch<SetStateAction<FormState>>; targets: Array<{ value: string; label: string; type: MissaoTarget; id: string; nome: string }>; departamentos: Array<{ id: string; nome: string }>; saving: boolean; onClose: () => void; onSave: () => void }) {
