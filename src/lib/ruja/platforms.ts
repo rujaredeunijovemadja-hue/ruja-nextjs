@@ -49,7 +49,7 @@ export const PLATFORM_REGISTRY: Record<PlatformSlug, PlatformDefinition> = {
   nexus: {
     slug: 'nexus', label: 'Nexus', icon: '🦁', color: '#ef4444',
     description: 'Nucleo global de gestao da RUJA.',
-    modules: ['dashboard', 'jovens', 'frequencia', 'recuperacao', 'eventos', 'relatorios', 'ia', 'configuracoes'],
+    modules: ['dashboard', 'jovens', 'frequencia', 'recuperacao', 'eventos', 'tarefas', 'relatorios', 'ia', 'configuracoes'],
   },
   midia: {
     slug: 'midia', label: 'Midia', icon: '🎥', color: '#8b5cf6',

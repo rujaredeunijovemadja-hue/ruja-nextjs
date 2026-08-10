@@ -21,6 +21,9 @@ lição e aluno, sem utilizar `ruja_frequencias` ou `ruja_eventos_frequencia`.
 Materiais da EBD usam `20260806040000_ebd_materiais.sql`, com bucket privado
 separado e URLs assinadas por lição.
 
+O painel de missões do Nexus usa `20260806050000_missoes.sql`, permitindo
+atribuição a jovens, líderes ou usuários com progresso, prioridade e prazo.
+
 - `ruja_plataformas`: catálogo, status, ordem e identidade visual.
 - `ruja_modulos`: catálogo reutilizável de capacidades.
 - `ruja_plataforma_modulos`: módulos habilitados por plataforma.
@@ -191,3 +194,4 @@ API server-side escreve com `service_role`.
 - `supabase/migrations/20260806020000_ebd.sql`
 - `supabase/migrations/20260806030000_ebd_presenca.sql`
 - `supabase/migrations/20260806040000_ebd_materiais.sql`
+- `supabase/migrations/20260806050000_missoes.sql`

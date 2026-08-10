@@ -19,6 +19,8 @@
   fora desse domínio.
 - Central EBD ganhou chamada por lição, com presença isolada por aluno e classe.
 - Central EBD ganhou materiais privados anexados às lições.
+- Criado painel de missões do Nexus para jovens, líderes e usuários, com prazo,
+  prioridade, progresso e status.
 
 ### Aplicação
 

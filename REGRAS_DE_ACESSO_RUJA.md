@@ -42,6 +42,8 @@ proteger dados.
   presença nas tabelas de frequência do Nexus.
 - Materiais da EBD usam bucket privado próprio, sem compartilhar arquivos da
   plataforma Mídia.
+- Missões usam RLS do módulo `tarefas`, respeitando plataforma, departamento,
+  criador e usuário atribuído.
 
 ## Estrutura oficial
 

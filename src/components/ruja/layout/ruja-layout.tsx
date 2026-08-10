@@ -36,6 +36,7 @@ const RujaMidia = dynamic(() => import('../midia/ruja-midia'))
 const RujaPlataformas = dynamic(() => import('../plataformas/ruja-plataformas'))
 const RujaPlataformaWorkspace = dynamic(() => import('../plataformas/ruja-plataforma-workspace'))
 const RujaEbd = dynamic(() => import('../plataformas/ruja-ebd'))
+const RujaMissoes = dynamic(() => import('../missoes/ruja-missoes'))
 
 export type RujaPage =
   | 'dashboard' | 'teens' | 'simply' | 'eventos' | 'jovens' | 'frequencia' | 'historico-frequencia' | 'recuperacao'
@@ -44,6 +45,7 @@ export type RujaPage =
   | 'midia'
   | 'plataformas'
   | Exclude<PlatformSlug, 'nexus' | 'midia'>
+  | 'missoes'
 
 const PAGE_TITLES: Record<RujaPage, string> = {
   dashboard:     'Dashboard Geral',
@@ -73,6 +75,7 @@ const PAGE_TITLES: Record<RujaPage, string> = {
   redacao:        'Redação',
   palestras:      'Palestras',
   contabilidade:  'Contabilidade',
+  missoes:        'Missões',
 }
 
 const FULL_HEIGHT_PAGES: RujaPage[] = ['analista-ia']
@@ -83,16 +86,16 @@ function allowedPages(profile: RujaAccessProfile, platforms: PlatformAccess[]): 
   const platformPages = platforms.filter(platform => platform.slug !== 'nexus').map(platform => platform.slug as RujaPage)
   if (profile.role === 'lider_supremo') return [...Object.keys(PAGE_TITLES), ...platformPages].filter((page, index, pages) => pages.indexOf(page) === index) as RujaPage[]
   if (profile.role === 'administrador') {
-    return ['dashboard', 'teens', 'simply', 'eventos', 'jovens', 'frequencia', 'historico-frequencia', 'recuperacao', 'departamentos', 'lideres', 'metas', 'aniversarios', 'pendentes', 'alertas', 'analista-ia', ...platformPages]
+    return ['dashboard', 'teens', 'simply', 'eventos', 'jovens', 'frequencia', 'historico-frequencia', 'recuperacao', 'departamentos', 'lideres', 'metas', 'aniversarios', 'pendentes', 'alertas', 'analista-ia', 'missoes', ...platformPages]
   }
   const department = profile.departamento_id === 'simply' ? 'simply' : 'teens'
   if (profile.role === 'lider_departamento') {
-    return [department, 'jovens', 'frequencia', 'historico-frequencia', 'recuperacao', 'lideres', 'metas', 'pendentes', 'analista-ia', ...platformPages]
+    return [department, 'jovens', 'frequencia', 'historico-frequencia', 'recuperacao', 'lideres', 'metas', 'pendentes', 'analista-ia', 'missoes', ...platformPages]
   }
   if (profile.role === 'voluntario') {
-    return [department, 'jovens', 'frequencia', 'historico-frequencia', 'analista-ia', ...platformPages]
+    return [department, 'jovens', 'frequencia', 'historico-frequencia', 'analista-ia', 'missoes', ...platformPages]
   }
-  return [department, 'jovens', 'frequencia', 'historico-frequencia', ...platformPages]
+  return [department, 'jovens', 'frequencia', 'historico-frequencia', 'missoes', ...platformPages]
 }
 
 export function RujaLayout({ profile, platforms }: Props) {
@@ -148,6 +151,7 @@ export function RujaLayout({ profile, platforms }: Props) {
     'analista-ia': <RujaAnalistaIA />,
     midia:          <RujaMidia access={platforms.find(platform => platform.slug === 'midia') ?? platforms[0]} />,
     plataformas:    <RujaPlataformas />,
+    missoes:        <RujaMissoes access={platforms.find(platform => platform.slug === 'nexus') ?? platforms[0]} />,
   }
   for (const platform of platforms) {
     if (platform.slug === 'nexus' || platform.slug === 'midia') continue
