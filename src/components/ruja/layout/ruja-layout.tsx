@@ -37,6 +37,7 @@ const RujaPlataformas = dynamic(() => import('../plataformas/ruja-plataformas'))
 const RujaPlataformaWorkspace = dynamic(() => import('../plataformas/ruja-plataforma-workspace'))
 const RujaContabilidade = dynamic(() => import('../plataformas/ruja-contabilidade'))
 const RujaRedacao = dynamic(() => import('../plataformas/ruja-redacao'))
+const RujaPalestras = dynamic(() => import('../plataformas/ruja-palestras'))
 const RujaEbd = dynamic(() => import('../plataformas/ruja-ebd'))
 const RujaMissoes = dynamic(() => import('../missoes/ruja-missoes'))
 
@@ -159,7 +160,7 @@ export function RujaLayout({ profile, platforms }: Props) {
     if (platform.slug === 'nexus' || platform.slug === 'midia') continue
     PAGES[platform.slug as RujaPage] = platform.slug === 'central-ebd'
       ? <RujaEbd access={platform} />
-      : platform.slug === 'contabilidade' ? <RujaContabilidade access={platform} /> : platform.slug === 'redacao' ? <RujaRedacao access={platform} /> : <RujaPlataformaWorkspace access={platform} />
+      : platform.slug === 'contabilidade' ? <RujaContabilidade access={platform} /> : platform.slug === 'redacao' ? <RujaRedacao access={platform} /> : platform.slug === 'palestras' ? <RujaPalestras access={platform} /> : <RujaPlataformaWorkspace access={platform} />
   }
 
   const isFull = FULL_HEIGHT_PAGES.includes(page)
