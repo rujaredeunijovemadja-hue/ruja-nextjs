@@ -95,7 +95,7 @@ function allowedPages(profile: RujaAccessProfile, platforms: PlatformAccess[]): 
   if (profile.role === 'voluntario') {
     return [department, 'jovens', 'frequencia', 'historico-frequencia', 'analista-ia', 'missoes', ...platformPages]
   }
-  return [department, 'jovens', 'frequencia', 'historico-frequencia', 'missoes', ...platformPages]
+    return [department, 'jovens', 'frequencia', 'historico-frequencia', ...platformPages]
 }
 
 export function RujaLayout({ profile, platforms }: Props) {

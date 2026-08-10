@@ -21,6 +21,8 @@
 - Central EBD ganhou materiais privados anexados às lições.
 - Criado painel de missões do Nexus para jovens, líderes e usuários, com prazo,
   prioridade, progresso e status.
+- Missões agora registram histórico de atualizações e exibem a linha do tempo
+  de progresso no card.
 
 ### Aplicação
 

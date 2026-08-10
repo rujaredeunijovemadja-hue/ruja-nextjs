@@ -24,6 +24,9 @@ separado e URLs assinadas por lição.
 O painel de missões do Nexus usa `20260806050000_missoes.sql`, permitindo
 atribuição a jovens, líderes ou usuários com progresso, prioridade e prazo.
 
+O histórico das mudanças de status e progresso usa
+`20260806060000_missoes_historico.sql`.
+
 - `ruja_plataformas`: catálogo, status, ordem e identidade visual.
 - `ruja_modulos`: catálogo reutilizável de capacidades.
 - `ruja_plataforma_modulos`: módulos habilitados por plataforma.
@@ -195,3 +198,4 @@ API server-side escreve com `service_role`.
 - `supabase/migrations/20260806030000_ebd_presenca.sql`
 - `supabase/migrations/20260806040000_ebd_materiais.sql`
 - `supabase/migrations/20260806050000_missoes.sql`
+- `supabase/migrations/20260806060000_missoes_historico.sql`

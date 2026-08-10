@@ -138,6 +138,7 @@ Migrations locais:
 - `supabase/migrations/20260806030000_ebd_presenca.sql`
 - `supabase/migrations/20260806040000_ebd_materiais.sql`
 - `supabase/migrations/20260806050000_missoes.sql`
+- `supabase/migrations/20260806060000_missoes_historico.sql`
 
 Tabelas principais do novo modelo:
 

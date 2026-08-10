@@ -44,6 +44,9 @@ proteger dados.
   plataforma Mídia.
 - Missões usam RLS do módulo `tarefas`, respeitando plataforma, departamento,
   criador e usuário atribuído.
+- Jovens não possuem login para o painel de missões. Eles são destinatários
+  cadastrados; somente a liderança atualiza status, progresso e histórico.
+- O histórico de missões é acessível somente no mesmo escopo RLS da missão.
 
 ## Estrutura oficial
 
