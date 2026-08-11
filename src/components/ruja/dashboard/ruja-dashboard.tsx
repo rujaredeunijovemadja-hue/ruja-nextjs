@@ -94,7 +94,7 @@ export default function RujaDashboard({ scope = 'all', title }: Props) {
           meta={metas.ativosDepto}
           pct={pctAtivos}
           icon="🏛️"
-          color="bg-green-500"
+          color="bg-yellow-400"
         />
         <MetaCard
           label="Batizados Ativos em Dep."
@@ -102,7 +102,7 @@ export default function RujaDashboard({ scope = 'all', title }: Props) {
           meta={metas.batizadosDepto}
           pct={pctBatizados}
           icon="🔵"
-          color="bg-blue-500"
+          color="bg-sky-400"
         />
       </div>
 
