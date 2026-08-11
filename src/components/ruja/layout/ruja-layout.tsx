@@ -9,6 +9,7 @@ import { signOut } from '@/lib/ruja/auth'
 import { RujaProvider } from '@/lib/ruja/context'
 import { RujaSidebar } from './ruja-sidebar'
 import { RujaMobileNav } from './ruja-mobile-nav'
+import { RujaIcon } from './ruja-icon'
 import { RujaBusca } from '../busca/ruja-busca'
 import dynamic from 'next/dynamic'
 import type { DepartmentScope } from '@/lib/ruja/departments'
@@ -193,6 +194,18 @@ export function RujaLayout({ profile, platforms }: Props) {
         {/* ── COLUNA DIREITA ── */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
+          <header className="hidden md:flex items-center justify-between h-16 px-8 border-b border-white/8 bg-[#0d0d0d] shrink-0">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.18em] text-gray-600">RUJA / Operação</p>
+              <h1 className="text-sm font-semibold text-white mt-0.5">{PAGE_TITLES[page]}</h1>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-xs text-gray-600">{new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium' }).format(new Date())}</span>
+              <button onClick={() => setBuscaAberta(true)} className="p-2 text-gray-500 hover:text-white transition" aria-label="Buscar"><RujaIcon name="search" size={17} /></button>
+              <div className="w-8 h-8 rounded-lg bg-red-600/15 border border-red-500/20 flex items-center justify-center text-red-400 text-xs font-bold">{profile.nome.charAt(0).toUpperCase()}</div>
+            </div>
+          </header>
+
           {/* Topbar mobile */}
           <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-white/8 bg-[#111]/95 backdrop-blur shrink-0 z-30">
             <div className="flex items-center gap-2">
@@ -211,13 +224,13 @@ export function RujaLayout({ profile, platforms }: Props) {
                 onClick={() => setBuscaAberta(true)}
                 className="p-2 text-gray-400 hover:text-white touch-manipulation"
               >
-                🔍
+                <RujaIcon name="search" size={17} />
               </button>
               <button
                 onClick={handleLogout}
                 className="p-2 text-gray-400 hover:text-white touch-manipulation"
               >
-                🚪
+                <RujaIcon name="logout" size={17} />
               </button>
             </div>
           </header>
