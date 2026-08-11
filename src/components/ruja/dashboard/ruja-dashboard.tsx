@@ -62,10 +62,11 @@ export default function RujaDashboard({ scope = 'all', title }: Props) {
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
-        <BrandMark src="/logos/ruja.jpeg" alt="RUJA" label="Rede Unijovem ADJA" className="bg-white" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <BrandMark src="/logos/ruja-brand.png" alt="RUJA" label="Rede Unijovem ADJA" className="bg-[#171717]" />
         <BrandMark src="/logos/nexus.png" alt="Nexus" label="Governança" className="bg-black" />
         <BrandMark src="/logos/simply.png" alt="Simply" label="Simply" className="bg-white" />
+        <BrandMark src="/logos/teens.jpeg" alt="Teens" label="Teens" className="bg-black" />
       </div>
 
       {/* KPIs principais */}
