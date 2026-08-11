@@ -6,6 +6,7 @@ import { Avatar } from '@/components/ui/avatar'
 import { getDiasParaAniversario, getFreqPct } from '@/lib/ruja/calculos'
 import type { DepartmentScope } from '@/lib/ruja/departments'
 import { DEPARTMENT_LABELS, filterJovensByScope, jovemMatchesDepartment } from '@/lib/ruja/departments'
+import { RujaIcon } from '../layout/ruja-icon'
 
 interface Props {
   scope?: DepartmentScope
@@ -51,7 +52,7 @@ export default function RujaDashboard({ scope = 'all', title }: Props) {
   if (loading) return <div className="flex-1 flex items-center justify-center"><Spinner /></div>
 
   return (
-    <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-5">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-7">
       <div>
         <h1 className="text-xl font-bold text-white">
           {title ?? (scope === 'all' ? 'Dashboard Geral' : `Dashboard ${DEPARTMENT_LABELS[scope]}`)}
@@ -63,14 +64,14 @@ export default function RujaDashboard({ scope = 'all', title }: Props) {
 
       {/* KPIs principais */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <KpiCard label="Total de Jovens"  value={kpis.total}    icon="👥" />
-        <KpiCard label="Ativos"           value={kpis.ativos}   icon="🟢" color="text-green-400" />
-        <KpiCard label="Oscilando"        value={kpis.oscilando} icon="🟡" color="text-yellow-400" />
-        <KpiCard label="Em Risco"         value={kpis.emRisco}  icon="🔴" color="text-red-400" />
-        {scope === 'all' && <KpiCard label="Teens" value={kpis.totalTeens} icon="👦" color="text-blue-300" />}
-        {scope === 'all' && <KpiCard label="Simply" value={kpis.totalSimply} icon="🌱" color="text-emerald-300" />}
-        <KpiCard label="Frequência Geral" value={kpis.frequenciaGeral} icon="✅" suffix="%" color="text-blue-400" />
-        <KpiCard label="Batizados"        value={kpis.batizados}icon="🔵" color="text-blue-400" />
+        <KpiCard label="Total de Jovens" value={kpis.total} icon="jovens" />
+        <KpiCard label="Ativos" value={kpis.ativos} icon="check" color="text-green-400" />
+        <KpiCard label="Oscilando" value={kpis.oscilando} icon="alert" color="text-yellow-400" />
+        <KpiCard label="Em Risco" value={kpis.emRisco} icon="risco" color="text-red-400" />
+        {scope === 'all' && <KpiCard label="Teens" value={kpis.totalTeens} icon="jovens" color="text-white" />}
+        {scope === 'all' && <KpiCard label="Simply" value={kpis.totalSimply} icon="jovens" color="text-white" />}
+        <KpiCard label="Frequência Geral" value={kpis.frequenciaGeral} icon="frequencia" suffix="%" color="text-white" />
+        <KpiCard label="Batizados" value={kpis.batizados} icon="check" color="text-white" />
       </div>
 
       {/* Metas */}
@@ -109,7 +110,7 @@ export default function RujaDashboard({ scope = 'all', title }: Props) {
       {/* Aniversariantes */}
       {(kpis.aniversHoje.length > 0 || kpis.aniversMes.length > 0) && (
         <div className="bg-[#111] border border-white/8 rounded-xl p-4">
-          <h3 className="text-white font-semibold mb-3">🎂 Aniversariantes</h3>
+          <h3 className="text-white font-semibold mb-3">Aniversariantes</h3>
           <div className="space-y-2">
             {(kpis.aniversHoje.length > 0 ? kpis.aniversHoje : kpis.aniversMes.slice(0, 5)).map(j => {
               const isHoje = getDiasParaAniversario(j.data_nasc) === 0
@@ -126,7 +127,7 @@ export default function RujaDashboard({ scope = 'all', title }: Props) {
                     <div className="text-white text-sm font-semibold truncate">{j.nome}</div>
                     <div className="text-gray-500 text-xs">
                       {j.data_nasc && `${j.data_nasc.slice(8,10)}/${j.data_nasc.slice(5,7)}`}
-                      {isHoje && <span className="text-yellow-400 font-bold ml-1">🎉 Hoje!</span>}
+                      {isHoje && <span className="text-red-400 font-bold ml-1">Hoje</span>}
                     </div>
                   </div>
                 </div>
@@ -193,7 +194,7 @@ export default function RujaDashboard({ scope = 'all', title }: Props) {
 function KpiCard({ label, value, icon, color='text-white', suffix='' }: { label:string; value:number; icon:string; color?:string; suffix?: string }) {
   return (
     <div className="bg-[#111] border border-white/8 rounded-xl p-4">
-      <div className="text-2xl mb-1">{icon}</div>
+      <div className={`mb-3 ${color}`}><RujaIcon name={icon} size={20} /></div>
       <div className={`text-2xl font-black ${color}`}>{value}{suffix}</div>
       <div className="text-gray-500 text-xs mt-1">{label}</div>
     </div>

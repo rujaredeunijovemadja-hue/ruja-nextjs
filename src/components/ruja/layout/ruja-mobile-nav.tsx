@@ -3,6 +3,7 @@ import { useState } from 'react'
 import type { RujaPage } from './ruja-layout'
 import type { RujaAccessProfile } from '@/lib/ruja/access'
 import { platformDefinition, type PlatformAccess } from '@/lib/ruja/platforms'
+import { RujaIcon } from './ruja-icon'
 
 interface Props {
   current: RujaPage
@@ -46,7 +47,7 @@ export function RujaMobileNav({ current, onNavigate, onBusca, profile, allowedPa
     .filter(item => allowedPages.includes(item.page))
   const platformPages = platforms
     .filter(platform => platform.slug !== 'nexus')
-    .map(platform => ({ page: platform.slug as RujaPage, icon: platformDefinition(platform.slug)?.icon ?? '🧩', label: platformDefinition(platform.slug)?.label ?? platform.slug }))
+    .map(platform => ({ page: platform.slug as RujaPage, icon: platform.slug, label: platformDefinition(platform.slug)?.label ?? platform.slug }))
   const morePages = [...MORE_PAGES, ...platformPages].filter(item => allowedPages.includes(item.page))
 
   return (
@@ -58,13 +59,13 @@ export function RujaMobileNav({ current, onNavigate, onBusca, profile, allowedPa
             <button key={t.page} onClick={() => onNavigate(t.page)}
               className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-xs font-medium transition touch-manipulation
                 ${current === t.page ? 'text-red-500' : 'text-gray-500 hover:text-gray-300'}`}>
-              <span className="text-xl leading-none">{t.icon}</span>
+               <span className="text-red-500"><RujaIcon name={t.icon} size={18} /></span>
               {t.label}
             </button>
           ))}
           <button onClick={() => setShowMore(true)}
             className="flex-1 flex flex-col items-center justify-center gap-0.5 text-xs font-medium text-gray-500 hover:text-gray-300 transition touch-manipulation">
-            <span className="text-xl leading-none">☰</span>
+             <span className="text-gray-500"><RujaIcon name="menu" size={18} /></span>
             Mais
           </button>
         </div>
@@ -81,7 +82,7 @@ export function RujaMobileNav({ current, onNavigate, onBusca, profile, allowedPa
             <div className="px-4 py-2">
               <button onClick={() => { setShowMore(false); onBusca() }}
                 className="w-full flex items-center gap-2 bg-white/5 border border-white/8 rounded-xl px-4 py-3 text-gray-400 text-sm touch-manipulation">
-                🔍 Buscar...
+                <RujaIcon name="search" size={16} /> Buscar...
               </button>
             </div>
 
@@ -91,7 +92,7 @@ export function RujaMobileNav({ current, onNavigate, onBusca, profile, allowedPa
                   onClick={() => { onNavigate(p.page); setShowMore(false) }}
                   className={`flex flex-col items-center gap-1.5 p-3 rounded-xl text-xs font-medium transition touch-manipulation
                     ${current === p.page ? 'bg-red-500/20 text-red-400' : 'text-gray-400 hover:bg-white/5'}`}>
-                  <span className="text-2xl">{p.icon}</span>
+                  <span className="text-gray-500"><RujaIcon name={p.icon} size={20} /></span>
                   <span className="text-center leading-tight">{p.label}</span>
                 </button>
               ))}

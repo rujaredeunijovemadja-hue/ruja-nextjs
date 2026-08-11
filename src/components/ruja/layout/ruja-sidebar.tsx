@@ -6,6 +6,7 @@
 import type { RujaPage } from './ruja-layout'
 import type { RujaAccessProfile } from '@/lib/ruja/access'
 import { platformDefinition, type PlatformAccess } from '@/lib/ruja/platforms'
+import { RujaIcon } from './ruja-icon'
 
 interface Props {
   current:    RujaPage
@@ -19,24 +20,24 @@ interface Props {
 }
 
 const NAV_ITEMS: { page: RujaPage; icon: string; label: string }[] = [
-  { page: 'dashboard',     icon: '🏠', label: 'Dashboard Geral' },
-  { page: 'teens',         icon: '👦', label: 'Teens' },
-  { page: 'simply',        icon: '🌱', label: 'Simply' },
-  { page: 'eventos',       icon: '📅', label: 'Eventos Gerais' },
-  { page: 'pendentes',     icon: '📋', label: 'Cadastros Pendentes' },
-  { page: 'analista-ia',   icon: '🤖', label: 'IA Nexus' },
-  { page: 'config',        icon: '⚙️', label: 'Configurações' },
-  { page: 'departamentos', icon: '🏛️', label: 'Departamentos' },
-  { page: 'usuarios',      icon: '👤', label: 'Usuários' },
-  { page: 'plataformas',   icon: '🧩', label: 'Plataformas' },
-  { page: 'missoes',       icon: '🎯', label: 'Missões' },
+  { page: 'dashboard',     icon: 'dashboard', label: 'Dashboard Geral' },
+  { page: 'teens',         icon: 'jovens', label: 'Teens' },
+  { page: 'simply',        icon: 'jovens', label: 'Simply' },
+  { page: 'eventos',       icon: 'eventos', label: 'Eventos Gerais' },
+  { page: 'pendentes',     icon: 'tarefas', label: 'Cadastros Pendentes' },
+  { page: 'analista-ia',   icon: 'ia', label: 'IA Nexus' },
+  { page: 'config',        icon: 'configuracoes', label: 'Configurações' },
+  { page: 'departamentos', icon: 'departamentos', label: 'Departamentos' },
+  { page: 'usuarios',      icon: 'usuarios', label: 'Usuários' },
+  { page: 'plataformas',   icon: 'plataformas', label: 'Plataformas' },
+  { page: 'missoes',       icon: 'metas', label: 'Missões' },
 ]
 
 export function RujaSidebar({ current, userName, onNavigate, onLogout, onBusca, profile, allowedPages, platforms }: Props) {
   const scopedDepartment = profile.departamento_id === 'simply' ? 'Simply' : 'Teens'
   const platformItems = platforms
     .filter(platform => platform.slug !== 'nexus')
-    .map(platform => ({ page: platform.slug as RujaPage, icon: platformDefinition(platform.slug)?.icon ?? '🧩', label: platformDefinition(platform.slug)?.label ?? platform.slug }))
+    .map(platform => ({ page: platform.slug as RujaPage, icon: platform.slug, label: platformDefinition(platform.slug)?.label ?? platform.slug }))
   const items = [...NAV_ITEMS, ...platformItems]
     .map(item => profile.role !== 'lider_supremo' && profile.role !== 'administrador' && item.page === 'eventos'
       ? { ...item, page: 'frequencia' as RujaPage, label: `Eventos ${scopedDepartment}` }
@@ -67,7 +68,7 @@ export function RujaSidebar({ current, userName, onNavigate, onLogout, onBusca, 
           onClick={onBusca}
           className="mt-3 w-full flex items-center gap-2 bg-white/5 hover:bg-white/8 border border-white/8 rounded-xl px-3 py-2 text-gray-500 text-sm transition touch-manipulation"
         >
-          🔍 <span>Buscar...</span>
+          <RujaIcon name="search" size={16} /> <span>Buscar...</span>
           <span className="ml-auto text-xs bg-white/10 px-1.5 py-0.5 rounded">⌘K</span>
         </button>
       </div>
@@ -83,7 +84,7 @@ export function RujaSidebar({ current, userName, onNavigate, onLogout, onBusca, 
                 ? 'bg-red-500/15 text-red-400'
                 : 'text-gray-400 hover:bg-white/5 hover:text-gray-200'}`}
           >
-            <span className="text-base w-5 text-center">{item.icon}</span>
+            <span className="text-gray-500 w-5"><RujaIcon name={item.icon} /></span>
             {item.label}
           </button>
         ))}
@@ -104,7 +105,7 @@ export function RujaSidebar({ current, userName, onNavigate, onLogout, onBusca, 
           onClick={onLogout}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-400 hover:bg-white/5 hover:text-gray-200 transition touch-manipulation"
         >
-          <span>🚪</span> Sair
+          <RujaIcon name="logout" size={17} /> Sair
         </button>
       </div>
     </aside>
