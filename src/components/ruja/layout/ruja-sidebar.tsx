@@ -51,8 +51,8 @@ export function RujaSidebar({ current, userName, onNavigate, onLogout, onBusca, 
         <div className="flex items-center gap-3">
           {/* Logo real do RUJA */}
           <img
-             src="/logos/nexus.png"
-             alt="Nexus RUJA"
+             src="/logos/ruja-brand.png"
+             alt="RUJA Rede Unijovem ADJA"
             className="w-10 h-10 object-contain rounded-full shrink-0"
           />
           <div>
