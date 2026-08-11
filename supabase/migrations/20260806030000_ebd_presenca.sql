@@ -11,6 +11,25 @@ FROM public.ruja_plataformas p, public.ruja_modulos m
 WHERE p.slug = 'central-ebd' AND m.chave = 'frequencia'
 ON CONFLICT (plataforma_id, modulo_id) DO UPDATE SET ativo = true;
 
+-- Recreate the EBD base tables when the remote migration history contains
+-- 20260806020000 but its objects were not restored in the target schema.
+CREATE TABLE IF NOT EXISTS public.ruja_ebd_classes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(), plataforma_id uuid NOT NULL REFERENCES public.ruja_plataformas(id),
+  nome text NOT NULL, faixa_etaria text NOT NULL DEFAULT '', descricao text NOT NULL DEFAULT '', ativo boolean NOT NULL DEFAULT true,
+  created_by uuid NOT NULL REFERENCES auth.users(id), created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS public.ruja_ebd_alunos (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(), plataforma_id uuid NOT NULL REFERENCES public.ruja_plataformas(id),
+  classe_id uuid NOT NULL REFERENCES public.ruja_ebd_classes(id) ON DELETE CASCADE, nome text NOT NULL, contato text NOT NULL DEFAULT '', ativo boolean NOT NULL DEFAULT true,
+  created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS public.ruja_ebd_licoes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(), plataforma_id uuid NOT NULL REFERENCES public.ruja_plataformas(id),
+  classe_id uuid NOT NULL REFERENCES public.ruja_ebd_classes(id) ON DELETE CASCADE, titulo text NOT NULL, data date,
+  status text NOT NULL DEFAULT 'planejada' CHECK (status IN ('planejada', 'ministrada', 'cancelada')), observacao text NOT NULL DEFAULT '',
+  created_by uuid NOT NULL REFERENCES auth.users(id), created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS public.ruja_ebd_presencas (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   plataforma_id uuid NOT NULL REFERENCES public.ruja_plataformas(id),
