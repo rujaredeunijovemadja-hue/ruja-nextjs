@@ -53,13 +53,18 @@ export default function RujaDashboard({ scope = 'all', title }: Props) {
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-7">
-      <div>
-        <h1 className="text-xl font-bold text-white">
-          {title ?? (scope === 'all' ? 'Dashboard Geral' : `Dashboard ${DEPARTMENT_LABELS[scope]}`)}
-        </h1>
-        <p className="text-gray-500 text-sm">
-          {scope === 'all' ? 'Visão consolidada de todos os departamentos da RUJA.' : `Dados filtrados apenas por ${DEPARTMENT_LABELS[scope]}.`}
-        </p>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold text-white">
+            {title ?? (scope === 'all' ? 'Dashboard Geral' : `Dashboard ${DEPARTMENT_LABELS[scope]}`)}
+          </h1>
+          <p className="text-gray-500 text-sm">
+            {scope === 'all' ? 'Visão consolidada de todos os departamentos da RUJA.' : `Dados filtrados apenas por ${DEPARTMENT_LABELS[scope]}.`}
+          </p>
+        </div>
+        <div className="hidden sm:block w-14 h-14 rounded-xl overflow-hidden bg-white border border-white/15 shrink-0">
+          <img src="/logos/ruja-brand.png" alt="RUJA" className="w-full h-full object-contain" />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -75,8 +80,8 @@ export default function RujaDashboard({ scope = 'all', title }: Props) {
         <KpiCard label="Ativos" value={kpis.ativos} icon="check" color="text-green-400" />
         <KpiCard label="Oscilando" value={kpis.oscilando} icon="alert" color="text-yellow-400" />
         <KpiCard label="Em Risco" value={kpis.emRisco} icon="risco" color="text-red-400" />
-        {scope === 'all' && <KpiCard label="Teens" value={kpis.totalTeens} icon="jovens" color="text-white" />}
-        {scope === 'all' && <KpiCard label="Simply" value={kpis.totalSimply} icon="jovens" color="text-white" />}
+        {scope === 'all' && <KpiCard label="Teens" value={kpis.totalTeens} icon="jovens" logo="/logos/teens.jpeg" color="text-yellow-300" />}
+        {scope === 'all' && <KpiCard label="Simply" value={kpis.totalSimply} icon="jovens" logo="/logos/simply.png" color="text-sky-400" />}
         <KpiCard label="Frequência Geral" value={kpis.frequenciaGeral} icon="frequencia" suffix="%" color="text-white" />
         <KpiCard label="Batizados" value={kpis.batizados} icon="check" color="text-white" />
       </div>
@@ -198,10 +203,10 @@ export default function RujaDashboard({ scope = 'all', title }: Props) {
   )
 }
 
-function KpiCard({ label, value, icon, color='text-white', suffix='' }: { label:string; value:number; icon:string; color?:string; suffix?: string }) {
+function KpiCard({ label, value, icon, logo, color='text-white', suffix='' }: { label:string; value:number; icon:string; logo?: string; color?:string; suffix?: string }) {
   return (
     <div className="bg-[#111] border border-white/8 rounded-xl p-4">
-      <div className={`mb-3 ${color}`}><RujaIcon name={icon} size={20} /></div>
+      {logo ? <div className={`w-9 h-9 rounded-lg overflow-hidden mb-2 border ${logo.includes('teens') ? 'bg-[#211b05] border-yellow-500/30' : 'bg-[#071b2b] border-sky-500/30'}`}><img src={logo} alt="" className="w-full h-full object-contain" /></div> : <div className={`mb-3 ${color}`}><RujaIcon name={icon} size={20} /></div>}
       <div className={`text-2xl font-black ${color}`}>{value}{suffix}</div>
       <div className="text-gray-500 text-xs mt-1">{label}</div>
     </div>
@@ -209,7 +214,7 @@ function KpiCard({ label, value, icon, color='text-white', suffix='' }: { label:
 }
 
 function BrandMark({ src, alt, label, className }: { src: string; alt: string; label: string; className: string }) {
-  return <div className={`flex items-center gap-2.5 rounded-xl border border-white/10 px-3 py-2.5 ${className}`}><div className="w-8 h-8 rounded-lg overflow-hidden shrink-0"><img src={src} alt={alt} className="w-full h-full object-contain" /></div><span className="text-[10px] font-semibold text-gray-700 truncate">{label}</span></div>
+  return <div className={`flex items-center gap-2.5 rounded-xl border border-white/10 px-3 py-2.5 ${className}`}><div className="w-8 h-8 rounded-lg overflow-hidden shrink-0"><img src={src} alt={alt} className="w-full h-full object-contain" /></div><span className={`text-[10px] font-semibold truncate ${className.includes('bg-black') || className.includes('bg-[#171717]') ? 'text-white' : 'text-gray-700'}`}>{label}</span></div>
 }
 
 function MetaCard({ label, atual, meta, pct, icon, color }: {
