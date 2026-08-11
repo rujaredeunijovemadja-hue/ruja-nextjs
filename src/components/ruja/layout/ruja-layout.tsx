@@ -210,8 +210,8 @@ export function RujaLayout({ profile, platforms }: Props) {
           <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-white/8 bg-[#111]/95 backdrop-blur shrink-0 z-30">
             <div className="flex items-center gap-2">
               <img
-                src="/ruja-logo.png"
-                alt="RUJA"
+                 src="/logos/nexus.png"
+                 alt="Nexus RUJA"
                 className="w-7 h-7 object-contain rounded-full"
               />
               <span className="font-black text-white text-base">

@@ -62,6 +62,12 @@ export default function RujaDashboard({ scope = 'all', title }: Props) {
         </p>
       </div>
 
+      <div className="grid grid-cols-3 gap-3">
+        <BrandMark src="/logos/ruja.jpeg" alt="RUJA" label="Rede Unijovem ADJA" className="bg-white" />
+        <BrandMark src="/logos/nexus.png" alt="Nexus" label="Governança" className="bg-black" />
+        <BrandMark src="/logos/simply.png" alt="Simply" label="Simply" className="bg-white" />
+      </div>
+
       {/* KPIs principais */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <KpiCard label="Total de Jovens" value={kpis.total} icon="jovens" />
@@ -199,6 +205,10 @@ function KpiCard({ label, value, icon, color='text-white', suffix='' }: { label:
       <div className="text-gray-500 text-xs mt-1">{label}</div>
     </div>
   )
+}
+
+function BrandMark({ src, alt, label, className }: { src: string; alt: string; label: string; className: string }) {
+  return <div className={`flex items-center gap-2.5 rounded-xl border border-white/10 px-3 py-2.5 ${className}`}><div className="w-8 h-8 rounded-lg overflow-hidden shrink-0"><img src={src} alt={alt} className="w-full h-full object-contain" /></div><span className="text-[10px] font-semibold text-gray-700 truncate">{label}</span></div>
 }
 
 function MetaCard({ label, atual, meta, pct, icon, color }: {
