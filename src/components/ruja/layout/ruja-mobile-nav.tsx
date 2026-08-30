@@ -35,6 +35,7 @@ const MORE_PAGES: { page: RujaPage; icon: string; label: string }[] = [
   { page: 'usuarios',       icon: '👤', label: 'Usuários' },
   { page: 'plataformas',    icon: '🧩', label: 'Plataformas' },
   { page: 'missoes',        icon: '🎯', label: 'Missões' },
+  { page: 'automacao',      icon: '🤖', label: 'Automação' },
 ]
 
 export function RujaMobileNav({ current, onNavigate, onBusca, profile, allowedPages, platforms }: Props) {

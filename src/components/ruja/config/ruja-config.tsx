@@ -1,94 +1,10 @@
 'use client'
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef } from 'react'
 import { useRuja } from '@/lib/ruja/context'
 import { saveConfig } from '@/lib/ruja/queries'
 import { exportToCSV, importFromCSV } from '@/lib/ruja/csv'
 import { createClient } from '@/lib/supabase/client'
 import { Spinner } from '@/components/ui/spinner'
-
-// ─── Card: WhatsApp da automação (PLANO_AUTOMACAO_WHATSAPP_RUJA.md) ────
-function WhatsappAutomacaoCard() {
-  const [qr, setQr] = useState<string | null>(null)
-  const [connected, setConnected] = useState<boolean | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [erro, setErro] = useState('')
-
-  const buscarQr = useCallback(async () => {
-    setLoading(true)
-    setErro('')
-    try {
-      const res = await fetch('/api/ruja/whatsapp/qrcode')
-      const data = await res.json()
-      if (!res.ok || data.ok === false) {
-        const detalhe = [data.causeCode, data.causeMessage].filter(Boolean).join(': ')
-        setErro((data.error ?? 'Erro ao gerar QR code.') + (detalhe ? ` (${detalhe})` : ''))
-        setQr(null)
-        return
-      }
-      setConnected(Boolean(data.connected))
-      setQr(data.connected ? null : (data.base64 ?? null))
-    } catch (e) {
-      setErro(e instanceof Error ? e.message : 'Erro ao conectar.')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  // Poll de estado a cada 4s enquanto não conectar -- some assim que
-  // conectar (não precisa mais ficar checando).
-  useEffect(() => {
-    if (connected) return
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch('/api/ruja/whatsapp/qrcode?check=state')
-        const data = await res.json()
-        if (data.connected) {
-          setConnected(true)
-          setQr(null)
-        }
-      } catch {
-        // silencioso -- próximo poll tenta de novo
-      }
-    }, 4000)
-    return () => clearInterval(interval)
-  }, [connected])
-
-  return (
-    <div className="bg-[#111] border border-white/8 rounded-xl p-5">
-      <h2 className="text-white font-semibold mb-1">💬 WhatsApp da Automação</h2>
-      <p className="text-gray-500 text-xs mb-3">
-        Número oficial da RUJA usado pro grupo de líderes e o SOS de acolhimento.
-      </p>
-
-      {connected === true && (
-        <div className="flex items-center gap-2 text-green-400 text-sm py-3">
-          <span>✅</span> Conectado
-        </div>
-      )}
-
-      {connected !== true && qr && (
-        <div className="flex flex-col items-center gap-3 py-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={qr} alt="QR Code do WhatsApp" className="w-56 h-56 rounded-lg bg-white p-2" />
-          <p className="text-gray-500 text-xs text-center">
-            Escaneie em WhatsApp → Aparelhos conectados → Conectar um aparelho.
-            <br />O código expira rápido -- gere outro se der tempo.
-          </p>
-        </div>
-      )}
-
-      {erro && <p className="text-red-400 text-sm mb-2">{erro}</p>}
-
-      <button
-        onClick={buscarQr}
-        disabled={loading}
-        className="w-full py-3 bg-white/10 hover:bg-white/15 disabled:opacity-50 text-white font-bold rounded-xl touch-manipulation"
-      >
-        {loading ? 'Gerando...' : connected ? '🔄 Verificar conexão' : '📱 Gerar QR Code'}
-      </button>
-    </div>
-  )
-}
 
 export default function RujaConfig() {
   const { jovens, lideres, departamentos, frequencias, loading, reload } = useRuja()
@@ -186,9 +102,6 @@ export default function RujaConfig() {
           <div><div className="text-white font-bold">{departamentos.length}</div><div className="text-gray-500 text-xs">Deptos</div></div>
         </div>
       </div>
-
-      {/* WhatsApp da Automação */}
-      <WhatsappAutomacaoCard />
 
       {/* Exportar CSV */}
       <div className="bg-[#111] border border-white/8 rounded-xl p-5">

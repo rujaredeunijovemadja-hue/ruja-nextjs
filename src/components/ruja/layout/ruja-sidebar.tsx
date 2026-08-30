@@ -31,6 +31,7 @@ const NAV_ITEMS: { page: RujaPage; icon: string; label: string }[] = [
   { page: 'usuarios',      icon: 'usuarios', label: 'Usuários' },
   { page: 'plataformas',   icon: 'plataformas', label: 'Plataformas' },
   { page: 'missoes',       icon: 'metas', label: 'Missões' },
+  { page: 'automacao',     icon: 'automacao', label: 'Automação' },
 ]
 
 export function RujaSidebar({ current, userName, onNavigate, onLogout, onBusca, profile, allowedPages, platforms }: Props) {
