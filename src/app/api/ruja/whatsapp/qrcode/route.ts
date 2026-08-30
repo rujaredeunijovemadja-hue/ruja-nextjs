@@ -68,6 +68,23 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ ok: true, base64, connected: rawState === 'open', rawState })
   } catch (err) {
-    return NextResponse.json({ ok: false, error: err instanceof Error ? err.message : 'Falha ao consultar a Evolution.' }, { status: 502 })
+    // "fetch failed" sozinho não diz nada -- err.cause tem a causa real
+    // (ECONNREFUSED, timeout, TLS...). Acesso 30/08/2026: 502 em toda
+    // tentativa (nunca chega log na Evolution) -- precisamos da causa
+    // exata pra saber se é timeout, DNS ou TLS entre Vercel e o Tailscale
+    // Funnel.
+    const cause = err instanceof Error && 'cause' in err ? (err as { cause?: unknown }).cause : undefined
+    console.error('[ruja/whatsapp/qrcode] falha ao chamar Evolution', {
+      message: err instanceof Error ? err.message : String(err),
+      causeMessage: cause instanceof Error ? cause.message : cause ? String(cause) : null,
+      causeCode: cause && typeof cause === 'object' && 'code' in cause ? (cause as { code?: unknown }).code : null,
+      baseUrl: cfg.baseUrl,
+    })
+    return NextResponse.json({
+      ok: false,
+      error: err instanceof Error ? err.message : 'Falha ao consultar a Evolution.',
+      causeMessage: cause instanceof Error ? cause.message : cause ? String(cause) : null,
+      causeCode: cause && typeof cause === 'object' && 'code' in cause ? (cause as { code?: unknown }).code : null,
+    }, { status: 502 })
   }
 }

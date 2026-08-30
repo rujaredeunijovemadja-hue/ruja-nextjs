@@ -20,7 +20,8 @@ function WhatsappAutomacaoCard() {
       const res = await fetch('/api/ruja/whatsapp/qrcode')
       const data = await res.json()
       if (!res.ok || data.ok === false) {
-        setErro(data.error ?? 'Erro ao gerar QR code.')
+        const detalhe = [data.causeCode, data.causeMessage].filter(Boolean).join(': ')
+        setErro((data.error ?? 'Erro ao gerar QR code.') + (detalhe ? ` (${detalhe})` : ''))
         setQr(null)
         return
       }
