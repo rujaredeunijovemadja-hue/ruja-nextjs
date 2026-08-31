@@ -5,6 +5,7 @@ import { saveConfig } from '@/lib/ruja/queries'
 import { uploadFoto } from '@/lib/ruja/storage'
 import { Spinner } from '@/components/ui/spinner'
 import type { LiderSupremo } from '@/lib/ruja/types'
+import { X, Crown, Pencil, MessageCircle, Camera, BookOpen, Target, FileText, Clock, CalendarDays, type LucideIcon } from 'lucide-react'
 
 export default function RujaLiderSupremo() {
   const { liderSupremo, loading, reload } = useRuja()
@@ -59,10 +60,10 @@ export default function RujaLiderSupremo() {
   return (
     <div className="p-4 md:p-6 max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-5">
-        <h1 className="text-xl font-bold text-white">👑 Líder Supremo</h1>
+        <h1 className="flex items-center gap-2 text-xl font-bold text-white"><Crown size={20} className="text-yellow-400" />Líder Supremo</h1>
         <button onClick={abrirEditar}
-          className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm touch-manipulation">
-          ✏️ Editar
+          className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm touch-manipulation">
+          <Pencil size={14} />Editar
         </button>
       </div>
 
@@ -74,7 +75,7 @@ export default function RujaLiderSupremo() {
             <div className="w-20 h-20 rounded-full border-4 border-[#111] overflow-hidden bg-red-500/20 flex items-center justify-center">
               {ls.foto
                 ? <img src={ls.foto} alt={ls.nome} className="w-full h-full object-cover" />
-                : <span className="text-red-400 font-black text-2xl">{ls.nome?.charAt(0) ?? '👑'}</span>
+                : ls.nome ? <span className="text-red-400 font-black text-2xl">{ls.nome.charAt(0)}</span> : <Crown size={28} className="text-red-400" />
               }
             </div>
           </div>
@@ -88,13 +89,13 @@ export default function RujaLiderSupremo() {
             {ls.contato && (
               <a href={`https://wa.me/55${ls.contato.replace(/\D/g,'')}`} target="_blank" rel="noreferrer"
                 className="flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-xl px-3 py-2.5 text-green-400 text-sm touch-manipulation hover:bg-green-500/20 transition">
-                📱 WhatsApp
+                <MessageCircle size={15} />WhatsApp
               </a>
             )}
             {ls.instagram && (
               <a href={`https://instagram.com/${ls.instagram.replace('@','')}`} target="_blank" rel="noreferrer"
                 className="flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 rounded-xl px-3 py-2.5 text-purple-400 text-sm touch-manipulation hover:bg-purple-500/20 transition">
-                📸 Instagram
+                <Camera size={15} />Instagram
               </a>
             )}
           </div>
@@ -104,19 +105,19 @@ export default function RujaLiderSupremo() {
       {/* Informações */}
       <div className="space-y-3">
         {ls.versiculoLider && (
-          <InfoCard icon="📖" label="Versículo" value={ls.versiculoLider} highlight />
+          <InfoCard icon={BookOpen} label="Versículo" value={ls.versiculoLider} highlight />
         )}
         {ls.visao && (
-          <InfoCard icon="🎯" label="Visão do Ministério" value={ls.visao} />
+          <InfoCard icon={Target} label="Visão do Ministério" value={ls.visao} />
         )}
         {ls.descricao && (
-          <InfoCard icon="📝" label="Sobre" value={ls.descricao} />
+          <InfoCard icon={FileText} label="Sobre" value={ls.descricao} />
         )}
         {ls.tempoRuja && (
-          <InfoCard icon="⏳" label="Tempo na RUJA" value={ls.tempoRuja} />
+          <InfoCard icon={Clock} label="Tempo na RUJA" value={ls.tempoRuja} />
         )}
         {ls.dataPosseLider && (
-          <InfoCard icon="📅" label="Data de Posse" value={ls.dataPosseLider} />
+          <InfoCard icon={CalendarDays} label="Data de Posse" value={ls.dataPosseLider} />
         )}
       </div>
 
@@ -126,7 +127,7 @@ export default function RujaLiderSupremo() {
           <div className="bg-[#111] border border-white/10 rounded-t-2xl md:rounded-2xl w-full max-w-lg max-h-[92dvh] flex flex-col">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/8 flex-shrink-0">
               <h2 className="text-white font-bold">Editar Perfil</h2>
-              <button onClick={() => setEditando(false)} className="text-gray-400 text-xl touch-manipulation">✕</button>
+              <button onClick={() => setEditando(false)} className="text-gray-400 text-xl touch-manipulation"><X size={16} /></button>
             </div>
 
             <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
@@ -136,7 +137,7 @@ export default function RujaLiderSupremo() {
                   className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center text-red-400 font-bold text-xl cursor-pointer overflow-hidden border-2 border-dashed border-red-500/30 touch-manipulation flex-shrink-0">
                   {fotoPreview
                     ? <img src={fotoPreview} className="w-full h-full object-cover" alt="" />
-                    : form.nome?.charAt(0) ?? '👑'
+                    : (form.nome ? form.nome.charAt(0) : <Crown size={22} />)
                   }
                 </div>
                 <button onClick={() => fotoRef.current?.click()}
@@ -204,10 +205,10 @@ export default function RujaLiderSupremo() {
   )
 }
 
-function InfoCard({ icon, label, value, highlight }: { icon: string; label: string; value: string; highlight?: boolean }) {
+function InfoCard({ icon: Icon, label, value, highlight }: { icon: LucideIcon; label: string; value: string; highlight?: boolean }) {
   return (
     <div className={`bg-[#111] border rounded-xl p-4 ${highlight ? 'border-red-500/20' : 'border-white/8'}`}>
-      <div className="text-gray-500 text-xs uppercase tracking-wider mb-1">{icon} {label}</div>
+      <div className="flex items-center gap-1.5 text-gray-500 text-xs uppercase tracking-wider mb-1"><Icon size={12} />{label}</div>
       <p className={`text-sm leading-relaxed ${highlight ? 'text-red-300 italic' : 'text-gray-300'}`}>{value}</p>
     </div>
   )

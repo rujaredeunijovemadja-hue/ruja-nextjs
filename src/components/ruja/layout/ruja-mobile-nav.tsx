@@ -15,27 +15,27 @@ interface Props {
 }
 
 const MAIN_TABS: { page: RujaPage; icon: string; label: string }[] = [
-  { page: 'dashboard',   icon: '🏠', label: 'Geral' },
-  { page: 'teens',       icon: '👦', label: 'Teens' },
-  { page: 'simply',      icon: '🌱', label: 'Simply' },
-  { page: 'eventos',     icon: '📅', label: 'Eventos' },
+  { page: 'dashboard',   icon: 'dashboard', label: 'Geral' },
+  { page: 'teens',       icon: 'teens', label: 'Teens' },
+  { page: 'simply',      icon: 'simply', label: 'Simply' },
+  { page: 'eventos',     icon: 'eventos', label: 'Eventos' },
 ]
 
 const MORE_PAGES: { page: RujaPage; icon: string; label: string }[] = [
-  { page: 'pendentes',   icon: '📋', label: 'Pendentes' },
-  { page: 'analista-ia',   icon: '🤖', label: 'IA Nexus' },
-  { page: 'config',        icon: '⚙️', label: 'Configurações' },
-  { page: 'historico-frequencia', icon: '📋', label: 'Relatórios' },
-  { page: 'jovens',        icon: '👥', label: 'Jovens' },
-  { page: 'frequencia',    icon: '✅', label: 'Frequência' },
-  { page: 'recuperacao',   icon: '🚑', label: 'Recuperação' },
-  { page: 'lideres',       icon: '⭐', label: 'Líderes' },
-  { page: 'metas',         icon: '🎯', label: 'Metas' },
-  { page: 'departamentos', icon: '🏛️', label: 'Departamentos' },
-  { page: 'usuarios',       icon: '👤', label: 'Usuários' },
-  { page: 'plataformas',    icon: '🧩', label: 'Plataformas' },
-  { page: 'missoes',        icon: '🎯', label: 'Missões' },
-  { page: 'automacao',      icon: '🤖', label: 'Automação' },
+  { page: 'pendentes',   icon: 'pendentes', label: 'Pendentes' },
+  { page: 'analista-ia',   icon: 'ia', label: 'IA Nexus' },
+  { page: 'config',        icon: 'config', label: 'Configurações' },
+  { page: 'historico-frequencia', icon: 'historico-frequencia', label: 'Relatórios' },
+  { page: 'jovens',        icon: 'jovens', label: 'Jovens' },
+  { page: 'frequencia',    icon: 'check', label: 'Frequência' },
+  { page: 'recuperacao',   icon: 'recuperacao', label: 'Recuperação' },
+  { page: 'lideres',       icon: 'lideres', label: 'Líderes' },
+  { page: 'metas',         icon: 'metas', label: 'Metas' },
+  { page: 'departamentos', icon: 'departamentos', label: 'Departamentos' },
+  { page: 'usuarios',       icon: 'usuarios', label: 'Usuários' },
+  { page: 'plataformas',    icon: 'plataformas', label: 'Plataformas' },
+  { page: 'missoes',        icon: 'missoes', label: 'Missões' },
+  { page: 'automacao',      icon: 'automacao', label: 'Automação' },
 ]
 
 export function RujaMobileNav({ current, onNavigate, onBusca, profile, allowedPages, platforms }: Props) {

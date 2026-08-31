@@ -7,6 +7,7 @@ import { Spinner } from '@/components/ui/spinner'
 import type { Jovem, Status, Batizado } from '@/lib/ruja/types'
 import type { DepartmentScope } from '@/lib/ruja/departments'
 import { activeDepartments, DEPARTMENT_LABELS } from '@/lib/ruja/departments'
+import { X, CheckCircle2, XCircle } from 'lucide-react'
 
 const STATUS_OPTS: Status[] = ['Ativo', 'Oscilando', 'Ocioso', 'Em Risco']
 
@@ -100,7 +101,7 @@ export function RujaJovemForm({ jovem, scope = 'all', onClose, onSaved }: Props)
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/8">
           <h2 className="text-white font-bold">{jovem ? 'Editar Jovem' : 'Novo Jovem'}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-xl touch-manipulation">✕</button>
+          <button onClick={onClose} className="text-gray-400 hover:text-white text-xl touch-manipulation"><X size={16} /></button>
         </div>
 
         {/* Scroll area */}
@@ -199,7 +200,7 @@ export function RujaJovemForm({ jovem, scope = 'all', onClose, onSaved }: Props)
                   className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition touch-manipulation
                     ${form.batizado === b ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-white/5 text-gray-400'}`}
                 >
-                  {b === 'sim' ? '✅ Sim' : '❌ Não'}
+                  {b === 'sim' ? (<span className="flex items-center justify-center gap-1"><CheckCircle2 size={14}/>Sim</span>) : (<span className="flex items-center justify-center gap-1"><XCircle size={14}/>Não</span>)}
                 </button>
               ))}
             </div>

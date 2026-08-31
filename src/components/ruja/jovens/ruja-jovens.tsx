@@ -11,6 +11,7 @@ import { deleteJovem, auditLog } from '@/lib/ruja/queries'
 import type { Jovem } from '@/lib/ruja/types'
 import type { DepartmentScope } from '@/lib/ruja/departments'
 import { activeDepartments, DEPARTMENT_LABELS, filterJovensByScope, jovemMatchesDepartmentName } from '@/lib/ruja/departments'
+import { Pencil, Trash2, Users, Droplet } from 'lucide-react'
 
 type Filtro = 'todos' | 'Ativo' | 'Oscilando' | 'Ocioso' | 'Em Risco'
 type Depto = 'todos' | string
@@ -126,7 +127,7 @@ export default function RujaJovens({ scope = 'all' }: { scope?: DepartmentScope 
       {/* Lista */}
       {filtrados.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
-          <div className="text-4xl mb-3">👥</div>
+          <div className="flex justify-center mb-3"><Users size={40} className="text-gray-600" /></div>
           <p>{busca ? 'Nenhum resultado para a busca.' : 'Nenhum jovem cadastrado.'}</p>
         </div>
       ) : (
@@ -227,7 +228,7 @@ function JovemCard({ jovem, onView, onEdit, onDelete, onExpandFoto, canManage }:
           <span className="text-white font-semibold text-sm truncate">{jovem.nome}</span>
           <StatusBadge status={jovem.status} />
           {jovem.batizado === 'sim' && (
-            <span className="text-xs text-blue-400">🔵 Batizado</span>
+            <span className="flex items-center gap-1 text-xs text-blue-400"><Droplet size={12} />Batizado</span>
           )}
         </div>
         <div className="text-gray-500 text-xs mt-0.5">{jovem.contato || '—'}</div>
@@ -244,11 +245,11 @@ function JovemCard({ jovem, onView, onEdit, onDelete, onExpandFoto, canManage }:
       {canManage && <div className="flex gap-1 flex-shrink-0">
         <button onClick={e => { e.stopPropagation(); onEdit() }}
           className="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition touch-manipulation text-base">
-          ✏️
+          <Pencil size={16} />
         </button>
         <button onClick={e => { e.stopPropagation(); onDelete() }}
           className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition touch-manipulation text-base">
-          🗑️
+          <Trash2 size={16} />
         </button>
       </div>}
     </div>

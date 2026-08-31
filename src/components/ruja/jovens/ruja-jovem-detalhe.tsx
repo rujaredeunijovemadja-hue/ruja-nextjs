@@ -8,6 +8,7 @@ import {
   getEventoFreqPct, getEventoFaltasSeguidas, eventosDoDepartamento, departamentoNomePorId,
 } from '@/lib/ruja/calculos'
 import type { Jovem } from '@/lib/ruja/types'
+import { Pencil, X, Check } from 'lucide-react'
 
 interface Props {
   jovem: Jovem
@@ -51,8 +52,8 @@ export function RujaJovemDetalhe({ jovem, onClose, onEdit }: Props) {
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/8 flex-shrink-0">
           <h2 className="text-white font-bold truncate">Perfil do Jovem</h2>
           <div className="flex gap-2 flex-shrink-0">
-            {onEdit && <button onClick={onEdit} className="p-2 text-gray-400 hover:text-white bg-white/5 rounded-lg touch-manipulation">✏️</button>}
-            <button onClick={onClose} className="p-2 text-gray-400 hover:text-white text-xl touch-manipulation">✕</button>
+            {onEdit && <button onClick={onEdit} className="p-2 text-gray-400 hover:text-white bg-white/5 rounded-lg touch-manipulation"><Pencil size={16} /></button>}
+            <button onClick={onClose} className="p-2 text-gray-400 hover:text-white text-xl touch-manipulation"><X size={16} /></button>
           </div>
         </div>
 
@@ -117,8 +118,8 @@ export function RujaJovemDetalhe({ jovem, onClose, onEdit }: Props) {
                 <div className="text-gray-500 text-xs mb-2">Últimos registros legados</div>
                 <div className="flex flex-wrap gap-1.5">
                   {ultFreqs.map(f => (
-                    <div key={f.id} className={`text-xs px-2 py-1 rounded-lg ${f.presenca === 'presente' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                      {f.data.slice(5)} {f.presenca === 'presente' ? '✓' : '✗'}
+                    <div key={f.id} className={`flex items-center gap-1 text-xs px-2 py-1 rounded-lg ${f.presenca === 'presente' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                      {f.data.slice(5)} {f.presenca === 'presente' ? <Check size={11} /> : <X size={11} />}
                     </div>
                   ))}
                 </div>

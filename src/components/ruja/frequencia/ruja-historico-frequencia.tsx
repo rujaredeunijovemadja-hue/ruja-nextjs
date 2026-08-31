@@ -7,6 +7,7 @@ import { departamentoNomePorId } from '@/lib/ruja/calculos'
 import type { EventoFrequencia, EventoFrequenciaInput, StatusEvento, TipoEventoFrequencia } from '@/lib/ruja/types'
 import { getRujaErrorMessage } from '@/lib/ruja/errors'
 import { jovemMatchesDepartmentName } from '@/lib/ruja/departments'
+import { X, Check } from 'lucide-react'
 
 type Filtro = { data: string; departamentoId: string; liderId: string }
 const TIPOS: TipoEventoFrequencia[] = ['Culto', 'Reunião', 'Ensaio', 'Conexão', 'Congresso', 'Vigília', 'Evangelismo', 'Outro']
@@ -185,7 +186,7 @@ export default function RujaHistoricoFrequencia() {
                   <p className="text-gray-500 text-xs mt-2">Envolvidos: {aberto.departamentos_envolvidos.join(', ')}</p>
                 ) : null}
               </div>
-              <button onClick={() => setAberto(null)} className="text-gray-400 hover:text-white p-2">✕</button>
+              <button onClick={() => setAberto(null)} className="text-gray-400 hover:text-white p-2"><X size={16} /></button>
             </div>
             <div className="p-5 border-b border-white/8">
               <input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar participante" className={INP} />
@@ -295,7 +296,7 @@ function EditarEventoModal({
       <div className="bg-[#141414] border border-white/12 rounded-t-2xl md:rounded-2xl w-full max-w-3xl max-h-[92dvh] flex flex-col">
         <div className="p-5 border-b border-white/8 flex items-center justify-between">
           <h2 className="text-white font-bold">Editar evento</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white p-2">✕</button>
+          <button onClick={onClose} className="text-gray-400 hover:text-white p-2"><X size={16} /></button>
         </div>
         <div className="overflow-y-auto p-5 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -336,7 +337,7 @@ function EditarEventoModal({
                     if (n.has(j.id)) n.delete(j.id); else n.add(j.id)
                     return n
                   })} className="w-full flex items-center gap-3 text-left">
-                    <span className={`w-5 h-5 rounded-full border flex items-center justify-center ${checked ? 'bg-green-500 border-green-500 text-white' : 'border-gray-600'}`}>{checked ? '✓' : ''}</span>
+                    <span className={`w-5 h-5 rounded-full border flex items-center justify-center ${checked ? 'bg-green-500 border-green-500 text-white' : 'border-gray-600'}`}>{checked ? <Check size={12} /> : ''}</span>
                     <span className="text-white text-sm font-medium flex-1">{j.nome}</span>
                   </button>
                   {checked && (

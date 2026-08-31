@@ -1,5 +1,6 @@
 'use client'
 import Image from 'next/image'
+import { X } from 'lucide-react'
 
 interface FotoLightboxProps {
   src: string
@@ -17,7 +18,7 @@ export function FotoLightbox({ src, nome, onClose }: FotoLightboxProps) {
         onClick={onClose}
         className="absolute top-4 right-4 p-2 text-white/70 hover:text-white text-2xl touch-manipulation"
       >
-        ✕
+        <X size={16} />
       </button>
       <Image
         src={src}

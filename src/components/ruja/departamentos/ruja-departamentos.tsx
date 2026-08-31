@@ -5,6 +5,7 @@ import { upsertDepartamento, deleteDepartamento } from '@/lib/ruja/queries'
 import { Spinner } from '@/components/ui/spinner'
 import type { Departamento } from '@/lib/ruja/types'
 import { jovemMatchesDepartmentName } from '@/lib/ruja/departments'
+import { Pencil, Trash2, X, Landmark } from 'lucide-react'
 
 const EMPTY: Omit<Departamento, 'id'> = { nome:'', icone:'🏛️', lider:'', capacidade:0, descricao:'' }
 
@@ -78,7 +79,7 @@ export default function RujaDepartamentos() {
       {/* Cards */}
       {departamentos.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
-          <div className="text-4xl mb-3">🏛️</div>
+          <div className="flex justify-center mb-3"><Landmark size={36} className="text-gray-600" /></div>
           <p>Nenhum departamento cadastrado.</p>
         </div>
       ) : (
@@ -97,8 +98,8 @@ export default function RujaDepartamentos() {
                     </div>
                   </div>
                   <div className="flex gap-1">
-                    <button onClick={() => openEdit(d)} className="p-2 text-gray-400 hover:text-white touch-manipulation">✏️</button>
-                    <button onClick={() => setDeletando(d)} className="p-2 text-gray-400 hover:text-red-400 touch-manipulation">🗑️</button>
+                    <button onClick={() => openEdit(d)} className="p-2 text-gray-400 hover:text-white touch-manipulation"><Pencil size={16} /></button>
+                    <button onClick={() => setDeletando(d)} className="p-2 text-gray-400 hover:text-red-400 touch-manipulation"><Trash2 size={16} /></button>
                   </div>
                 </div>
                 <div className="flex gap-4 mt-3 pt-3 border-t border-white/5">
@@ -130,7 +131,7 @@ export default function RujaDepartamentos() {
           <div className="bg-[#111] border border-white/10 rounded-t-2xl md:rounded-2xl w-full max-w-md">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/8">
               <h2 className="text-white font-bold">{editando === 'novo' ? 'Novo Departamento' : 'Editar Departamento'}</h2>
-              <button onClick={() => setEditando(null)} className="text-gray-400 text-xl touch-manipulation">✕</button>
+              <button onClick={() => setEditando(null)} className="text-gray-400 text-xl touch-manipulation"><X size={16} /></button>
             </div>
             <div className="px-5 py-4 space-y-4">
               <div className="flex gap-3">

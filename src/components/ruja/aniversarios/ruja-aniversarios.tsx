@@ -4,6 +4,7 @@ import { useRuja } from '@/lib/ruja/context'
 import { Spinner } from '@/components/ui/spinner'
 import { Avatar } from '@/components/ui/avatar'
 import { getDiasParaAniversario, getIdade, diasLabel } from '@/lib/ruja/calculos'
+import { Cake, CalendarDays, Clock, Users, CheckCircle2, PartyPopper, MessageCircle, type LucideIcon } from 'lucide-react'
 
 type Tab = 'hoje' | 'mes' | '30dias' | 'todos'
 
@@ -39,11 +40,11 @@ export default function RujaAniversarios() {
     }
   }, [todos, tab])
 
-  const TABS: { key: Tab; label: string; count: number }[] = [
-    { key: 'hoje',   label: '🎂 Hoje',       count: todos.filter(p => p.dias === 0).length },
-    { key: 'mes',    label: '📅 Este mês',   count: todos.filter(p => { if (!p.data_nasc) return false; return parseInt(p.data_nasc.split('-')[1]) === new Date().getMonth()+1 }).length },
-    { key: '30dias', label: '⏳ 30 dias',    count: todos.filter(p => p.dias <= 30).length },
-    { key: 'todos',  label: '👥 Todos',      count: todos.length },
+  const TABS: { key: Tab; label: string; icon: LucideIcon; count: number }[] = [
+    { key: 'hoje',   label: 'Hoje',       icon: Cake,        count: todos.filter(p => p.dias === 0).length },
+    { key: 'mes',    label: 'Este mês',   icon: CalendarDays, count: todos.filter(p => { if (!p.data_nasc) return false; return parseInt(p.data_nasc.split('-')[1]) === new Date().getMonth()+1 }).length },
+    { key: '30dias', label: '30 dias',    icon: Clock,       count: todos.filter(p => p.dias <= 30).length },
+    { key: 'todos',  label: 'Todos',      icon: Users,       count: todos.length },
   ]
 
   function getMensagem(nome: string, dias: number): string {
@@ -76,7 +77,7 @@ export default function RujaAniversarios() {
           <div className="text-gray-500 text-xs">Este mês</div>
         </div>
         <div className="bg-[#111] border border-white/8 rounded-xl p-3 text-center">
-          <div className="text-2xl font-black text-gray-400">{todos.filter(p => !p.data_nasc).length === 0 ? '✅' : todos.filter(p => !p.data_nasc).length}</div>
+          <div className="text-2xl font-black text-gray-400">{todos.filter(p => !p.data_nasc).length === 0 ? <CheckCircle2 className="inline" size={20} /> : todos.filter(p => !p.data_nasc).length}</div>
           <div className="text-gray-500 text-xs">Sem data</div>
         </div>
       </div>
@@ -87,7 +88,7 @@ export default function RujaAniversarios() {
           <button key={t.key} onClick={() => setTab(t.key)}
             className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition touch-manipulation
               ${tab === t.key ? 'bg-red-600 text-white' : 'bg-white/5 text-gray-400'}`}>
-            {t.label} {t.count > 0 && <span className="ml-1 opacity-70">({t.count})</span>}
+            <span className="inline-flex items-center gap-1"><t.icon size={13} />{t.label}</span> {t.count > 0 && <span className="ml-1 opacity-70">({t.count})</span>}
           </button>
         ))}
       </div>
@@ -95,7 +96,7 @@ export default function RujaAniversarios() {
       {/* Lista */}
       {filtrados.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
-          <div className="text-4xl mb-3">🎂</div>
+          <div className="flex justify-center mb-3"><Cake size={36} className="text-gray-600" /></div>
           <p>Nenhum aniversariante {tab === 'hoje' ? 'hoje' : tab === 'mes' ? 'este mês' : 'nos próximos 30 dias'}.</p>
         </div>
       ) : (
@@ -117,7 +118,7 @@ export default function RujaAniversarios() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-white font-semibold text-sm">{p.nome}</span>
-                    {isHoje && <span className="text-yellow-400 text-xs font-bold">🎉 Hoje!</span>}
+                    {isHoje && <span className="flex items-center gap-1 text-yellow-400 text-xs font-bold"><PartyPopper size={12} />Hoje!</span>}
                   </div>
                   <div className="text-gray-500 text-xs">
                     {p.data_nasc ? `${p.data_nasc.slice(8,10)}/${p.data_nasc.slice(5,7)}` : '—'}
@@ -128,7 +129,7 @@ export default function RujaAniversarios() {
                 {contato && (
                   <button onClick={() => abrirWpp(p)}
                     className="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition touch-manipulation flex-shrink-0">
-                    📱
+                    <MessageCircle size={16} />
                   </button>
                 )}
               </div>

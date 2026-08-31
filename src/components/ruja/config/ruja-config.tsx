@@ -5,6 +5,7 @@ import { saveConfig } from '@/lib/ruja/queries'
 import { exportToCSV, importFromCSV } from '@/lib/ruja/csv'
 import { createClient } from '@/lib/supabase/client'
 import { Spinner } from '@/components/ui/spinner'
+import { Users, Star, Landmark, CheckCircle2, Package, Download, Upload, RefreshCw, Lock, FolderOpen, AlertTriangle, XCircle, type LucideIcon } from 'lucide-react'
 
 export default function RujaConfig() {
   const { jovens, lideres, departamentos, frequencias, loading, reload } = useRuja()
@@ -59,22 +60,22 @@ export default function RujaConfig() {
     try {
       const { importados, erros } = await importFromCSV(file, csvTipo)
       await reload()
-      setImportStatus(`✅ ${importados} registros importados.${erros.length ? ` ⚠️ ${erros.length} erros.` : ''}`)
+      setImportStatus(`${importados} registros importados.${erros.length ? ` ${erros.length} erros.` : ''}`)
       showToast(`${importados} registros importados!`)
     } catch (e) {
-      setImportStatus('❌ Erro: ' + (e instanceof Error ? e.message : ''))
+      setImportStatus('Erro: ' + (e instanceof Error ? e.message : ''))
     } finally {
       setImportando(false)
       if (fileRef.current) fileRef.current.value = ''
     }
   }
 
-  const EXPORTS = [
-    { label: '👥 Jovens',        fn: () => exportToCSV(jovens,        'ruja_jovens') },
-    { label: '⭐ Líderes',       fn: () => exportToCSV(lideres,       'ruja_lideres') },
-    { label: '🏛️ Departamentos', fn: () => exportToCSV(departamentos, 'ruja_departamentos') },
-    { label: '✅ Frequências',   fn: () => exportToCSV(frequencias,   'ruja_frequencias') },
-    { label: '📦 Tudo',          fn: () => {
+  const EXPORTS: { label: string; icon: LucideIcon; fn: () => void }[] = [
+    { label: 'Jovens',        icon: Users,    fn: () => exportToCSV(jovens,        'ruja_jovens') },
+    { label: 'Líderes',       icon: Star,     fn: () => exportToCSV(lideres,       'ruja_lideres') },
+    { label: 'Departamentos', icon: Landmark, fn: () => exportToCSV(departamentos, 'ruja_departamentos') },
+    { label: 'Frequências',   icon: CheckCircle2, fn: () => exportToCSV(frequencias, 'ruja_frequencias') },
+    { label: 'Tudo',          icon: Package,  fn: () => {
       exportToCSV(jovens, 'ruja_jovens')
       setTimeout(() => exportToCSV(lideres, 'ruja_lideres'), 300)
       setTimeout(() => exportToCSV(departamentos, 'ruja_departamentos'), 600)
@@ -90,7 +91,8 @@ export default function RujaConfig() {
       {/* Sobre */}
       <div className="bg-[#111] border border-white/8 rounded-xl p-4">
         <div className="flex items-center gap-3 mb-3">
-          <span className="text-3xl">🦁</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logos/ruja-brand.png" alt="RUJA" className="w-10 h-10 object-contain rounded-full" />
           <div>
             <div className="text-white font-bold">RUJA — Rede UniJovem ADJA</div>
             <div className="text-gray-500 text-xs">Painel de Gestão · Next.js + Supabase</div>
@@ -105,12 +107,12 @@ export default function RujaConfig() {
 
       {/* Exportar CSV */}
       <div className="bg-[#111] border border-white/8 rounded-xl p-5">
-        <h2 className="text-white font-semibold mb-3">⬇️ Exportar CSV</h2>
+        <h2 className="flex items-center gap-2 text-white font-semibold mb-3"><Download size={17} className="text-red-400" />Exportar CSV</h2>
         <div className="flex flex-wrap gap-2">
-          {EXPORTS.map(({ label, fn }) => (
+          {EXPORTS.map(({ label, icon: Icon, fn }) => (
             <button key={label} onClick={fn}
-              className="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 text-sm rounded-xl transition touch-manipulation">
-              {label}
+              className="flex items-center gap-1.5 px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 text-sm rounded-xl transition touch-manipulation">
+              <Icon size={14} />{label}
             </button>
           ))}
         </div>
@@ -118,7 +120,7 @@ export default function RujaConfig() {
 
       {/* Importar CSV */}
       <div className="bg-[#111] border border-white/8 rounded-xl p-5">
-        <h2 className="text-white font-semibold mb-3">⬆️ Importar CSV</h2>
+        <h2 className="flex items-center gap-2 text-white font-semibold mb-3"><Upload size={17} className="text-red-400" />Importar CSV</h2>
         <p className="text-gray-500 text-xs mb-3">O CSV deve ter cabeçalho com os mesmos nomes das colunas exportadas. Registros existentes serão atualizados.</p>
         <div className="flex gap-3 mb-3 flex-wrap">
           {(['jovens','lideres','departamentos','frequencias'] as const).map(t => (
@@ -131,7 +133,7 @@ export default function RujaConfig() {
         </div>
         <button onClick={() => fileRef.current?.click()} disabled={importando}
           className="w-full py-3 border border-dashed border-white/20 rounded-xl text-gray-400 hover:border-white/40 hover:text-gray-200 transition text-sm touch-manipulation disabled:opacity-50">
-          {importando ? '⏳ Importando...' : '📁 Escolher arquivo CSV'}
+          {importando ? 'Importando...' : (<span className="flex items-center justify-center gap-2"><FolderOpen size={16}/>Escolher arquivo CSV</span>)}
         </button>
         <input ref={fileRef} type="file" accept=".csv" onChange={handleImport} className="hidden" />
         {importStatus && (
@@ -141,7 +143,7 @@ export default function RujaConfig() {
 
       {/* GAS URL */}
       <div className="bg-[#111] border border-white/8 rounded-xl p-5">
-        <h2 className="text-white font-semibold mb-1">🔄 Google Sheets (opcional)</h2>
+        <h2 className="flex items-center gap-2 text-white font-semibold mb-1"><RefreshCw size={17} className="text-red-400" />Google Sheets (opcional)</h2>
         <p className="text-gray-500 text-xs mb-3">URL do Apps Script para importação manual de dados legados.</p>
         <input
           value={gasUrl}
@@ -151,13 +153,13 @@ export default function RujaConfig() {
         />
         <button onClick={handleSalvarGas} disabled={savingGas}
           className="w-full py-3 bg-white/10 hover:bg-white/15 disabled:opacity-50 text-white font-bold rounded-xl touch-manipulation">
-          {savingGas ? 'Salvando...' : '💾 Salvar URL'}
+          {savingGas ? 'Salvando...' : 'Salvar URL'}
         </button>
       </div>
 
       {/* Alterar senha */}
       <div className="bg-[#111] border border-white/8 rounded-xl p-5">
-        <h2 className="text-white font-semibold mb-3">🔐 Alterar Senha</h2>
+        <h2 className="flex items-center gap-2 text-white font-semibold mb-3"><Lock size={17} className="text-red-400" />Alterar Senha</h2>
         <input
           type="password"
           value={senha}
@@ -172,7 +174,7 @@ export default function RujaConfig() {
         </label>
         <button onClick={handleAlterarSenha} disabled={alterandoSenha || !senha || !senhaConf}
           className="w-full py-3 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white font-bold rounded-xl touch-manipulation">
-          {alterandoSenha ? 'Alterando...' : '🔐 Alterar Senha'}
+          {alterandoSenha ? 'Alterando...' : 'Alterar Senha'}
         </button>
       </div>
 

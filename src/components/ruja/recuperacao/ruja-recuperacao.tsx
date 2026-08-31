@@ -7,6 +7,7 @@ import { Avatar } from '@/components/ui/avatar'
 import type { Recuperacao } from '@/lib/ruja/types'
 import type { DepartmentScope } from '@/lib/ruja/departments'
 import { DEPARTMENT_LABELS, filterJovensByScope } from '@/lib/ruja/departments'
+import { Pencil, Trash2, X, AlertTriangle, HeartPulse, CheckCircle2, MessageCircle } from 'lucide-react'
 
 export default function RujaRecuperacao({ scope = 'all' }: { scope?: DepartmentScope }) {
   const { jovens, lideres, recuperacoes, loading, reload } = useRuja()
@@ -72,7 +73,7 @@ export default function RujaRecuperacao({ scope = 'all' }: { scope?: DepartmentS
     try {
       await upsertRecuperacao({ ...r, status: 'concluido' })
       await reload()
-      showToast('Marcado como concluído! 🎉')
+      showToast('Marcado como concluído!')
     } catch (e) {
       showToast('Erro: ' + (e instanceof Error ? e.message : ''))
     }
@@ -100,7 +101,7 @@ export default function RujaRecuperacao({ scope = 'all' }: { scope?: DepartmentS
       {/* Jovens em risco sem plano */}
       {jovensEmRisco.length > 0 && (
         <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-4">
-          <div className="text-red-400 text-sm font-semibold mb-2">🚨 Jovens Em Risco sem plano de recuperação</div>
+          <div className="flex items-center gap-1.5 text-red-400 text-sm font-semibold mb-2"><AlertTriangle size={14} />Jovens Em Risco sem plano de recuperação</div>
           <div className="flex flex-wrap gap-2">
             {jovensEmRisco
               .filter(j => !recuperacoes.some(r => r.jovem_id === j.id && r.status === 'ativo'))
@@ -129,7 +130,7 @@ export default function RujaRecuperacao({ scope = 'all' }: { scope?: DepartmentS
       {/* Lista */}
       {filtrados.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
-          <div className="text-4xl mb-3">🚑</div>
+          <div className="flex justify-center mb-3"><HeartPulse size={36} className="text-gray-600" /></div>
           <p>Nenhum plano de recuperação.</p>
         </div>
       ) : (
@@ -151,7 +152,7 @@ export default function RujaRecuperacao({ scope = 'all' }: { scope?: DepartmentS
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-white font-semibold">{jovem?.nome ?? 'Jovem não encontrado'}</span>
                       <span className={`text-xs px-2 py-0.5 rounded-full ${r.status === 'ativo' ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}`}>
-                        {r.status === 'ativo' ? '🚑 Ativo' : '✅ Concluído'}
+                        {r.status === 'ativo' ? (<span className="flex items-center gap-1"><HeartPulse size={11}/>Ativo</span>) : (<span className="flex items-center gap-1"><CheckCircle2 size={11}/>Concluído</span>)}
                       </span>
                     </div>
                     <div className="text-gray-500 text-xs mt-1">
@@ -163,13 +164,13 @@ export default function RujaRecuperacao({ scope = 'all' }: { scope?: DepartmentS
                     {r.status === 'ativo' && (
                       <button onClick={() => marcarConcluido(r)}
                         title="Marcar como concluído"
-                        className="p-2 text-green-400 hover:bg-green-500/10 rounded-lg touch-manipulation">✅</button>
+                        className="p-2 text-green-400 hover:bg-green-500/10 rounded-lg touch-manipulation"><CheckCircle2 size={16} /></button>
                     )}
-                    <button onClick={() => openEdit(r)} className="p-2 text-gray-400 hover:text-white touch-manipulation">✏️</button>
-                    <button onClick={() => setDeletando(r)} className="p-2 text-gray-400 hover:text-red-400 touch-manipulation">🗑️</button>
+                    <button onClick={() => openEdit(r)} className="p-2 text-gray-400 hover:text-white touch-manipulation"><Pencil size={16} /></button>
+                    <button onClick={() => setDeletando(r)} className="p-2 text-gray-400 hover:text-red-400 touch-manipulation"><Trash2 size={16} /></button>
                     {jovem?.contato && (
                       <a href={`https://wa.me/55${jovem.contato.replace(/\D/g,'')}`} target="_blank" rel="noreferrer"
-                        className="p-2 text-green-400 hover:bg-green-500/10 rounded-lg touch-manipulation">📱</a>
+                        className="p-2 text-green-400 hover:bg-green-500/10 rounded-lg touch-manipulation"><MessageCircle size={16} /></a>
                     )}
                   </div>
                 </div>
@@ -185,7 +186,7 @@ export default function RujaRecuperacao({ scope = 'all' }: { scope?: DepartmentS
           <div className="bg-[#111] border border-white/10 rounded-t-2xl md:rounded-2xl w-full max-w-md">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/8">
               <h2 className="text-white font-bold">Plano de Recuperação</h2>
-              <button onClick={() => setEditando(null)} className="text-gray-400 text-xl touch-manipulation">✕</button>
+              <button onClick={() => setEditando(null)} className="text-gray-400 text-xl touch-manipulation"><X size={16} /></button>
             </div>
             <div className="px-5 py-4 space-y-4">
               <div>
@@ -214,8 +215,8 @@ export default function RujaRecuperacao({ scope = 'all' }: { scope?: DepartmentS
               <div>
                 <label className={LBL}>Status</label>
                 <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value as 'ativo'|'concluido' }))} className={INP}>
-                  <option value="ativo">🚑 Ativo</option>
-                  <option value="concluido">✅ Concluído</option>
+                  <option value="ativo">Ativo</option>
+                  <option value="concluido">Concluído</option>
                 </select>
               </div>
               {error && <div className="text-red-400 text-sm bg-red-500/10 rounded-xl px-4 py-3">{error}</div>}

@@ -4,6 +4,7 @@ import { useRuja } from '@/lib/ruja/context'
 import { saveConfig } from '@/lib/ruja/queries'
 import { Spinner } from '@/components/ui/spinner'
 import { DEFAULT_REGRAS, DEFAULT_METAS } from '@/lib/ruja/types'
+import { Landmark, Droplet, CheckCircle2, Target, Settings, Save } from 'lucide-react'
 
 function sanitize(val: number, min: number, max: number, def: number): number {
   const n = parseInt(String(val))
@@ -69,11 +70,11 @@ export default function RujaMetas() {
       {/* Progresso atual */}
       <div className="grid md:grid-cols-2 gap-3">
         {[
-          { label:'🏛️ Ativos em Departamento', atual: ativosDepto, meta: metas.ativosDepto, pct: pctAtivos, color:'bg-green-500' },
-          { label:'🔵 Batizados Ativos em Dep.', atual: batizadosDepto, meta: metas.batizadosDepto, pct: pctBatizados, color:'bg-blue-500' },
-        ].map(({ label, atual, meta, pct, color }) => (
+          { label:'Ativos em Departamento', icon: Landmark, atual: ativosDepto, meta: metas.ativosDepto, pct: pctAtivos, color:'bg-green-500' },
+          { label:'Batizados Ativos em Dep.', icon: Droplet, atual: batizadosDepto, meta: metas.batizadosDepto, pct: pctBatizados, color:'bg-blue-500' },
+        ].map(({ label, icon: Icon, atual, meta, pct, color }) => (
           <div key={label} className="bg-[#111] border border-white/8 rounded-xl p-4">
-            <div className="text-gray-400 text-sm mb-2">{label}</div>
+            <div className="flex items-center gap-1.5 text-gray-400 text-sm mb-2"><Icon size={14} />{label}</div>
             <div className="text-3xl font-black text-white">
               {atual} <span className="text-gray-600 text-lg font-normal">/ {meta}</span>
             </div>
@@ -82,7 +83,7 @@ export default function RujaMetas() {
             </div>
             <div className="flex justify-between mt-1">
               <span className="text-gray-500 text-xs">{pct}%</span>
-              {pct >= 100 && <span className="text-green-400 text-xs font-bold">✅ Meta atingida!</span>}
+              {pct >= 100 && <span className="flex items-center gap-1 text-green-400 text-xs font-bold"><CheckCircle2 size={12} />Meta atingida!</span>}
             </div>
           </div>
         ))}
@@ -90,7 +91,7 @@ export default function RujaMetas() {
 
       {/* Configurar metas */}
       <div className="bg-[#111] border border-white/8 rounded-xl p-5">
-        <h2 className="text-white font-semibold mb-4">🎯 Configurar Metas</h2>
+        <h2 className="flex items-center gap-2 text-white font-semibold mb-4"><Target size={17} className="text-red-400" />Configurar Metas</h2>
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <label className={LBL}>Ativos em Departamento</label>
@@ -109,31 +110,31 @@ export default function RujaMetas() {
         </div>
         <button onClick={salvarMetas} disabled={saving === 'metas'}
           className="w-full py-3 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold rounded-xl touch-manipulation">
-          {saving === 'metas' ? 'Salvando...' : '💾 Salvar Metas'}
+          {saving === 'metas' ? 'Salvando...' : <span className="flex items-center justify-center gap-2"><Save size={16} />Salvar Metas</span>}
         </button>
       </div>
 
       {/* Regras de status */}
       <div className="bg-[#111] border border-white/8 rounded-xl p-5">
-        <h2 className="text-white font-semibold mb-1">⚙️ Regras de Status Automático</h2>
+        <h2 className="flex items-center gap-2 text-white font-semibold mb-1"><Settings size={17} className="text-red-400" />Regras de Status Automático</h2>
         <p className="text-gray-500 text-xs mb-4">Aplicadas automaticamente ao registrar frequência.</p>
         <div className="space-y-4 mb-4">
           <div>
-            <label className={LBL}>🟢 Ativo — Frequência mínima (%)</label>
+            <label className={LBL}><span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-1.5" />Ativo — Frequência mínima (%)</label>
             <input type="number" min={1} max={100}
               value={formRegras.ativo}
               onChange={e => setFormRegras(f => ({ ...f, ativo: parseInt(e.target.value)||0 }))}
               className={INP} />
           </div>
           <div>
-            <label className={LBL}>🟡 Oscilando — Frequência mínima (%)</label>
+            <label className={LBL}><span className="inline-block w-2 h-2 rounded-full bg-yellow-400 mr-1.5" />Oscilando — Frequência mínima (%)</label>
             <input type="number" min={0} max={100}
               value={formRegras.oscilando}
               onChange={e => setFormRegras(f => ({ ...f, oscilando: parseInt(e.target.value)||0 }))}
               className={INP} />
           </div>
           <div>
-            <label className={LBL}>🔴 Em Risco — Faltas seguidas</label>
+            <label className={LBL}><span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-1.5" />Em Risco — Faltas seguidas</label>
             <input type="number" min={1} max={20}
               value={formRegras.risco}
               onChange={e => setFormRegras(f => ({ ...f, risco: parseInt(e.target.value)||0 }))}
@@ -142,7 +143,7 @@ export default function RujaMetas() {
         </div>
         <button onClick={salvarRegras} disabled={saving === 'regras'}
           className="w-full py-3 bg-white/10 hover:bg-white/15 disabled:opacity-50 text-white font-bold rounded-xl touch-manipulation">
-          {saving === 'regras' ? 'Salvando...' : '💾 Salvar Regras'}
+          {saving === 'regras' ? 'Salvando...' : <span className="flex items-center justify-center gap-2"><Save size={16} />Salvar Regras</span>}
         </button>
       </div>
 

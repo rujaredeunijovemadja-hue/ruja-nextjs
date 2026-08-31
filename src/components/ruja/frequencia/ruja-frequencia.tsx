@@ -9,6 +9,7 @@ import type { EventoFrequenciaInput, StatusEvento, TipoEventoFrequencia } from '
 import type { DepartmentScope } from '@/lib/ruja/departments'
 import { activeDepartments, DEPARTMENT_LABELS, filterJovensByScope, jovemMatchesDepartmentName } from '@/lib/ruja/departments'
 import RujaHistoricoFrequencia from './ruja-historico-frequencia'
+import { Check } from 'lucide-react'
 
 const TIPOS: TipoEventoFrequencia[] = ['Culto', 'Reunião', 'Ensaio', 'Conexão', 'Congresso', 'Vigília', 'Evangelismo', 'Outro']
 const STATUS_EVENTO: StatusEvento[] = ['Agendado', 'Em andamento', 'Finalizado', 'Cancelado']
@@ -306,7 +307,7 @@ export default function RujaFrequencia({
                 presente ? 'bg-green-500/10 border-green-500/30' : 'bg-[#111] border-white/8 hover:border-white/15'
               }`}>
               <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${presente ? 'bg-green-500 border-green-500' : 'border-gray-600'}`}>
-                {presente && <span className="text-white text-xs">✓</span>}
+                {presente && <span className="text-white text-xs"><Check size={16} /></span>}
               </div>
               <img src={j.foto_url || '/ruja-logo.png'} alt="" className="w-10 h-10 rounded-full object-cover bg-white/5" />
               <div className="flex-1 min-w-0">

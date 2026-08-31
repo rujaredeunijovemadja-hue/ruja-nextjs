@@ -12,6 +12,7 @@ import {
   ROLE_LABELS, type PlatformRole, type RujaPlatformOption, type RujaProfile,
 } from '@/lib/ruja/users'
 import { getRujaErrorMessage } from '@/lib/ruja/errors'
+import { Pencil, X, CheckCircle2, Lock, Copy, User, Ban, AlertTriangle } from 'lucide-react'
 
 // ── Estado do form de criação ──────────────────────────────────
 const FORM_INICIAL = {
@@ -165,7 +166,7 @@ export default function RujaUsuarios() {
           return updatePlatformAccess({ user_id: editando.id, plataforma_id: platform.id, role: assignment.role, departamento_id: assignment.departamento_id, ativo: assignment.ativo })
         }))
       }
-      showToast('✅ Usuário atualizado com sucesso.')
+      showToast('Usuário atualizado com sucesso.')
       setEditando(null)
       await loadData()
     } catch {
@@ -224,7 +225,7 @@ export default function RujaUsuarios() {
       {!canCreate && myProfile && (
         <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 mb-4">
           <p className="text-yellow-400 text-sm">
-            🔒 Apenas <strong>Líder Supremo</strong> e <strong>Administradores</strong> podem criar ou editar usuários.
+            <Lock size={13} className="inline mr-1 align-[-2px]" />Apenas <strong>Líder Supremo</strong> e <strong>Administradores</strong> podem criar ou editar usuários.
           </p>
         </div>
       )}
@@ -232,7 +233,7 @@ export default function RujaUsuarios() {
       {/* ── RESULTADO DE CRIAÇÃO ────────────────────────────── */}
       {resultado && (
         <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-5 mb-5">
-          <div className="text-green-400 font-bold mb-3">✅ Usuário criado com sucesso!</div>
+          <div className="flex items-center gap-2 text-green-400 font-bold mb-3"><CheckCircle2 size={18} />Usuário criado com sucesso!</div>
           <div className="space-y-2 text-sm mb-4">
             <div className="flex gap-2"><span className="text-gray-400 w-20">Nome:</span><span className="text-white">{resultado.nome}</span></div>
             <div className="flex gap-2"><span className="text-gray-400 w-20">Email:</span><span className="text-white">{resultado.email}</span></div>
@@ -242,7 +243,7 @@ export default function RujaUsuarios() {
           {resultado.senha && (
             <div className="bg-black/40 border border-white/10 rounded-xl p-4">
               <div className="text-yellow-400 text-xs font-semibold mb-2 uppercase tracking-wider">
-                ⚠️ Senha temporária — copie agora, não será exibida novamente
+                <AlertTriangle size={13} className="inline mr-1 align-[-2px]" />Senha temporária — copie agora, não será exibida novamente
               </div>
               <div className="flex items-center gap-3">
                 <code className="text-white font-mono text-lg bg-black/40 px-3 py-2 rounded-lg flex-1 select-all">
@@ -252,7 +253,7 @@ export default function RujaUsuarios() {
                   onClick={() => copiarSenha(resultado.senha)}
                   className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg touch-manipulation transition font-semibold"
                 >
-                  {senhaCopiada ? '✅ Copiado!' : '📋 Copiar'}
+                  senhaCopiada ? (<span className="flex items-center gap-1"><CheckCircle2 size={14}/>Copiado!</span>) : (<span className="flex items-center gap-1"><Copy size={14}/>Copiar</span>)
                 </button>
               </div>
               <p className="text-gray-500 text-xs mt-2">
@@ -271,7 +272,7 @@ export default function RujaUsuarios() {
       {/* ── LISTA DE USUÁRIOS ───────────────────────────────── */}
       {profiles.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
-          <div className="text-4xl mb-3">👤</div>
+          <div className="flex justify-center mb-3"><User size={36} className="text-gray-600" /></div>
           <p>Nenhum perfil cadastrado ainda.</p>
         </div>
       ) : (
@@ -314,7 +315,7 @@ export default function RujaUsuarios() {
                   className="flex-shrink-0 p-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition touch-manipulation text-xs"
                   title="Editar usuário"
                 >
-                  ✏️
+                  <Pencil size={16} />
                 </button>
               )}
             </div>
@@ -328,7 +329,7 @@ export default function RujaUsuarios() {
           <div className="bg-[#111] border border-white/10 rounded-t-2xl md:rounded-2xl w-full max-w-md max-h-[92dvh] flex flex-col">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/8 flex-shrink-0">
               <h2 className="text-white font-bold">Criar Novo Usuário</h2>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 text-xl touch-manipulation">✕</button>
+              <button onClick={() => setShowForm(false)} className="text-gray-400 text-xl touch-manipulation"><X size={16} /></button>
             </div>
 
             <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
@@ -357,13 +358,13 @@ export default function RujaUsuarios() {
                 <select value={form.role}
                   onChange={e => setForm(f => ({ ...f, role: e.target.value as RujaProfile['role'] }))}
                   className={INP}>
-                  <option value="voluntario">🙋 Voluntário</option>
-                  <option value="visualizador">👁 Visualizador</option>
-                  <option value="lider_departamento">⭐ Líder de Departamento</option>
+                  <option value="voluntario">Voluntário</option>
+                  <option value="visualizador">Visualizador</option>
+                  <option value="lider_departamento">Líder de Departamento</option>
                   {myProfile?.role === 'lider_supremo' && (
                     <>
-                      <option value="administrador">🔑 Administrador</option>
-                      <option value="lider_supremo">👑 Líder Supremo</option>
+                      <option value="administrador">Administrador</option>
+                      <option value="lider_supremo">Líder Supremo</option>
                     </>
                   )}
                 </select>
@@ -402,14 +403,14 @@ export default function RujaUsuarios() {
 
                 {form.gerarSenha && (
                   <div className="bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-gray-500 text-sm">
-                    🔐 Senha de 12 caracteres gerada e exibida após criação.
+                    <Lock size={13} className="inline mr-1 align-[-2px]" />Senha de 12 caracteres gerada e exibida após criação.
                   </div>
                 )}
               </div>
 
               <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3">
                 <p className="text-yellow-400 text-xs">
-                  ⚠️ A senha temporária será exibida <strong>apenas uma vez</strong>.
+                  <AlertTriangle size={13} className="inline mr-1 align-[-2px]" />A senha temporária será exibida <strong>apenas uma vez</strong>.
                   Copie e envie por canal seguro.
                 </p>
               </div>
@@ -428,7 +429,7 @@ export default function RujaUsuarios() {
               </button>
               <button onClick={handleCreate} disabled={saving}
                 className="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold flex items-center justify-center gap-2 touch-manipulation">
-                {saving ? <Spinner size="sm" /> : '👤'}
+                {saving ? <Spinner size="sm" /> : <User size={16} />}
                 {saving ? 'Criando...' : 'Criar Usuário'}
               </button>
             </div>
@@ -445,7 +446,7 @@ export default function RujaUsuarios() {
                 <h2 className="text-white font-bold">Editar Usuário</h2>
                 <p className="text-gray-500 text-xs mt-0.5">{editando.nome} · {editando.email}</p>
               </div>
-              <button onClick={() => setEditando(null)} className="text-gray-400 text-xl touch-manipulation">✕</button>
+              <button onClick={() => setEditando(null)} className="text-gray-400 text-xl touch-manipulation"><X size={16} /></button>
             </div>
 
             <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
@@ -456,13 +457,13 @@ export default function RujaUsuarios() {
                 <select value={editForm.role}
                   onChange={e => setEditForm(f => ({ ...f, role: e.target.value as RujaProfile['role'] }))}
                   className={INP}>
-                  <option value="voluntario">🙋 Voluntário</option>
-                  <option value="visualizador">👁 Visualizador</option>
-                  <option value="lider_departamento">⭐ Líder de Departamento</option>
+                  <option value="voluntario">Voluntário</option>
+                  <option value="visualizador">Visualizador</option>
+                  <option value="lider_departamento">Líder de Departamento</option>
                   {myProfile?.role === 'lider_supremo' && (
                     <>
-                      <option value="administrador">🔑 Administrador</option>
-                      <option value="lider_supremo">👑 Líder Supremo</option>
+                      <option value="administrador">Administrador</option>
+                      <option value="lider_supremo">Líder Supremo</option>
                     </>
                   )}
                 </select>
@@ -513,7 +514,7 @@ export default function RujaUsuarios() {
                       ${editForm.ativo
                         ? 'bg-green-500/20 text-green-400 border border-green-500/30'
                         : 'bg-white/5 text-gray-500 border border-white/5'}`}>
-                    ✅ Ativo
+                    <span className="flex items-center gap-1"><CheckCircle2 size={13}/>Ativo</span>
                   </button>
                   <button
                     onClick={() => setEditForm(f => ({ ...f, ativo: false }))}
@@ -521,7 +522,7 @@ export default function RujaUsuarios() {
                       ${!editForm.ativo
                         ? 'bg-red-500/20 text-red-400 border border-red-500/30'
                         : 'bg-white/5 text-gray-500 border border-white/5'}`}>
-                    🚫 Inativo
+                    <span className="flex items-center gap-1"><Ban size={13}/>Inativo</span>
                   </button>
                 </div>
               </div>
@@ -529,7 +530,7 @@ export default function RujaUsuarios() {
               {!editForm.ativo && (
                 <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2.5">
                   <p className="text-red-400 text-xs">
-                    ⚠️ Desativar bloqueia o acesso imediatamente. O usuário não conseguirá fazer login.
+                    <AlertTriangle size={13} className="inline mr-1 align-[-2px]" />Desativar bloqueia o acesso imediatamente. O usuário não conseguirá fazer login.
                   </p>
                 </div>
               )}

@@ -7,6 +7,7 @@ import { getDiasParaAniversario, getFreqPct } from '@/lib/ruja/calculos'
 import type { DepartmentScope } from '@/lib/ruja/departments'
 import { DEPARTMENT_LABELS, filterJovensByScope, jovemMatchesDepartment } from '@/lib/ruja/departments'
 import { RujaIcon } from '../layout/ruja-icon'
+import { Landmark, HeartPulse, Cake, CalendarDays, CheckCircle2, Droplet, type LucideIcon } from 'lucide-react'
 
 interface Props {
   scope?: DepartmentScope
@@ -93,7 +94,7 @@ export default function RujaDashboard({ scope = 'all', title }: Props) {
           atual={kpis.ativosDepto}
           meta={metas.ativosDepto}
           pct={pctAtivos}
-          icon="🏛️"
+          icon={Landmark}
           color="bg-yellow-400"
         />
         <MetaCard
@@ -101,7 +102,7 @@ export default function RujaDashboard({ scope = 'all', title }: Props) {
           atual={kpis.batizadosDepto}
           meta={metas.batizadosDepto}
           pct={pctBatizados}
-          icon="🔵"
+          icon={Droplet}
           color="bg-sky-400"
         />
       </div>
@@ -109,13 +110,13 @@ export default function RujaDashboard({ scope = 'all', title }: Props) {
       {/* Alertas rápidos */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {kpis.recuperacaoAtiva > 0 && (
-          <AlertCard label="Em Recuperação" value={kpis.recuperacaoAtiva} icon="🚑" color="bg-orange-500/20 border-orange-500/30 text-orange-400" />
+          <AlertCard label="Em Recuperação" value={kpis.recuperacaoAtiva} icon={HeartPulse} color="bg-orange-500/20 border-orange-500/30 text-orange-400" />
         )}
         {kpis.aniversHoje.length > 0 && (
-          <AlertCard label="Aniversário Hoje" value={kpis.aniversHoje.length} icon="🎂" color="bg-yellow-500/20 border-yellow-500/30 text-yellow-400" />
+          <AlertCard label="Aniversário Hoje" value={kpis.aniversHoje.length} icon={Cake} color="bg-yellow-500/20 border-yellow-500/30 text-yellow-400" />
         )}
         {kpis.aniversMes.length > 0 && (
-          <AlertCard label="Aniversários no Mês" value={kpis.aniversMes.length} icon="📅" color="bg-purple-500/20 border-purple-500/30 text-purple-400" />
+          <AlertCard label="Aniversários no Mês" value={kpis.aniversMes.length} icon={CalendarDays} color="bg-purple-500/20 border-purple-500/30 text-purple-400" />
         )}
       </div>
 
@@ -217,15 +218,15 @@ function BrandMark({ src, alt, label, className }: { src: string; alt: string; l
   return <div className={`flex items-center gap-2.5 rounded-xl border border-white/10 px-3 py-2.5 ${className}`}><div className="w-8 h-8 rounded-lg overflow-hidden shrink-0"><img src={src} alt={alt} className="w-full h-full object-contain" /></div><span className={`text-[10px] font-semibold truncate ${className.includes('bg-black') || className.includes('bg-[#171717]') ? 'text-white' : 'text-gray-700'}`}>{label}</span></div>
 }
 
-function MetaCard({ label, atual, meta, pct, icon, color }: {
-  label:string; atual:number; meta:number; pct:number; icon:string; color:string
+function MetaCard({ label, atual, meta, pct, icon: Icon, color }: {
+  label:string; atual:number; meta:number; pct:number; icon:LucideIcon; color:string
 }) {
   const atingida = pct >= 100
   return (
     <div className="bg-[#111] border border-white/8 rounded-xl p-4">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-gray-400 text-sm">{icon} {label}</span>
-        {atingida && <span className="text-green-400 text-xs font-bold">✅ Meta!</span>}
+        <span className="flex items-center gap-1.5 text-gray-400 text-sm"><Icon size={14} />{label}</span>
+        {atingida && <span className="flex items-center gap-1 text-green-400 text-xs font-bold"><CheckCircle2 size={12} />Meta!</span>}
       </div>
       <div className="text-2xl font-black text-white mb-1">
         {atual} <span className="text-gray-600 text-base font-normal">/ {meta}</span>
@@ -238,10 +239,10 @@ function MetaCard({ label, atual, meta, pct, icon, color }: {
   )
 }
 
-function AlertCard({ label, value, icon, color }: { label:string; value:number; icon:string; color:string }) {
+function AlertCard({ label, value, icon: Icon, color }: { label:string; value:number; icon:LucideIcon; color:string }) {
   return (
     <div className={`border rounded-xl p-3 ${color}`}>
-      <div className="text-2xl">{icon}</div>
+      <div><Icon size={24} /></div>
       <div className="text-xl font-black mt-1">{value}</div>
       <div className="text-xs mt-0.5 opacity-80">{label}</div>
     </div>

@@ -3,6 +3,7 @@ import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { signIn, resetPassword, translateAuthError } from '@/lib/ruja/auth'
 import { Spinner } from '@/components/ui/spinner'
+import { Eye, EyeOff, Mail, LogIn } from 'lucide-react'
 
 export default function LoginPage() {
   const router   = useRouter()
@@ -68,7 +69,7 @@ export default function LoginPage() {
       <div className="relative w-full max-w-sm bg-[#111] border border-white/8 rounded-2xl p-8 shadow-2xl">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="text-5xl mb-3">🦁</div>
+          <div className="flex justify-center mb-3">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/logos/ruja-brand.png" alt="RUJA" className="w-16 h-16 object-contain" /></div>
           <h1 className="text-3xl font-black text-white tracking-tight">
             <span className="text-red-500">RUJA</span>
           </h1>
@@ -113,7 +114,7 @@ export default function LoginPage() {
                   onClick={() => setShowPass(v => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 p-1 touch-manipulation"
                 >
-                  {showPass ? '🙈' : '👁️'}
+                  {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
@@ -141,7 +142,7 @@ export default function LoginPage() {
             {loading ? <Spinner size="sm" /> : null}
             {loading
               ? (forgotMode ? 'Enviando...' : 'Entrando...')
-              : (forgotMode ? '📧 Enviar link' : '🦁 Entrar no Painel')
+              : (forgotMode ? (<span className="flex items-center gap-2"><Mail size={16}/>Enviar link</span>) : (<span className="flex items-center gap-2"><LogIn size={16}/>Entrar no Painel</span>))
             }
           </button>
 

@@ -1,5 +1,65 @@
+// ─── ÍCONES DE NAVEGAÇÃO ────────────────────────────────────────
+// Mapa nome -> ícone (lucide-react). Antes disso os itens de nav do
+// mobile usavam emoji como "name" (ex.: icon: '🎯'), que não batia com
+// nenhuma palavra-chave e sempre caía no ícone genérico de "+". Trocado
+// por um mapa explícito -- cobre página do app + slug de plataforma.
+import {
+  LayoutDashboard, Users, CalendarDays, ClipboardList, Sparkles, Settings,
+  Landmark, UserCog, Puzzle, Target, Bot, Search, LogOut, Menu, User,
+  HeartPulse, History, Flame, Mic, Wine, BookOpen, PenLine, Presentation,
+  Wallet, Sprout, Star, type LucideIcon,
+} from 'lucide-react'
+
+const ICONS: Record<string, LucideIcon> = {
+  dashboard: LayoutDashboard,
+  jovens: Users,
+  usuarios: UserCog,
+  usu: UserCog,
+  user: User,
+  teens: Users,
+  simply: Sprout,
+  evento: CalendarDays,
+  eventos: CalendarDays,
+  calend: CalendarDays,
+  tarefas: ClipboardList,
+  pendentes: ClipboardList,
+  ia: Sparkles,
+  'analista-ia': Sparkles,
+  config: Settings,
+  configuracoes: Settings,
+  departamentos: Landmark,
+  plata: Puzzle,
+  plataformas: Puzzle,
+  metas: Target,
+  meta: Target,
+  missoes: Target,
+  miss: Target,
+  automacao: Bot,
+  bot: Bot,
+  robot: Bot,
+  busca: Search,
+  search: Search,
+  logout: LogOut,
+  menu: Menu,
+  recuperacao: HeartPulse,
+  'historico-frequencia': History,
+  altar: Flame,
+  podsimply: Mic,
+  'happy-hour': Wine,
+  'central-ebd': BookOpen,
+  redacao: PenLine,
+  palestras: Presentation,
+  contabilidade: Wallet,
+  lideres: Star,
+  lider: Star,
+  frequ: ClipboardList,
+  check: ClipboardList,
+  alert: Sparkles,
+  risco: Sparkles,
+}
+
 export function RujaIcon({ name, size = 18 }: { name: string; size?: number }) {
   const key = name.toLowerCase()
-  const path = key.includes('dashboard') ? 'M3 10.5 12 3l9 7.5M5 9v10h14V9M9 19v-6h6v6' : key.includes('jov') || key.includes('usu') ? 'M16 21v-2a4 4 0 0 0-8 0v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM19 8v6M22 11h-6' : key.includes('evento') || key.includes('calend') ? 'M6 3v3M18 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z' : key.includes('config') ? 'M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.4 1.4-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.2h-2v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1L9 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H7v-2h.9a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9L9 9l1.4-1.4.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5v-.2h2v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1L20 9l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.2v2h-.2a1.7 1.7 0 0 0-1.7 1Z' : key.includes('busca') || key.includes('search') ? 'm21 21-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z' : key.includes('miss') || key.includes('meta') ? 'M12 3 14.8 9l6.2.6-4.7 4.1 1.4 6.1-5.7-3.2-5.7 3.2 1.4-6.1-4.7-4.1L9.2 9 12 3Z' : key.includes('plata') || key.includes('modul') ? 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z' : key.includes('frequ') || key.includes('check') ? 'm5 12 4 4L19 6' : key.includes('alert') || key.includes('risco') ? 'M12 4 3 20h18L12 4ZM12 10v4M12 17v.1' : key.includes('automa') || key.includes('robot') || key.includes('bot') ? 'M12 2v3M7 8h10a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2ZM9 13v.1M15 13v.1M4 12H2M22 12h-2' : 'M12 3v18M3 12h18'
-  return <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>
+  const Icon = ICONS[key] ?? Object.entries(ICONS).find(([k]) => key.includes(k))?.[1] ?? Menu
+  return <Icon size={size} strokeWidth={1.8} aria-hidden="true" />
 }

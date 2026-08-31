@@ -6,17 +6,18 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRuja } from '@/lib/ruja/context'
 import { Spinner } from '@/components/ui/spinner'
+import { BarChart3, User, Sprout, CheckCircle2, TrendingUp, Landmark, Target, HeartPulse, ClipboardList, type LucideIcon } from 'lucide-react'
 
-const SUGESTOES = [
-  { icon: '📊', texto: 'Como consultar o dashboard do meu departamento?' },
-  { icon: '👦', texto: 'Como cadastrar um jovem no Teens?' },
-  { icon: '🌱', texto: 'Como registrar um evento do Simply?' },
-  { icon: '✅', texto: 'Como registrar e corrigir frequência?' },
-  { icon: '📈', texto: 'Como consultar os relatórios de eventos?' },
-  { icon: '🏛️', texto: 'Como funcionam os departamentos no RUJA?' },
-  { icon: '🎯', texto: 'Como configurar e acompanhar metas?' },
-  { icon: '🚑', texto: 'Como criar um plano de recuperação?' },
-  { icon: '📋', texto: 'Como aprovar um cadastro pendente?' },
+const SUGESTOES: { icon: LucideIcon; texto: string }[] = [
+  { icon: BarChart3, texto: 'Como consultar o dashboard do meu departamento?' },
+  { icon: User, texto: 'Como cadastrar um jovem no Teens?' },
+  { icon: Sprout, texto: 'Como registrar um evento do Simply?' },
+  { icon: CheckCircle2, texto: 'Como registrar e corrigir frequência?' },
+  { icon: TrendingUp, texto: 'Como consultar os relatórios de eventos?' },
+  { icon: Landmark, texto: 'Como funcionam os departamentos no RUJA?' },
+  { icon: Target, texto: 'Como configurar e acompanhar metas?' },
+  { icon: HeartPulse, texto: 'Como criar um plano de recuperação?' },
+  { icon: ClipboardList, texto: 'Como aprovar um cadastro pendente?' },
 ]
 
 const COMO_USAR = [
@@ -98,7 +99,7 @@ export default function RujaAnalistaIA() {
       {/* ── HEADER ──────────────────────────────────────────── */}
       <div className="flex items-center justify-between px-4 md:px-6 pt-4 pb-3 border-b border-white/8 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-red-500/15 rounded-xl flex items-center justify-center text-lg shrink-0">🦁</div>
+          <div className="w-9 h-9 bg-red-500/15 rounded-xl flex items-center justify-center shrink-0 overflow-hidden"><img src="/logos/ruja-brand.png" alt="" className="w-6 h-6 object-contain" /></div>
           <div>
             <h1 className="text-white font-bold text-base leading-tight">IA Nexus</h1>
             <p className="text-gray-500 text-xs">Assistente do sistema · Apenas leitura</p>
@@ -120,7 +121,7 @@ export default function RujaAnalistaIA() {
         {mensagens.length === 0 && !pensando && (
           <div className="space-y-4">
             <div className="text-center pt-6 pb-2">
-              <div className="text-4xl mb-3">🦁</div>
+              <div className="flex justify-center mb-3"><img src="/logos/ruja-brand.png" alt="" className="w-12 h-12 object-contain" /></div>
               <h2 className="text-white font-semibold text-base">Olá! Sou o Analista da Juventude.</h2>
               <p className="text-gray-500 text-sm mt-1 max-w-xs mx-auto">
                 Analiso dados reais da sua juventude. Pergunte qualquer coisa.
@@ -131,7 +132,7 @@ export default function RujaAnalistaIA() {
               {SUGESTOES.map(s => (
                 <button key={s.texto} onClick={() => enviar(s.texto)}
                   className="flex items-center gap-3 p-3.5 bg-[#111] hover:bg-white/5 border border-white/8 hover:border-white/15 rounded-xl text-left transition touch-manipulation group">
-                  <span className="text-lg shrink-0">{s.icon}</span>
+                  <s.icon size={17} className="shrink-0 text-gray-400" />
                   <span className="text-gray-400 group-hover:text-gray-200 text-sm leading-snug transition">{s.texto}</span>
                 </button>
               ))}
@@ -161,7 +162,7 @@ export default function RujaAnalistaIA() {
         {mensagens.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             {msg.role === 'assistant' && (
-              <div className="w-7 h-7 bg-red-500/15 rounded-lg flex items-center justify-center text-sm shrink-0 mt-0.5 mr-2">🦁</div>
+              <div className="w-7 h-7 bg-red-500/15 rounded-lg flex items-center justify-center shrink-0 mt-0.5 mr-2 overflow-hidden"><img src="/logos/ruja-brand.png" alt="" className="w-4 h-4 object-contain" /></div>
             )}
             <div className={`max-w-[85%] md:max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed
               ${msg.role === 'user'
@@ -174,7 +175,7 @@ export default function RujaAnalistaIA() {
 
         {pensando && (
           <div className="flex items-start gap-2">
-            <div className="w-7 h-7 bg-red-500/15 rounded-lg flex items-center justify-center text-sm shrink-0 mt-0.5">🦁</div>
+            <div className="w-7 h-7 bg-red-500/15 rounded-lg flex items-center justify-center shrink-0 mt-0.5 overflow-hidden"><img src="/logos/ruja-brand.png" alt="" className="w-4 h-4 object-contain" /></div>
             <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl rounded-bl-sm px-4 py-3">
               <div className="flex gap-1.5 items-center">
                 {[0,1,2].map(i => (
