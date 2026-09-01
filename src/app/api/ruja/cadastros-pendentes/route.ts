@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       .eq('slug', departamentoSlug)
       .eq('ativo', true)
       .maybeSingle()
-    if (!departamento || !['teens', 'simply'].includes(departamento.id)) {
+    if (!departamento || !['teens', 'simply'].includes(departamento.slug ?? '')) {
       return fieldError('departamento_slug', 'Departamento indisponível.')
     }
 
