@@ -67,9 +67,6 @@ export async function POST(request: NextRequest) {
     if (telefoneNormalizado.length < 10 || telefoneNormalizado.length > 11) {
       return fieldError('telefone', 'Informe um telefone com DDD.')
     }
-    if (!['teens', 'simply'].includes(departamentoSlug)) {
-      return fieldError('departamento_slug', 'Escolha Teens ou Simply.')
-    }
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return fieldError('email', 'Informe um email válido.')
     }
@@ -92,14 +89,22 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const { data: departamento } = await admin
-      .from('ruja_departamentos')
-      .select('id,nome,slug,ativo')
-      .eq('slug', departamentoSlug)
-      .eq('ativo', true)
-      .maybeSingle()
-    if (!departamento || !['teens', 'simply'].includes(departamento.slug ?? '')) {
-      return fieldError('departamento_slug', 'Departamento indisponível.')
+    // Departamento é opcional (pedido 01/09/2026) -- o jovem pode ainda não
+    // saber em qual "plataforma" quer entrar. Só valida contra o banco
+    // quando algo foi escolhido; aceita qualquer departamento ativo, não só
+    // Teens/Simply mais.
+    let departamentoId: string | null = null
+    if (departamentoSlug) {
+      const { data: departamento } = await admin
+        .from('ruja_departamentos')
+        .select('id,nome,slug,ativo')
+        .eq('slug', departamentoSlug)
+        .eq('ativo', true)
+        .maybeSingle()
+      if (!departamento) {
+        return fieldError('departamento_slug', 'Departamento indisponível.')
+      }
+      departamentoId = departamento.id
     }
 
     let photoBuffer: Buffer | null = null
@@ -143,7 +148,7 @@ export async function POST(request: NextRequest) {
       email: email || null,
       email_normalizado: email || null,
       data_nascimento: dataNascimento,
-      departamento_id: departamento.id,
+      departamento_id: departamentoId,
       foto_path: uploadedPath || null,
       endereco: endereco || null,
       tempo_ruja: tempoRuja || null,
@@ -180,13 +185,13 @@ export async function POST(request: NextRequest) {
     const actions = [{
       cadastro_id: cadastro.id,
       acao: 'cadastro_publico_enviado',
-      departamento_id: departamento.id,
+      departamento_id: departamentoId,
       dados_depois: { possivel_duplicidade: duplicates.length > 0, possui_foto: Boolean(uploadedPath) },
     }]
     if (duplicates.length) actions.push({
       cadastro_id: cadastro.id,
       acao: 'duplicidade_identificada',
-      departamento_id: departamento.id,
+      departamento_id: departamentoId,
       dados_depois: { possivel_duplicidade: true, possui_foto: Boolean(uploadedPath) },
     })
     await admin.from('ruja_cadastro_acoes').insert(actions)
@@ -195,7 +200,7 @@ export async function POST(request: NextRequest) {
       acao: 'cadastro_publico_enviado',
       tabela: 'ruja_cadastros_pendentes',
       registro_id: cadastro.id,
-      dados_depois: { departamento_id: departamento.id, possivel_duplicidade: duplicates.length > 0 },
+      dados_depois: { departamento_id: departamentoId, possivel_duplicidade: duplicates.length > 0 },
     })
 
     return NextResponse.json({ ok: true, protocolo: protocol(cadastro.id), enviado_em: cadastro.created_at }, { status: 201 })

@@ -55,6 +55,41 @@ export function activeOfficialDepartments(departamentos: Departamento[]) {
   })
 }
 
+/**
+ * O banco tem departamentos duplicados: uma versão antiga curada (com
+ * líder/capacidade, mas slug quebrado tipo "-idia" -- gerado por um
+ * slugify diferente do atual) e uma versão importada automaticamente
+ * dos vínculos de `ruja_jovens.departamento` (slug limpo, mas sem
+ * líder/capacidade). Usado pelo cadastro público (01/09/2026) pra
+ * mostrar cada departamento uma vez só, com o slug que realmente bate
+ * com `departmentSlug()`/a coluna `slug` no banco, sem perder o nome
+ * do líder quando existir numa das duas linhas.
+ */
+export function dedupeDepartmentsByName(departamentos: Departamento[]) {
+  const groups = new Map<string, Departamento[]>()
+  departamentos.forEach((department) => {
+    const key = department.nome.trim().toLowerCase()
+    const list = groups.get(key) ?? []
+    list.push(department)
+    groups.set(key, list)
+  })
+
+  return Array.from(groups.values()).map((group) => {
+    const canonical = group.find((d) => {
+      const computed = departmentSlug(d)
+      return computed === (d.slug ?? '').toLowerCase() || computed === slugifyDepartment(d.nome)
+    }) ?? group[0]
+    const withInfo = group.find((d) => d.lider || d.capacidade > 0) ?? canonical
+    return {
+      ...canonical,
+      slug: departmentSlug(canonical),
+      lider: canonical.lider || withInfo.lider,
+      capacidade: canonical.capacidade || withInfo.capacidade,
+      icone: canonical.icone || withInfo.icone,
+    }
+  }).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+}
+
 export function activeDepartments(departamentos: Departamento[]) {
   return departamentos
     .filter(department => department.ativo !== false)

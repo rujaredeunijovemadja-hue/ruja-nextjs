@@ -22,16 +22,16 @@ type FormState = {
   observacoes: string
 }
 
-const emptyForm = (departamentos: Departamento[]): FormState => ({
+const emptyForm = (): FormState => ({
   nome: '', telefone: '', email: '', data_nascimento: '',
-  departamento_slug: departamentos[0] ? departmentSlug(departamentos[0]) : 'teens',
+  departamento_slug: '',
   endereco: '', tempo_ruja: '', batizado: false, data_batismo: '',
   responsavel_nome: '', responsavel_telefone: '', autorizacao_responsavel: false,
   consentimento_dados: false, observacoes: '',
 })
 
 export default function CadastroPublicoForm({ departamentos }: { departamentos: Departamento[] }) {
-  const [form, setForm] = useState<FormState>(() => emptyForm(departamentos))
+  const [form, setForm] = useState<FormState>(() => emptyForm())
   const [foto, setFoto] = useState<File | null>(null)
   const [fotoPreview, setFotoPreview] = useState('')
   const [submissionToken, setSubmissionToken] = useState('')
@@ -71,7 +71,6 @@ export default function CadastroPublicoForm({ departamentos }: { departamentos: 
     if (form.nome.trim().length < 3) next.nome = 'Informe o nome completo.'
     if (!isValidDate(form.data_nascimento)) next.data_nascimento = 'Informe uma data válida.'
     if (normalizePhone(form.telefone).length < 10) next.telefone = 'Informe telefone com DDD.'
-    if (!['teens', 'simply'].includes(form.departamento_slug)) next.departamento_slug = 'Escolha Teens ou Simply.'
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) next.email = 'Informe um email válido.'
     if (!form.consentimento_dados) next.consentimento_dados = 'Esta autorização é necessária.'
     if (menor) {
@@ -106,7 +105,7 @@ export default function CadastroPublicoForm({ departamentos }: { departamentos: 
       }
 
       setProtocolo(data.protocolo)
-      setForm(emptyForm(departamentos))
+      setForm(emptyForm())
       setFoto(null)
       if (fotoPreview) URL.revokeObjectURL(fotoPreview)
       setFotoPreview('')
@@ -169,8 +168,9 @@ export default function CadastroPublicoForm({ departamentos }: { departamentos: 
           </Field>
 
           <SectionTitle title="Vínculo com a RUJA" />
-          <Field label="Departamento" required error={errors.departamento_slug}>
+          <Field label="Departamento (plataforma)" error={errors.departamento_slug}>
             <select value={form.departamento_slug} onChange={e => update('departamento_slug', e.target.value)} className={inputClass(errors.departamento_slug)}>
+              <option value="">Ainda não sei / prefiro não informar</option>
               {departamentos.map(departamento => (
                 <option key={departamento.id} value={departmentSlug(departamento)}>{departamento.nome}</option>
               ))}
