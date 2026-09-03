@@ -24,6 +24,8 @@ export interface EventoFixo {
   departamento_id: string | null
   departamentos_envolvidos: string[]
   lider_responsavel_id: string | null
+  plataforma_id: string | null
+  cobrar_frequencia: boolean
   ativo: boolean
   created_at: string
 }
@@ -43,6 +45,7 @@ export interface MissaoFixa {
   dia_semana: number | null
   dia_mes: number | null
   prazo_dias: number
+  cobrar_atraso: boolean
   ativo: boolean
   created_at: string
 }
