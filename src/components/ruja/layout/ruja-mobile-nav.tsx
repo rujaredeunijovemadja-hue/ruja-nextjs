@@ -21,22 +21,46 @@ const MAIN_TABS: { page: RujaPage; icon: string; label: string }[] = [
   { page: 'eventos',     icon: 'eventos', label: 'Eventos' },
 ]
 
-const MORE_PAGES: { page: RujaPage; icon: string; label: string }[] = [
-  { page: 'pendentes',   icon: 'pendentes', label: 'Pendentes' },
-  { page: 'duplicatas',  icon: 'jovens', label: 'Duplicatas' },
-  { page: 'analista-ia',   icon: 'ia', label: 'IA Nexus' },
-  { page: 'config',        icon: 'config', label: 'Configurações' },
-  { page: 'historico-frequencia', icon: 'historico-frequencia', label: 'Relatórios' },
-  { page: 'jovens',        icon: 'jovens', label: 'Jovens' },
-  { page: 'frequencia',    icon: 'check', label: 'Frequência' },
-  { page: 'recuperacao',   icon: 'recuperacao', label: 'Recuperação' },
-  { page: 'lideres',       icon: 'lideres', label: 'Líderes' },
-  { page: 'metas',         icon: 'metas', label: 'Metas' },
-  { page: 'departamentos', icon: 'departamentos', label: 'Departamentos' },
-  { page: 'usuarios',       icon: 'usuarios', label: 'Usuários' },
-  { page: 'plataformas',    icon: 'plataformas', label: 'Plataformas' },
-  { page: 'missoes',        icon: 'missoes', label: 'Missões' },
-  { page: 'automacao',      icon: 'automacao', label: 'Automação' },
+const MORE_SECTIONS: { title: string; items: { page: RujaPage; icon: string; label: string }[] }[] = [
+  {
+    title: 'Ruja',
+    items: [
+      { page: 'frequencia',    icon: 'check', label: 'Frequência' },
+      { page: 'historico-frequencia', icon: 'historico-frequencia', label: 'Relatórios' },
+      { page: 'recuperacao',   icon: 'recuperacao', label: 'Recuperação' },
+      { page: 'jovens',        icon: 'jovens', label: 'Jovens' },
+      { page: 'lideres',       icon: 'lideres', label: 'Líderes' },
+      { page: 'metas',         icon: 'metas', label: 'Metas' },
+    ],
+  },
+  {
+    title: 'Nexus',
+    items: [
+      { page: 'pendentes',   icon: 'pendentes', label: 'Pendentes' },
+      { page: 'duplicatas',  icon: 'jovens', label: 'Duplicatas' },
+      { page: 'analista-ia',   icon: 'ia', label: 'IA Nexus' },
+    ],
+  },
+  {
+    title: 'Plataformas',
+    items: [],
+  },
+  {
+    title: 'Operação',
+    items: [
+      { page: 'missoes',        icon: 'missoes', label: 'Missões' },
+      { page: 'automacao',      icon: 'automacao', label: 'Automação · Paulo' },
+    ],
+  },
+  {
+    title: 'Administração',
+    items: [
+      { page: 'departamentos', icon: 'departamentos', label: 'Departamentos' },
+      { page: 'usuarios',       icon: 'usuarios', label: 'Usuários' },
+      { page: 'plataformas',    icon: 'plataformas', label: 'Plataformas' },
+      { page: 'config',        icon: 'config', label: 'Configurações' },
+    ],
+  },
 ]
 
 export function RujaMobileNav({ current, onNavigate, onBusca, profile, allowedPages, platforms }: Props) {
@@ -50,7 +74,13 @@ export function RujaMobileNav({ current, onNavigate, onBusca, profile, allowedPa
   const platformPages = platforms
     .filter(platform => platform.slug !== 'nexus')
     .map(platform => ({ page: platform.slug as RujaPage, icon: platform.slug, label: platformDefinition(platform.slug)?.label ?? platform.slug }))
-  const morePages = [...MORE_PAGES, ...platformPages].filter(item => allowedPages.includes(item.page))
+  const moreSections = MORE_SECTIONS
+    .map(section => ({
+      ...section,
+      items: (section.title === 'Plataformas' ? platformPages : section.items)
+        .filter(item => allowedPages.includes(item.page)),
+    }))
+    .filter(section => section.items.length > 0)
 
   return (
     <>
@@ -88,15 +118,22 @@ export function RujaMobileNav({ current, onNavigate, onBusca, profile, allowedPa
               </button>
             </div>
 
-            <div className="grid grid-cols-4 gap-1 px-2 pb-2">
-              {morePages.map(p => (
-                <button key={p.page}
-                  onClick={() => { onNavigate(p.page); setShowMore(false) }}
-                  className={`flex flex-col items-center gap-1.5 p-3 rounded-xl text-xs font-medium transition touch-manipulation
-                    ${current === p.page ? 'bg-red-500/20 text-red-400' : 'text-gray-400 hover:bg-white/5'}`}>
-                  <span className="text-gray-500"><RujaIcon name={p.icon} size={20} /></span>
-                  <span className="text-center leading-tight">{p.label}</span>
-                </button>
+            <div className="px-2 pb-2 max-h-[60vh] overflow-y-auto">
+              {moreSections.map((section, sectionIndex) => (
+                <div key={section.title} className={sectionIndex > 0 ? 'border-t border-white/8 mt-2 pt-1' : ''}>
+                  <div className="text-gray-600 text-[10px] uppercase tracking-wider px-3 py-2">{section.title}</div>
+                  <div className="grid grid-cols-4 gap-1">
+                    {section.items.map(p => (
+                      <button key={p.page}
+                        onClick={() => { onNavigate(p.page); setShowMore(false) }}
+                        className={`flex flex-col items-center gap-1.5 p-3 rounded-xl text-xs font-medium transition touch-manipulation
+                          ${current === p.page ? 'bg-red-500/20 text-red-400' : 'text-gray-400 hover:bg-white/5'}`}>
+                        <span className="text-gray-500"><RujaIcon name={p.icon} size={20} /></span>
+                        <span className="text-center leading-tight">{p.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
