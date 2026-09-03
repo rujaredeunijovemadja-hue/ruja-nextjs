@@ -33,6 +33,7 @@ const RujaAlertas       = dynamic(() => import('../alertas/ruja-alertas'))
 const RujaUsuarios      = dynamic(() => import('../usuarios/ruja-usuarios'))
 const RujaAnalistaIA    = dynamic(() => import('../analista/ruja-analista-ia'))
 const RujaCadastrosPendentes = dynamic(() => import('../pendentes/ruja-cadastros-pendentes'))
+const RujaDuplicatas = dynamic(() => import('../pendentes/ruja-duplicatas'))
 const RujaMidia = dynamic(() => import('../midia/ruja-midia'))
 const RujaPlataformas = dynamic(() => import('../plataformas/ruja-plataformas'))
 const RujaPlataformaWorkspace = dynamic(() => import('../plataformas/ruja-plataforma-workspace'))
@@ -49,7 +50,7 @@ const RujaAutomacao = dynamic(() => import('../automacao/ruja-automacao'))
 export type RujaPage =
   | 'dashboard' | 'teens' | 'simply' | 'eventos' | 'jovens' | 'frequencia' | 'historico-frequencia' | 'recuperacao'
   | 'departamentos' | 'lideres' | 'metas' | 'aniversarios'
-  | 'pendentes' | 'config' | 'lidersupremo' | 'alertas' | 'usuarios' | 'analista-ia'
+  | 'pendentes' | 'duplicatas' | 'config' | 'lidersupremo' | 'alertas' | 'usuarios' | 'analista-ia'
   | 'midia'
   | 'plataformas'
   | Exclude<PlatformSlug, 'nexus' | 'midia'>
@@ -70,6 +71,7 @@ const PAGE_TITLES: Record<RujaPage, string> = {
   metas:         'Metas',
   aniversarios:  'Aniversários',
   pendentes:     'Cadastros Pendentes',
+  duplicatas:    'Duplicatas',
   config:        'Configurações',
   lidersupremo:  'Líder Supremo',
   alertas:       'Alertas',
@@ -96,7 +98,7 @@ function allowedPages(profile: RujaAccessProfile, platforms: PlatformAccess[]): 
   const platformPages = platforms.filter(platform => platform.slug !== 'nexus').map(platform => platform.slug as RujaPage)
   if (profile.role === 'lider_supremo') return [...Object.keys(PAGE_TITLES), ...platformPages].filter((page, index, pages) => pages.indexOf(page) === index) as RujaPage[]
   if (profile.role === 'administrador') {
-    return ['dashboard', 'teens', 'simply', 'eventos', 'jovens', 'frequencia', 'historico-frequencia', 'recuperacao', 'departamentos', 'lideres', 'metas', 'aniversarios', 'pendentes', 'alertas', 'analista-ia', 'missoes', 'automacao', ...platformPages]
+    return ['dashboard', 'teens', 'simply', 'eventos', 'jovens', 'frequencia', 'historico-frequencia', 'recuperacao', 'departamentos', 'lideres', 'metas', 'aniversarios', 'pendentes', 'duplicatas', 'alertas', 'analista-ia', 'missoes', 'automacao', ...platformPages]
   }
   const department = profile.departamento_id === 'simply' ? 'simply' : 'teens'
   if (profile.role === 'lider_departamento') {
@@ -154,6 +156,7 @@ export function RujaLayout({ profile, platforms }: Props) {
     metas:         <RujaMetas />,
     aniversarios:  <RujaAniversarios />,
     pendentes:     <RujaCadastrosPendentes scope={activeScope} />,
+    duplicatas:    <RujaDuplicatas />,
     config:        <RujaConfig />,
     lidersupremo:  <RujaLiderSupremo />,
     alertas:       <RujaAlertas />,

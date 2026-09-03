@@ -25,6 +25,7 @@ const NAV_ITEMS: { page: RujaPage; icon: string; label: string }[] = [
   { page: 'simply',        icon: 'jovens', label: 'Simply' },
   { page: 'eventos',       icon: 'eventos', label: 'Eventos Gerais' },
   { page: 'pendentes',     icon: 'tarefas', label: 'Cadastros Pendentes' },
+  { page: 'duplicatas',    icon: 'jovens', label: 'Duplicatas' },
   { page: 'analista-ia',   icon: 'ia', label: 'IA Nexus' },
   { page: 'config',        icon: 'configuracoes', label: 'Configurações' },
   { page: 'departamentos', icon: 'departamentos', label: 'Departamentos' },

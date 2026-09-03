@@ -23,6 +23,7 @@ const MAIN_TABS: { page: RujaPage; icon: string; label: string }[] = [
 
 const MORE_PAGES: { page: RujaPage; icon: string; label: string }[] = [
   { page: 'pendentes',   icon: 'pendentes', label: 'Pendentes' },
+  { page: 'duplicatas',  icon: 'jovens', label: 'Duplicatas' },
   { page: 'analista-ia',   icon: 'ia', label: 'IA Nexus' },
   { page: 'config',        icon: 'config', label: 'Configurações' },
   { page: 'historico-frequencia', icon: 'historico-frequencia', label: 'Relatórios' },
